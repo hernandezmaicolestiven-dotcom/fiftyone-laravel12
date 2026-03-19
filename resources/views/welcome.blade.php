@@ -287,7 +287,7 @@ function Products({ onAdd }) {
             <span className="text-[#3B59FF] text-sm font-semibold uppercase tracking-widest">Catálogo</span>
             <h2 className="text-4xl font-black text-black mt-2">Prendas destacadas</h2>
           </div>
-          <a href="#" className="inline-flex items-center gap-2 text-sm font-semibold text-[#333333] hover:text-[#3B59FF] transition-colors">
+          <a href="/productos" className="inline-flex items-center gap-2 text-sm font-semibold text-[#333333] hover:text-[#3B59FF] transition-colors">
             Ver todos <i className="fa-solid fa-arrow-right text-xs"></i>
           </a>
         </div>

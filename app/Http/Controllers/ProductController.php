@@ -8,12 +8,15 @@ class ProductController extends Controller
 {
 public function index()
 {
-    $products = Product::all();
-    return view('productos', compact('products'));
-// $products = Product::query()
-// ->latest()
-// ->paginate(10);
-// return ProductResource::collection($products);
+    $query = Product::with('category')->latest();
+
+    if (request()->filled('category')) {
+        $query->where('category_id', request('category'));
+    }
+
+    $products   = $query->paginate(12);
+    $categories = \App\Models\Category::orderBy('name')->get();
+    return view('catalogo', compact('products', 'categories'));
 }
 public function store(StoreProductRequest $request)
 {
