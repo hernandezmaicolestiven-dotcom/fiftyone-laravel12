@@ -22,6 +22,10 @@ class AdminProductController extends Controller
             $query->where('category_id', $request->category);
         }
 
+        if ($request->get('stock') === 'low') {
+            $query->where('stock', '<', 5)->orderBy('stock');
+        }
+
         $products   = $query->latest()->paginate(10)->withQueryString();
         $categories = Category::orderBy('name')->get();
 

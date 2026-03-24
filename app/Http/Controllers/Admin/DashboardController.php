@@ -16,17 +16,32 @@ class DashboardController extends Controller
             'categories' => Category::count(),
             'users'      => User::count(),
             'low_stock'  => Product::where('stock', '<', 5)->count(),
+            'out_stock'  => Product::where('stock', 0)->count(),
+            'total_stock'=> Product::sum('stock'),
         ];
 
         $recentProducts = Product::with('category')->latest()->take(5)->get();
 
-        // Productos creados por mes (últimos 7 meses — dato real)
+        $topCategories = Category::withCount('products')
+            ->orderByDesc('products_count')
+            ->take(5)
+            ->get();
+
+        $lowStockProducts = Product::where('stock', '<', 5)
+            ->orderBy('stock')
+            ->take(4)
+            ->get();
+
+        // Productos creados por mes (últimos 7 meses)
         $months      = collect(range(6, 0))->map(fn($i) => now()->subMonths($i));
-        $chartLabels = $months->map(fn($m) => $m->format('M'))->values();
+        $chartLabels = $months->map(fn($m) => $m->translatedFormat('M'))->values();
         $chartData   = $months->map(fn($m) => Product::whereYear('created_at', $m->year)
                                                       ->whereMonth('created_at', $m->month)
                                                       ->count())->values();
 
-        return view('admin.dashboard', compact('stats', 'recentProducts', 'chartLabels', 'chartData'));
+        return view('admin.dashboard', compact(
+            'stats', 'recentProducts', 'chartLabels', 'chartData',
+            'topCategories', 'lowStockProducts'
+        ));
     }
 }

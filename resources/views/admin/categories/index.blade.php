@@ -19,7 +19,7 @@
     </div>
 
     {{-- Search --}}
-    <form method="GET" class="flex gap-3 p-4 border-b border-gray-100">
+    <form method="GET" action="{{ route('admin.categories.index') }}" class="flex gap-3 p-4 border-b border-gray-100">
         <div class="relative flex-1 max-w-sm">
             <span class="absolute inset-y-0 left-3 flex items-center text-gray-400">
                 <i class="fa-solid fa-search text-sm"></i>

@@ -5,6 +5,8 @@ use App\Http\Controllers\Admin\AuthController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\AdminProductController;
 use App\Http\Controllers\Admin\CategoryController;
+use App\Http\Controllers\Admin\UserController;
+use App\Http\Controllers\Admin\SettingsController;
 
 // Public
 Route::get('/', function () {
@@ -23,6 +25,13 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
         Route::resource('products', AdminProductController::class);
         Route::resource('categories', CategoryController::class);
+        Route::resource('users', UserController::class);
+
+        // Configuración
+        Route::get('settings', [SettingsController::class, 'index'])->name('settings');
+        Route::put('settings/profile', [SettingsController::class, 'updateProfile'])->name('settings.profile');
+        Route::put('settings/password', [SettingsController::class, 'updatePassword'])->name('settings.password');
+        Route::delete('settings/account', [SettingsController::class, 'deleteAccount'])->name('settings.delete');
 
         // Perfil
         Route::get('profile', [\App\Http\Controllers\Admin\ProfileController::class, 'edit'])->name('profile');
