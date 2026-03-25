@@ -105,11 +105,12 @@
         {{-- Nav --}}
         <nav class="flex-1 px-2 py-4 space-y-1 overflow-y-auto">
             @foreach([
-                ['admin.dashboard',         'fa-gauge-high', 'Dashboard',     'admin.dashboard'],
-                ['admin.products.index',    'fa-box',        'Productos',     'admin.products*'],
-                ['admin.categories.index',  'fa-tags',       'Categorías',    'admin.categories*'],
-                ['admin.users.index',       'fa-users',      'Usuarios',      'admin.users*'],
-                ['admin.settings',          'fa-gear',       'Configuración', 'admin.settings*'],
+                ['admin.dashboard',         'fa-gauge-high',    'Dashboard',     'admin.dashboard'],
+                ['admin.products.index',    'fa-box',           'Productos',     'admin.products*'],
+                ['admin.categories.index',  'fa-tags',          'Categorías',    'admin.categories*'],
+                ['admin.orders.index',      'fa-bag-shopping',  'Pedidos',       'admin.orders*'],
+                ['admin.users.index',       'fa-users',         'Usuarios',      'admin.users*'],
+                ['admin.settings',          'fa-gear',          'Configuración', 'admin.settings*'],
             ] as [$route, $icon, $label, $pattern])
             @php $active = request()->routeIs($pattern); @endphp
             <a href="{{ route($route) }}"

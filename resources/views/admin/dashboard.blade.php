@@ -27,7 +27,7 @@
 </div>
 
 {{-- Stats Cards --}}
-<div class="grid grid-cols-2 xl:grid-cols-4 gap-4 mb-6">
+<div class="grid grid-cols-2 xl:grid-cols-5 gap-4 mb-6">
 
     <a href="{{ route('admin.products.index') }}"
        class="group bg-white rounded-2xl p-5 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-200 overflow-hidden relative">
@@ -62,6 +62,19 @@
         <p class="text-3xl font-black text-gray-800 mb-1">{{ $stats['users'] }}</p>
         <p class="text-xs font-semibold text-gray-400 uppercase tracking-wide">Usuarios</p>
         <p class="text-xs text-gray-400 mt-1">Administradores</p>
+    </a>
+
+    <a href="{{ route('admin.orders.index') }}"
+       class="group bg-white rounded-2xl p-5 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-200 overflow-hidden relative">
+        <div class="absolute -right-4 -top-4 w-20 h-20 rounded-full opacity-10 bg-violet-400"></div>
+        <div class="w-11 h-11 rounded-xl bg-violet-100 mb-4 flex items-center justify-center">
+            <i class="fa-solid fa-bag-shopping text-violet-600"></i>
+        </div>
+        <p class="text-3xl font-black text-gray-800 mb-1">{{ $stats['orders'] }}</p>
+        <p class="text-xs font-semibold text-gray-400 uppercase tracking-wide">Pedidos</p>
+        <p class="text-xs mt-1 {{ $stats['orders_pending'] > 0 ? 'text-amber-500 font-medium' : 'text-gray-400' }}">
+            {{ $stats['orders_pending'] }} pendientes
+        </p>
     </a>
 
     <a href="{{ route('admin.products.index', ['stock' => 'low']) }}"

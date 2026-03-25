@@ -18,6 +18,8 @@ class DashboardController extends Controller
             'low_stock'  => Product::where('stock', '<', 5)->count(),
             'out_stock'  => Product::where('stock', 0)->count(),
             'total_stock'=> Product::sum('stock'),
+            'orders'     => \App\Models\Order::count(),
+            'orders_pending' => \App\Models\Order::where('status', 'pending')->count(),
         ];
 
         $recentProducts = Product::with('category')->latest()->take(5)->get();

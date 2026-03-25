@@ -7,6 +7,8 @@ use App\Http\Controllers\Admin\AdminProductController;
 use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\SettingsController;
+use App\Http\Controllers\Admin\OrderController;
+use App\Http\Controllers\OrderController as PublicOrderController;
 
 // Public
 Route::get('/', function () {
@@ -26,6 +28,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::resource('products', AdminProductController::class);
         Route::resource('categories', CategoryController::class);
         Route::resource('users', UserController::class);
+        Route::resource('orders', OrderController::class)->only(['index', 'show', 'destroy']);
+        Route::patch('orders/{order}/status', [OrderController::class, 'updateStatus'])->name('orders.status');
 
         // Configuración
         Route::get('settings', [SettingsController::class, 'index'])->name('settings');
@@ -40,5 +44,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
     });
 });
 
-// Legacy public product route
+// Public order endpoint
+Route::post('/orders', [PublicOrderController::class, 'store'])->name('orders.store');
+
+// Public catalog routes
 Route::get('/productos', [App\Http\Controllers\ProductController::class, 'index'])->name('products.index');
+Route::get('/catalogo', [App\Http\Controllers\ProductController::class, 'index'])->name('catalogo');
