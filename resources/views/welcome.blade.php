@@ -46,19 +46,24 @@
 <body class="bg-white text-gray-900 antialiased">
 <div id="root"></div>
 
-<script>
-window.__PRODUCTS__ = {!! \App\Models\Product::with('category')->latest()->take(6)->get()->map(fn($p) => [
+@verbatim
+@php
+$products = \App\Models\Product::with('category')->latest()->take(6)->get()->map(fn($p) => [
   'id'    => $p->id,
   'name'  => $p->name,
   'price' => (float) $p->price,
   'badge' => $p->stock < 5 ? 'Oferta' : ($p->created_at->diffInDays() < 30 ? 'Nuevo' : null),
   'img'   => $p->image ? (str_starts_with($p->image,'http') ? $p->image : Storage::url($p->image)) : 'https://images.unsplash.com/photo-1556821840-3a63f15732ce?w=400&q=80',
   'rating'=> 5,
-])->toJson() !!};
-</script>
+]);
+@endphp
+@endverbatim
+<script type="text/plain" id="products-data">{!! json_encode($products) !!}</script>
 @verbatim
 <script type="text/babel">
 const { useState, useEffect } = React;
+
+window.__PRODUCTS__ = JSON.parse(document.getElementById('products-data').textContent);
 
 const dbProducts   = window.__PRODUCTS__;
 const gradientBg   = 'linear-gradient(90deg,#3B59FF,#7B2FBE)';

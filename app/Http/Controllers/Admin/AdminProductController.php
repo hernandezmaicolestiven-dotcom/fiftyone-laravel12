@@ -7,6 +7,7 @@ use App\Models\Category;
 use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class AdminProductController extends Controller
 {
@@ -30,6 +31,189 @@ class AdminProductController extends Controller
         $categories = Category::orderBy('name')->get();
 
         return view('admin.products.index', compact('products', 'categories'));
+    }
+
+    public function exportCsv(): StreamedResponse
+    {
+        $products = Product::with('category')->latest()->get();
+
+        return response()->stream(function () use ($products) {
+            $handle = fopen('php://output', 'w');
+            fprintf($handle, chr(0xEF) . chr(0xBB) . chr(0xBF));
+            fputcsv($handle, ['ID', 'Nombre', 'Descripción', 'Precio', 'Stock', 'Categoría', 'Fecha']);
+            foreach ($products as $p) {
+                fputcsv($handle, [
+                    $p->id, $p->name, $p->description,
+                    $p->price, $p->stock,
+                    $p->category?->name ?? '',
+                    $p->created_at->format('d/m/Y'),
+                ]);
+            }
+            fclose($handle);
+        }, 200, [
+            'Content-Type'        => 'text/csv; charset=UTF-8',
+            'Content-Disposition' => 'attachment; filename="productos_' . now()->format('Ymd_His') . '.csv"',
+        ]);
+    }
+
+    public function exportExcel(): StreamedResponse
+    {
+        $products = Product::with('category')->latest()->get();
+        $rows     = [['ID', 'Nombre', 'Descripción', 'Precio', 'Stock', 'Categoría', 'Fecha']];
+
+        foreach ($products as $p) {
+            $rows[] = [
+                $p->id, $p->name, $p->description ?? '',
+                $p->price, $p->stock,
+                $p->category?->name ?? '',
+                $p->created_at->format('d/m/Y'),
+            ];
+        }
+
+        $xml = $this->buildXlsx($rows);
+
+        return response()->stream(function () use ($xml) {
+            echo $xml;
+        }, 200, [
+            'Content-Type'        => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            'Content-Disposition' => 'attachment; filename="productos_' . now()->format('Ymd_His') . '.xlsx"',
+        ]);
+    }
+
+    private function buildXlsx(array $rows): string
+    {
+        // Build a minimal XLSX (ZIP with XML files) without external dependencies
+        $sharedStrings = [];
+        $ssIndex       = [];
+        $sheetRows     = '';
+
+        foreach ($rows as $ri => $row) {
+            $cells = '';
+            foreach ($row as $ci => $val) {
+                $col  = chr(65 + $ci);
+                $ref  = $col . ($ri + 1);
+                $val  = (string) $val;
+                if (!isset($ssIndex[$val])) {
+                    $ssIndex[$val]   = count($sharedStrings);
+                    $sharedStrings[] = htmlspecialchars($val, ENT_XML1);
+                }
+                $cells .= "<c r=\"$ref\" t=\"s\"><v>{$ssIndex[$val]}</v></c>";
+            }
+            $sheetRows .= "<row r=\"" . ($ri + 1) . "\">$cells</row>";
+        }
+
+        $ssXml   = '<?xml version="1.0" encoding="UTF-8"?><sst xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" count="' . count($sharedStrings) . '" uniqueCount="' . count($sharedStrings) . '">';
+        foreach ($sharedStrings as $s) { $ssXml .= "<si><t>$s</t></si>"; }
+        $ssXml  .= '</sst>';
+
+        $sheetXml = '<?xml version="1.0" encoding="UTF-8"?><worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><sheetData>' . $sheetRows . '</sheetData></worksheet>';
+        $wbXml    = '<?xml version="1.0" encoding="UTF-8"?><workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><sheets><sheet name="Productos" sheetId="1" r:id="rId1"/></sheets></workbook>';
+        $relsXml  = '<?xml version="1.0" encoding="UTF-8"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet1.xml"/><Relationship Id="rId2" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/sharedStrings" Target="sharedStrings.xml"/></Relationships>';
+        $ctXml    = '<?xml version="1.0" encoding="UTF-8"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/><Override PartName="/xl/worksheets/sheet1.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/><Override PartName="/xl/sharedStrings.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sharedStrings+xml"/></Types>';
+        $appRels  = '<?xml version="1.0" encoding="UTF-8"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/></Relationships>';
+
+        $tmp = tempnam(sys_get_temp_dir(), 'xlsx');
+        $zip = new \ZipArchive();
+        $zip->open($tmp, \ZipArchive::OVERWRITE);
+        $zip->addFromString('[Content_Types].xml',        $ctXml);
+        $zip->addFromString('_rels/.rels',                $appRels);
+        $zip->addFromString('xl/workbook.xml',            $wbXml);
+        $zip->addFromString('xl/_rels/workbook.xml.rels', $relsXml);
+        $zip->addFromString('xl/worksheets/sheet1.xml',   $sheetXml);
+        $zip->addFromString('xl/sharedStrings.xml',       $ssXml);
+        $zip->close();
+
+        $content = file_get_contents($tmp);
+        unlink($tmp);
+        return $content;
+    }
+
+    public function importCsv(Request $request)
+    {
+        $request->validate(['file' => 'required|file|mimes:csv,txt,xlsx,xls|max:5120']);
+
+        $file      = $request->file('file');
+        $ext       = strtolower($file->getClientOriginalExtension());
+        $imported  = 0;
+
+        if (in_array($ext, ['xlsx', 'xls'])) {
+            $rows = $this->readXlsx($file->getRealPath());
+            array_shift($rows); // skip header
+            foreach ($rows as $row) {
+                $row = array_pad($row, 6, '');
+                [, $name, $description, $price, $stock, $categoryName] = $row;
+                if (empty(trim((string)$name))) continue;
+                $category = !empty(trim((string)$categoryName))
+                    ? Category::firstOrCreate(['name' => trim((string)$categoryName)])
+                    : null;
+                Product::create([
+                    'name'        => trim((string)$name),
+                    'description' => trim((string)$description),
+                    'price'       => (float) $price,
+                    'stock'       => (int)   $stock,
+                    'category_id' => $category?->id,
+                ]);
+                $imported++;
+            }
+        } else {
+            $handle = fopen($file->getRealPath(), 'r');
+            fgetcsv($handle); // skip header
+            while (($row = fgetcsv($handle)) !== false) {
+                if (count($row) < 4) continue;
+                $row = array_pad($row, 6, '');
+                [, $name, $description, $price, $stock, $categoryName] = $row;
+                if (empty(trim($name))) continue;
+                $category = !empty(trim($categoryName))
+                    ? Category::firstOrCreate(['name' => trim($categoryName)])
+                    : null;
+                Product::create([
+                    'name'        => trim($name),
+                    'description' => trim($description),
+                    'price'       => (float) $price,
+                    'stock'       => (int)   $stock,
+                    'category_id' => $category?->id,
+                ]);
+                $imported++;
+            }
+            fclose($handle);
+        }
+
+        return redirect()->route('admin.products.index')
+            ->with('success', "$imported producto(s) importado(s) correctamente.");
+    }
+
+    private function readXlsx(string $path): array
+    {
+        $zip = new \ZipArchive();
+        if ($zip->open($path) !== true) return [];
+
+        $ssXml    = $zip->getFromName('xl/sharedStrings.xml');
+        $sheetXml = $zip->getFromName('xl/worksheets/sheet1.xml');
+        $zip->close();
+
+        $strings = [];
+        if ($ssXml) {
+            $ss = new \SimpleXMLElement($ssXml);
+            foreach ($ss->si as $si) {
+                $strings[] = (string) $si->t;
+            }
+        }
+
+        $rows = [];
+        if ($sheetXml) {
+            $ws = new \SimpleXMLElement($sheetXml);
+            foreach ($ws->sheetData->row as $row) {
+                $rowData = [];
+                foreach ($row->c as $cell) {
+                    $type = (string) $cell['t'];
+                    $val  = (string) $cell->v;
+                    $rowData[] = ($type === 's') ? ($strings[(int)$val] ?? '') : $val;
+                }
+                $rows[] = $rowData;
+            }
+        }
+
+        return $rows;
     }
 
     public function create()

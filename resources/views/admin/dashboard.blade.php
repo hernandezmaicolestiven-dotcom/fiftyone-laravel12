@@ -100,18 +100,66 @@
 <div class="grid grid-cols-1 xl:grid-cols-3 gap-5 mb-5">
 
     {{-- Gráfica --}}
-    <div class="xl:col-span-2 bg-white rounded-2xl shadow-sm p-6">
-        <div class="flex items-center justify-between mb-6">
-            <div>
-                <h3 class="text-base font-bold text-gray-800">Productos agregados</h3>
-                <p class="text-xs text-gray-400 mt-0.5">Últimos 7 meses</p>
+    <div class="xl:col-span-2 bg-white rounded-2xl shadow-sm overflow-hidden">
+
+        {{-- Header gráfica --}}
+        <div class="px-6 pt-6 pb-4 border-b border-gray-100">
+            <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+                <div>
+                    <h3 class="text-base font-bold text-gray-800">Pedidos realizados</h3>
+                    <p class="text-xs text-gray-400 mt-0.5">Últimos 7 meses</p>
+                </div>
+                {{-- Mini stats --}}
+                <div class="flex gap-4 flex-shrink-0">
+                    <div class="text-right">
+                        <p class="text-xs text-gray-400 mb-0.5">Este mes</p>
+                        <p class="text-lg font-black text-gray-800">{{ \App\Models\Order::whereMonth('created_at', now()->month)->whereYear('created_at', now()->year)->count() }}</p>
+                    </div>
+                    <div class="w-px bg-gray-100"></div>
+                    <div class="text-right">
+                        <p class="text-xs text-gray-400 mb-0.5">Ingresos mes</p>
+                        <p class="text-lg font-black text-gray-800">${{ number_format(\App\Models\Order::whereMonth('created_at', now()->month)->whereYear('created_at', now()->year)->sum('total'), 0, ',', '.') }}</p>
+                    </div>
+                    <div class="w-px bg-gray-100"></div>
+                    <div class="text-right">
+                        <p class="text-xs text-gray-400 mb-0.5">Pendientes</p>
+                        <p class="text-lg font-black {{ $stats['orders_pending'] > 0 ? 'text-amber-500' : 'text-gray-800' }}">{{ $stats['orders_pending'] }}</p>
+                    </div>
+                </div>
             </div>
-            <div class="flex items-center gap-2 text-xs text-gray-400">
-                <span class="w-3 h-3 rounded-full inline-block" style="background: linear-gradient(90deg, #3B59FF, #7B2FBE)"></span>
-                Productos
+
+            {{-- Toggle datasets --}}
+            <div class="flex gap-2 mt-4" x-data="{ active: 'orders' }">
+                <button @click="active = 'orders'; toggleDataset('orders')"
+                        class="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-semibold transition"
+                        :class="active === 'orders'
+                            ? 'text-white shadow-sm'
+                            : 'bg-gray-100 text-gray-500 hover:bg-gray-200'"
+                        :style="active === 'orders' ? 'background: linear-gradient(90deg,#3B59FF,#7B2FBE)' : ''">
+                    <i class="fa-solid fa-bag-shopping"></i> Pedidos
+                </button>
+                <button @click="active = 'revenue'; toggleDataset('revenue')"
+                        class="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-semibold transition"
+                        :class="active === 'revenue'
+                            ? 'text-white shadow-sm'
+                            : 'bg-gray-100 text-gray-500 hover:bg-gray-200'"
+                        :style="active === 'revenue' ? 'background: linear-gradient(90deg,#059669,#10b981)' : ''">
+                    <i class="fa-solid fa-dollar-sign"></i> Ingresos
+                </button>
+                <button @click="active = 'both'; toggleDataset('both')"
+                        class="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-semibold transition"
+                        :class="active === 'both'
+                            ? 'bg-gray-800 text-white shadow-sm'
+                            : 'bg-gray-100 text-gray-500 hover:bg-gray-200'">
+                    <i class="fa-solid fa-chart-line"></i> Ambos
+                </button>
             </div>
         </div>
-        <canvas id="salesChart" height="110"></canvas>
+
+        {{-- Canvas --}}
+        <div class="px-6 py-5">
+            <canvas id="ordersChart" height="130"></canvas>
+        </div>
     </div>
 
     {{-- Top categorías --}}
@@ -268,58 +316,142 @@
 
 @push('scripts')
 <script>
-const ctx = document.getElementById('salesChart').getContext('2d');
-const gradLine = ctx.createLinearGradient(0, 0, ctx.canvas.width, 0);
-gradLine.addColorStop(0, '#3B59FF');
-gradLine.addColorStop(1, '#7B2FBE');
-const gradFill = ctx.createLinearGradient(0, 0, 0, 280);
-gradFill.addColorStop(0, 'rgba(123,47,190,0.18)');
-gradFill.addColorStop(1, 'rgba(59,89,255,0.01)');
+(function () {
+    const labels   = {!! $chartLabels !!};
+    const orders   = {!! $chartData !!};
+    const revenue  = {!! $chartRevenue !!};
 
-new Chart(ctx, {
-    type: 'line',
-    data: {
-        labels: {!! $chartLabels !!},
-        datasets: [{
-            label: 'Productos',
-            data: {!! $chartData !!},
-            borderColor: gradLine,
-            backgroundColor: gradFill,
-            borderWidth: 2.5,
-            fill: true,
-            tension: 0.45,
-            pointBackgroundColor: '#fff',
-            pointBorderColor: '#7B2FBE',
-            pointBorderWidth: 2,
-            pointRadius: 5,
-            pointHoverRadius: 7,
-        }]
-    },
-    options: {
-        responsive: true,
-        plugins: {
-            legend: { display: false },
-            tooltip: {
-                backgroundColor: '#0a0e2e',
-                titleColor: '#a5b4fc',
-                bodyColor: '#fff',
-                padding: 10,
-                cornerRadius: 10,
-                displayColors: false,
-            }
+    const ctx = document.getElementById('ordersChart').getContext('2d');
+
+    // Gradients
+    const gradBlue = ctx.createLinearGradient(0, 0, ctx.canvas.width, 0);
+    gradBlue.addColorStop(0, '#3B59FF');
+    gradBlue.addColorStop(1, '#7B2FBE');
+
+    const gradGreen = ctx.createLinearGradient(0, 0, ctx.canvas.width, 0);
+    gradGreen.addColorStop(0, '#059669');
+    gradGreen.addColorStop(1, '#10b981');
+
+    const fillBlue = ctx.createLinearGradient(0, 0, 0, 300);
+    fillBlue.addColorStop(0, 'rgba(123,47,190,0.15)');
+    fillBlue.addColorStop(1, 'rgba(59,89,255,0.01)');
+
+    const fillGreen = ctx.createLinearGradient(0, 0, 0, 300);
+    fillGreen.addColorStop(0, 'rgba(16,185,129,0.15)');
+    fillGreen.addColorStop(1, 'rgba(5,150,105,0.01)');
+
+    const chart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels,
+            datasets: [
+                {
+                    id: 'orders',
+                    label: 'Pedidos',
+                    data: orders,
+                    borderColor: gradBlue,
+                    backgroundColor: fillBlue,
+                    borderWidth: 2.5,
+                    fill: true,
+                    tension: 0.45,
+                    pointBackgroundColor: '#fff',
+                    pointBorderColor: '#7B2FBE',
+                    pointBorderWidth: 2,
+                    pointRadius: 5,
+                    pointHoverRadius: 8,
+                    pointHoverBackgroundColor: '#7B2FBE',
+                    pointHoverBorderColor: '#fff',
+                    yAxisID: 'y',
+                },
+                {
+                    id: 'revenue',
+                    label: 'Ingresos ($)',
+                    data: revenue,
+                    borderColor: gradGreen,
+                    backgroundColor: fillGreen,
+                    borderWidth: 2.5,
+                    fill: true,
+                    tension: 0.45,
+                    pointBackgroundColor: '#fff',
+                    pointBorderColor: '#10b981',
+                    pointBorderWidth: 2,
+                    pointRadius: 5,
+                    pointHoverRadius: 8,
+                    pointHoverBackgroundColor: '#10b981',
+                    pointHoverBorderColor: '#fff',
+                    yAxisID: 'y1',
+                    hidden: true,
+                }
+            ]
         },
-        scales: {
-            y: {
-                beginAtZero: true,
-                ticks: { stepSize: 1, color: '#9ca3af', font: { size: 11 } },
-                grid: { color: '#f3f4f6' }
+        options: {
+            responsive: true,
+            interaction: { mode: 'index', intersect: false },
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    backgroundColor: '#0a0e2e',
+                    titleColor: '#a5b4fc',
+                    bodyColor: '#e2e8f0',
+                    padding: 12,
+                    cornerRadius: 12,
+                    displayColors: true,
+                    boxWidth: 8,
+                    boxHeight: 8,
+                    boxPadding: 4,
+                    callbacks: {
+                        label: ctx => {
+                            if (ctx.dataset.label === 'Ingresos ($)') {
+                                return '  Ingresos: $' + ctx.parsed.y.toLocaleString('es-CO');
+                            }
+                            return '  Pedidos: ' + ctx.parsed.y;
+                        }
+                    }
+                }
             },
-            x: {
-                ticks: { color: '#9ca3af', font: { size: 11 } },
-                grid: { display: false }
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    position: 'left',
+                    ticks: { stepSize: 1, color: '#9ca3af', font: { size: 11 } },
+                    grid: { color: '#f3f4f6' },
+                    border: { dash: [4, 4] },
+                },
+                y1: {
+                    beginAtZero: true,
+                    position: 'right',
+                    display: false,
+                    ticks: { color: '#9ca3af', font: { size: 11 } },
+                    grid: { drawOnChartArea: false },
+                },
+                x: {
+                    ticks: { color: '#9ca3af', font: { size: 11 } },
+                    grid: { display: false },
+                    border: { display: false },
+                }
             }
         }
-    }
-});
+    });
+
+    // Toggle datasets
+    window.toggleDataset = function (mode) {
+        const ds0 = chart.data.datasets[0];
+        const ds1 = chart.data.datasets[1];
+        if (mode === 'orders') {
+            ds0.hidden = false; ds1.hidden = true;
+            chart.options.scales.y.display  = true;
+            chart.options.scales.y1.display = false;
+        } else if (mode === 'revenue') {
+            ds0.hidden = true;  ds1.hidden = false;
+            chart.options.scales.y.display  = false;
+            chart.options.scales.y1.display = true;
+        } else {
+            ds0.hidden = false; ds1.hidden = false;
+            chart.options.scales.y.display  = true;
+            chart.options.scales.y1.display = true;
+        }
+        chart.update();
+    };
+})();
 </script>
 @endpush

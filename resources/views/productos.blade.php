@@ -300,7 +300,7 @@
                                     <p><strong>Descripción:</strong> {{ $product->description }}</p>
                                 @endif
                             </div>
-                            <button class="btn-add" onclick="agregarAlcarrito({{ JSON_encode($product) }})">
+                            <button class="btn-add" data-product="{!! json_encode($product) !!}" onclick="agregarAlcarrito(JSON.parse(this.dataset.product))">
                                 ➕ Añadir al carrito
                             </button>
                         </div>

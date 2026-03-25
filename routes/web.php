@@ -25,9 +25,15 @@ Route::prefix('admin')->name('admin.')->group(function () {
     // Protected admin routes
     Route::middleware('auth')->group(function () {
         Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
+        Route::get('products/export/csv', [AdminProductController::class, 'exportCsv'])->name('products.export.csv');
+        Route::get('products/export/excel', [AdminProductController::class, 'exportExcel'])->name('products.export.excel');
+        Route::post('products/import/csv', [AdminProductController::class, 'importCsv'])->name('products.import.csv');
         Route::resource('products', AdminProductController::class);
         Route::resource('categories', CategoryController::class);
+        Route::post('users/import/csv', [UserController::class, 'importCsv'])->name('users.import.csv');
         Route::resource('users', UserController::class);
+        Route::get('orders/export/csv', [OrderController::class, 'exportCsv'])->name('orders.export.csv');
+        Route::get('orders/export/pdf', [OrderController::class, 'exportPdf'])->name('orders.export.pdf');
         Route::resource('orders', OrderController::class)->only(['index', 'show', 'destroy']);
         Route::patch('orders/{order}/status', [OrderController::class, 'updateStatus'])->name('orders.status');
 

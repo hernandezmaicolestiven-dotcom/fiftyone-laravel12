@@ -25,7 +25,7 @@
                 <div class="w-8 h-8 rounded-lg flex items-center justify-center" style="background:linear-gradient(135deg,#3B59FF,#7B2FBE)">
                     <i class="fa-solid fa-shirt text-white text-sm"></i>
                 </div>
-                <span class="text-white font-black text-xl">Fifty<span style="background:linear-gradient(90deg,#3B59FF,#7B2FBE);-webkit-background-clip:text;-webkit-text-fill-color:transparent">One</span></span>
+                <span class="text-white font-black text-xl">Fifty<span style="background:linear-gradient(90deg,#3B59FF,#7B2FBE);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent">One</span></span>
             </a>
             <div class="flex items-center gap-4">
                 <a href="/" class="text-gray-300 hover:text-white text-sm font-medium transition-colors">← Volver al inicio</a>
@@ -38,24 +38,38 @@
 
     {{-- Header --}}
     <div class="mb-8">
-        <span class="text-sm font-semibold uppercase tracking-widest" style="background:linear-gradient(90deg,#3B59FF,#7B2FBE);-webkit-background-clip:text;-webkit-text-fill-color:transparent">Catálogo completo</span>
+        <span class="text-sm font-semibold uppercase tracking-widest" style="background:linear-gradient(90deg,#3B59FF,#7B2FBE);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent">Catálogo completo</span>
         <h1 class="text-4xl font-black text-gray-900 mt-1">Todos los productos</h1>
         <p class="text-gray-500 mt-2">{{ $products->total() }} productos disponibles</p>
     </div>
 
     {{-- Filtro por categoría --}}
     <form method="GET" class="flex flex-wrap gap-2 mb-8">
+        @if(!request('category'))
         <a href="{{ route('products.index') }}"
-           class="px-4 py-2 rounded-full text-sm font-semibold transition-all {{ !request('category') ? 'text-white' : 'bg-white text-gray-600 border border-gray-200 hover:border-gray-400' }}"
-           style="{{ !request('category') ? 'background:linear-gradient(90deg,#3B59FF,#7B2FBE)' : '' }}">
+           class="px-4 py-2 rounded-full text-sm font-semibold transition-all text-white"
+           style="background:linear-gradient(90deg,#3B59FF,#7B2FBE)">
             Todos
         </a>
+        @else
+        <a href="{{ route('products.index') }}"
+           class="px-4 py-2 rounded-full text-sm font-semibold transition-all bg-white text-gray-600 border border-gray-200 hover:border-gray-400">
+            Todos
+        </a>
+        @endif
         @foreach($categories as $cat)
+            @if(request('category') == $cat->id)
             <a href="{{ route('products.index', ['category' => $cat->id]) }}"
-               class="px-4 py-2 rounded-full text-sm font-semibold transition-all {{ request('category') == $cat->id ? 'text-white' : 'bg-white text-gray-600 border border-gray-200 hover:border-gray-400' }}"
-               style="{{ request('category') == $cat->id ? 'background:linear-gradient(90deg,#3B59FF,#7B2FBE)' : '' }}">
+               class="px-4 py-2 rounded-full text-sm font-semibold transition-all text-white"
+               style="background:linear-gradient(90deg,#3B59FF,#7B2FBE)">
                 {{ $cat->name }}
             </a>
+            @else
+            <a href="{{ route('products.index', ['category' => $cat->id]) }}"
+               class="px-4 py-2 rounded-full text-sm font-semibold transition-all bg-white text-gray-600 border border-gray-200 hover:border-gray-400">
+                {{ $cat->name }}
+            </a>
+            @endif
         @endforeach
     </form>
 
@@ -85,7 +99,7 @@
                 @if($product->description)
                     <p class="text-xs text-gray-400 mt-1 line-clamp-2">{{ $product->description }}</p>
                 @endif
-                <p class="text-lg font-black mt-2" style="background:linear-gradient(90deg,#3B59FF,#7B2FBE);-webkit-background-clip:text;-webkit-text-fill-color:transparent">
+                <p class="text-lg font-black mt-2" style="background:linear-gradient(90deg,#3B59FF,#7B2FBE);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent">
                     COP ${{ number_format($product->price, 0, ',', '.') }}
                 </p>
                 <button class="mt-3 w-full text-white text-sm font-semibold py-2.5 rounded-xl transition-all"
