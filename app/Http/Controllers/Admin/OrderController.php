@@ -4,11 +4,16 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Order;
+use App\Notifications\OrderStatusChangedNotification;
+use App\Services\OrderService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Notification;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class OrderController extends Controller
 {
+    public function __construct(private OrderService $orderService) {}
     public function index(Request $request)
     {
         $query = Order::with('items')->latest();
@@ -171,8 +176,14 @@ class OrderController extends Controller
     public function updateStatus(Request $request, Order $order)
     {
         $request->validate(['status' => 'required|in:pending,confirmed,shipped,delivered,cancelled']);
-        $order->update(['status' => $request->status]);
-        return back()->with('success', 'Estado actualizado.');
+
+        try {
+            $this->orderService->updateStatus($order, $request->status);
+            return back()->with('success', 'Estado actualizado a "' . $order->fresh()->status_label . '".');
+        } catch (\Exception $e) {
+            Log::error('Error actualizando estado de pedido', ['order_id' => $order->id, 'error' => $e->getMessage()]);
+            return back()->with('error', 'No se pudo actualizar el estado. Intenta de nuevo.');
+        }
     }
 
     public function destroy(Order $order)

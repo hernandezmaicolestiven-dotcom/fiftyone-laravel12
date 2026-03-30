@@ -8,6 +8,7 @@ use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\SettingsController;
 use App\Http\Controllers\Admin\OrderController;
+use App\Http\Controllers\Admin\ReportController;
 use App\Http\Controllers\OrderController as PublicOrderController;
 
 // Public
@@ -19,7 +20,7 @@ Route::get('/', function () {
 // Admin Auth
 Route::prefix('admin')->name('admin.')->group(function () {
     Route::get('login', [AuthController::class, 'showLogin'])->name('login')->middleware('guest');
-    Route::post('login', [AuthController::class, 'login'])->name('login.post');
+    Route::post('login', [AuthController::class, 'login'])->name('login.post')->middleware(['guest', 'throttle:5,1']);
     Route::post('logout', [AuthController::class, 'logout'])->name('logout')->middleware('auth');
 
     // Protected admin routes
@@ -36,6 +37,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('orders/export/pdf', [OrderController::class, 'exportPdf'])->name('orders.export.pdf');
         Route::resource('orders', OrderController::class)->only(['index', 'show', 'destroy']);
         Route::patch('orders/{order}/status', [OrderController::class, 'updateStatus'])->name('orders.status');
+
+        // Reportes
+        Route::get('reports/sales',        [ReportController::class, 'sales'])->name('reports.sales');
+        Route::get('reports/inventory',    [ReportController::class, 'inventory'])->name('reports.inventory');
+        Route::get('reports/top-products', [ReportController::class, 'topProducts'])->name('reports.top-products');
 
         // Configuración
         Route::get('settings', [SettingsController::class, 'index'])->name('settings');

@@ -38,7 +38,16 @@ class UserController extends Controller
     {
         $request->validate(['file' => 'required|file|mimes:csv,txt|max:2048']);
 
-        $handle   = fopen($request->file('file')->getRealPath(), 'r');
+        $file = $request->file('file');
+
+        // Verificar MIME real
+        $finfo    = new \finfo(FILEINFO_MIME_TYPE);
+        $realMime = $finfo->file($file->getRealPath());
+        if (!in_array($realMime, ['text/plain', 'text/csv'])) {
+            return back()->with('error', 'Tipo de archivo no permitido. Solo se aceptan archivos CSV.');
+        }
+
+        $handle   = fopen($file->getRealPath(), 'r');
         $header   = fgetcsv($handle); // skip header
         $imported = 0;
 

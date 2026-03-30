@@ -5,7 +5,9 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Category;
 use App\Models\Product;
+use App\Services\ProductImportService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
@@ -132,88 +134,16 @@ class AdminProductController extends Controller
     {
         $request->validate(['file' => 'required|file|mimes:csv,txt,xlsx,xls|max:5120']);
 
-        $file      = $request->file('file');
-        $ext       = strtolower($file->getClientOriginalExtension());
-        $imported  = 0;
-
-        if (in_array($ext, ['xlsx', 'xls'])) {
-            $rows = $this->readXlsx($file->getRealPath());
-            array_shift($rows); // skip header
-            foreach ($rows as $row) {
-                $row = array_pad($row, 6, '');
-                [, $name, $description, $price, $stock, $categoryName] = $row;
-                if (empty(trim((string)$name))) continue;
-                $category = !empty(trim((string)$categoryName))
-                    ? Category::firstOrCreate(['name' => trim((string)$categoryName)])
-                    : null;
-                Product::create([
-                    'name'        => trim((string)$name),
-                    'description' => trim((string)$description),
-                    'price'       => (float) $price,
-                    'stock'       => (int)   $stock,
-                    'category_id' => $category?->id,
-                ]);
-                $imported++;
-            }
-        } else {
-            $handle = fopen($file->getRealPath(), 'r');
-            fgetcsv($handle); // skip header
-            while (($row = fgetcsv($handle)) !== false) {
-                if (count($row) < 4) continue;
-                $row = array_pad($row, 6, '');
-                [, $name, $description, $price, $stock, $categoryName] = $row;
-                if (empty(trim($name))) continue;
-                $category = !empty(trim($categoryName))
-                    ? Category::firstOrCreate(['name' => trim($categoryName)])
-                    : null;
-                Product::create([
-                    'name'        => trim($name),
-                    'description' => trim($description),
-                    'price'       => (float) $price,
-                    'stock'       => (int)   $stock,
-                    'category_id' => $category?->id,
-                ]);
-                $imported++;
-            }
-            fclose($handle);
+        try {
+            $imported = app(ProductImportService::class)->import($request->file('file'));
+            return redirect()->route('admin.products.index')
+                ->with('success', "$imported producto(s) importado(s) correctamente.");
+        } catch (\InvalidArgumentException $e) {
+            return back()->with('error', $e->getMessage());
+        } catch (\Exception $e) {
+            Log::error('Error en importación de productos', ['error' => $e->getMessage()]);
+            return back()->with('error', 'Error al procesar el archivo. Verifica el formato e intenta de nuevo.');
         }
-
-        return redirect()->route('admin.products.index')
-            ->with('success', "$imported producto(s) importado(s) correctamente.");
-    }
-
-    private function readXlsx(string $path): array
-    {
-        $zip = new \ZipArchive();
-        if ($zip->open($path) !== true) return [];
-
-        $ssXml    = $zip->getFromName('xl/sharedStrings.xml');
-        $sheetXml = $zip->getFromName('xl/worksheets/sheet1.xml');
-        $zip->close();
-
-        $strings = [];
-        if ($ssXml) {
-            $ss = new \SimpleXMLElement($ssXml);
-            foreach ($ss->si as $si) {
-                $strings[] = (string) $si->t;
-            }
-        }
-
-        $rows = [];
-        if ($sheetXml) {
-            $ws = new \SimpleXMLElement($sheetXml);
-            foreach ($ws->sheetData->row as $row) {
-                $rowData = [];
-                foreach ($row->c as $cell) {
-                    $type = (string) $cell['t'];
-                    $val  = (string) $cell->v;
-                    $rowData[] = ($type === 's') ? ($strings[(int)$val] ?? '') : $val;
-                }
-                $rows[] = $rowData;
-            }
-        }
-
-        return $rows;
     }
 
     public function create()

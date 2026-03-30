@@ -21,13 +21,18 @@ class Order extends Model
 
     public function getStatusLabelAttribute(): string
     {
-        return match($this->status) {
+        return $this->getStatusLabel($this->status);
+    }
+
+    public function getStatusLabel(string $status): string
+    {
+        return match($status) {
             'pending'   => 'Pendiente',
             'confirmed' => 'Confirmado',
             'shipped'   => 'Enviado',
             'delivered' => 'Entregado',
             'cancelled' => 'Cancelado',
-            default     => $this->status,
+            default     => $status,
         };
     }
 

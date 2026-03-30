@@ -70,9 +70,18 @@
         .dark .divide-y > * { border-color: #2d2d44 !important; }
     </style>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    @stack('styles')
 </head>
-<body class="bg-gray-100 dark:bg-gray-950 font-sans"
-      x-data="{
+<body class="bg-gray-100 dark:bg-gray-950 font-sans">
+
+{{-- Skip to main content (accesibilidad) --}}
+<a href="#main-content"
+   class="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[999] focus:px-4 focus:py-2 focus:rounded-xl focus:text-white focus:text-sm focus:font-semibold focus:shadow-lg"
+   style="background:linear-gradient(90deg,#3B59FF,#7B2FBE)">
+    Saltar al contenido principal
+</a>
+
+<div class="flex h-screen overflow-hidden" x-data="{
           sidebarOpen: true,
           dark: localStorage.getItem('adminTheme') === 'dark',
           toggleTheme() {
@@ -83,12 +92,11 @@
           }
       }">
 
-<div class="flex h-screen overflow-hidden">
-
     {{-- SIDEBAR --}}
     <aside :class="sidebarOpen ? 'w-64' : 'w-16'"
            class="text-white flex flex-col transition-all duration-300 ease-in-out flex-shrink-0 z-20"
-           style="background: linear-gradient(180deg, #0d0d1a 0%, #0a0e2e 50%, #1a0a2e 100%)">
+           style="background: linear-gradient(180deg, #0d0d1a 0%, #0a0e2e 50%, #1a0a2e 100%)"
+           role="navigation" aria-label="Menú principal">
 
         {{-- Logo --}}
         <div class="flex items-center justify-between px-4 py-5 border-b border-white/10">
@@ -105,12 +113,13 @@
         {{-- Nav --}}
         <nav class="flex-1 px-2 py-4 space-y-1 overflow-y-auto">
             @foreach([
-                ['admin.dashboard',         'fa-gauge-high',    'Dashboard',     'admin.dashboard'],
-                ['admin.products.index',    'fa-box',           'Productos',     'admin.products*'],
-                ['admin.categories.index',  'fa-tags',          'Categorías',    'admin.categories*'],
-                ['admin.orders.index',      'fa-bag-shopping',  'Pedidos',       'admin.orders*'],
-                ['admin.users.index',       'fa-users',         'Usuarios',      'admin.users*'],
-                ['admin.settings',          'fa-gear',          'Configuración', 'admin.settings*'],
+                ['admin.dashboard',         'fa-gauge-high',    'Dashboard',        'admin.dashboard'],
+                ['admin.products.index',    'fa-box',           'Productos',        'admin.products*'],
+                ['admin.categories.index',  'fa-tags',          'Categorías',       'admin.categories*'],
+                ['admin.orders.index',      'fa-bag-shopping',  'Pedidos',          'admin.orders*'],
+                ['admin.users.index',       'fa-users',         'Usuarios',         'admin.users*'],
+                ['admin.reports.sales',     'fa-chart-line',    'Reportes',         'admin.reports*'],
+                ['admin.settings',          'fa-gear',          'Configuración',    'admin.settings*'],
             ] as [$route, $icon, $label, $pattern])
             @php $active = request()->routeIs($pattern); @endphp
             <a href="{{ route($route) }}"
@@ -146,14 +155,102 @@
         <header class="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 z-10 flex items-center justify-between px-6 py-3 shadow-sm">
             <div class="flex items-center gap-4">
                 <button @click="sidebarOpen = !sidebarOpen"
-                        class="text-gray-500 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition">
-                    <i class="fa-solid fa-bars text-lg"></i>
+                        class="text-gray-500 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition"
+                        :aria-label="sidebarOpen ? 'Colapsar menú' : 'Expandir menú'"
+                        aria-controls="sidebar">
+                    <i class="fa-solid fa-bars text-lg" aria-hidden="true"></i>
                 </button>
                 <h1 class="text-lg font-semibold text-gray-700 dark:text-gray-200">@yield('page-title', 'Dashboard')</h1>
             </div>
 
             <div class="flex items-center gap-3">
                 <span class="text-sm text-gray-400 dark:text-gray-500 hidden sm:block">{{ now()->format('d M Y') }}</span>
+
+                {{-- CAMPANA DE NOTIFICACIONES --}}
+                @php
+                    $pendingOrders = \App\Models\Order::where('status','pending')->count();
+                    $lowStock      = \App\Models\Product::where('stock','<',5)->where('stock','>',0)->count();
+                    $outStock      = \App\Models\Product::where('stock',0)->count();
+                    $notifCount    = ($pendingOrders > 0 ? 1 : 0) + ($lowStock > 0 ? 1 : 0) + ($outStock > 0 ? 1 : 0);
+                @endphp
+                <div class="relative" x-data="{ open: false }">
+                    <button @click="open = !open" @click.outside="open = false"
+                            class="relative w-9 h-9 rounded-xl flex items-center justify-center text-gray-500 hover:text-indigo-600 hover:bg-indigo-50 transition">
+                        <i class="fa-solid fa-bell text-base"></i>
+                        @if($notifCount > 0)
+                        <span class="absolute -top-0.5 -right-0.5 w-4 h-4 rounded-full text-white text-[10px] font-bold flex items-center justify-center"
+                              style="background:linear-gradient(135deg,#3B59FF,#7B2FBE)">{{ $notifCount }}</span>
+                        @endif
+                    </button>
+
+                    <div x-show="open" x-transition
+                         class="absolute right-0 mt-2 w-80 bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden z-50">
+                        <div class="px-4 py-3 border-b border-gray-100 flex items-center justify-between">
+                            <h3 class="text-sm font-bold text-gray-800">Notificaciones</h3>
+                            @if($notifCount > 0)
+                            <span class="text-xs px-2 py-0.5 rounded-full font-semibold text-white"
+                                  style="background:linear-gradient(90deg,#3B59FF,#7B2FBE)">{{ $notifCount }} nuevas</span>
+                            @endif
+                        </div>
+                        <div class="divide-y divide-gray-50 max-h-72 overflow-y-auto">
+                            @if($pendingOrders > 0)
+                            <a href="{{ route('admin.orders.index', ['status'=>'pending']) }}"
+                               class="flex items-start gap-3 px-4 py-3.5 hover:bg-amber-50 transition">
+                                <div class="w-9 h-9 rounded-xl bg-amber-100 flex items-center justify-center flex-shrink-0 mt-0.5">
+                                    <i class="fa-solid fa-bag-shopping text-amber-600 text-sm"></i>
+                                </div>
+                                <div>
+                                    <p class="text-sm font-semibold text-gray-800">{{ $pendingOrders }} pedido{{ $pendingOrders>1?'s':'' }} pendiente{{ $pendingOrders>1?'s':'' }}</p>
+                                    <p class="text-xs text-gray-400 mt-0.5">Requieren atención</p>
+                                </div>
+                                <i class="fa-solid fa-chevron-right text-xs text-gray-300 ml-auto mt-1.5"></i>
+                            </a>
+                            @endif
+                            @if($lowStock > 0)
+                            <a href="{{ route('admin.products.index', ['stock'=>'low']) }}"
+                               class="flex items-start gap-3 px-4 py-3.5 hover:bg-orange-50 transition">
+                                <div class="w-9 h-9 rounded-xl bg-orange-100 flex items-center justify-center flex-shrink-0 mt-0.5">
+                                    <i class="fa-solid fa-triangle-exclamation text-orange-500 text-sm"></i>
+                                </div>
+                                <div>
+                                    <p class="text-sm font-semibold text-gray-800">{{ $lowStock }} producto{{ $lowStock>1?'s':'' }} con stock bajo</p>
+                                    <p class="text-xs text-gray-400 mt-0.5">Menos de 5 unidades</p>
+                                </div>
+                                <i class="fa-solid fa-chevron-right text-xs text-gray-300 ml-auto mt-1.5"></i>
+                            </a>
+                            @endif
+                            @if($outStock > 0)
+                            <a href="{{ route('admin.products.index', ['stock'=>'low']) }}"
+                               class="flex items-start gap-3 px-4 py-3.5 hover:bg-red-50 transition">
+                                <div class="w-9 h-9 rounded-xl bg-red-100 flex items-center justify-center flex-shrink-0 mt-0.5">
+                                    <i class="fa-solid fa-circle-xmark text-red-500 text-sm"></i>
+                                </div>
+                                <div>
+                                    <p class="text-sm font-semibold text-gray-800">{{ $outStock }} producto{{ $outStock>1?'s':'' }} sin stock</p>
+                                    <p class="text-xs text-gray-400 mt-0.5">Agotados — requieren reposición</p>
+                                </div>
+                                <i class="fa-solid fa-chevron-right text-xs text-gray-300 ml-auto mt-1.5"></i>
+                            </a>
+                            @endif
+                            @if($notifCount === 0)
+                            <div class="px-4 py-8 text-center">
+                                <div class="w-12 h-12 rounded-2xl bg-emerald-100 mx-auto mb-3 flex items-center justify-center">
+                                    <i class="fa-solid fa-circle-check text-emerald-500 text-lg"></i>
+                                </div>
+                                <p class="text-sm font-semibold text-gray-700">Todo en orden</p>
+                                <p class="text-xs text-gray-400 mt-1">Sin alertas pendientes</p>
+                            </div>
+                            @endif
+                        </div>
+                        @if($notifCount > 0)
+                        <div class="px-4 py-3 border-t border-gray-100 bg-gray-50">
+                            <a href="{{ route('admin.dashboard') }}" class="text-xs font-semibold text-indigo-600 hover:underline">
+                                Ver dashboard completo →
+                            </a>
+                        </div>
+                        @endif
+                    </div>
+                </div>
 
                 {{-- TOGGLE DARK MODE --}}
                 <button @click="toggleTheme()"
@@ -180,31 +277,110 @@
         </header>
 
         {{-- CONTENT --}}
-        <main class="flex-1 overflow-y-auto p-6 bg-gray-100 dark:bg-gray-950">
+        <main class="flex-1 overflow-y-auto p-6 bg-gray-100 dark:bg-gray-950" role="main" id="main-content">
+
+            {{-- Breadcrumbs --}}
+            @php
+                $segments = collect(explode('/', trim(request()->path(), '/')))
+                    ->filter()
+                    ->values();
+                $breadcrumbs = [];
+                $path = '';
+                $labels = [
+                    'admin'      => 'Admin',
+                    'dashboard'  => 'Dashboard',
+                    'products'   => 'Productos',
+                    'categories' => 'Categorías',
+                    'orders'     => 'Pedidos',
+                    'users'      => 'Usuarios',
+                    'reports'    => 'Reportes',
+                    'sales'      => 'Ventas',
+                    'inventory'  => 'Inventario',
+                    'top-products' => 'Más vendidos',
+                    'settings'   => 'Configuración',
+                    'profile'    => 'Perfil',
+                    'create'     => 'Crear',
+                    'edit'       => 'Editar',
+                ];
+                foreach ($segments as $i => $seg) {
+                    $path .= '/' . $seg;
+                    $label = $labels[$seg] ?? ucfirst($seg);
+                    $isLast = $i === $segments->count() - 1;
+                    if (!is_numeric($seg)) {
+                        $breadcrumbs[] = ['label' => $label, 'url' => $path, 'last' => $isLast];
+                    }
+                }
+            @endphp
+            @if(count($breadcrumbs) > 1)
+            <nav aria-label="Breadcrumb" class="mb-4">
+                <ol class="flex flex-wrap items-center gap-1 text-xs text-gray-400">
+                    @foreach($breadcrumbs as $crumb)
+                        @if(!$loop->first)
+                            <li aria-hidden="true"><i class="fa-solid fa-chevron-right text-[10px]"></i></li>
+                        @endif
+                        <li>
+                            @if($crumb['last'])
+                                <span class="font-semibold text-gray-600 dark:text-gray-300" aria-current="page">{{ $crumb['label'] }}</span>
+                            @else
+                                <a href="{{ $crumb['url'] }}" class="hover:text-indigo-600 transition-colors">{{ $crumb['label'] }}</a>
+                            @endif
+                        </li>
+                    @endforeach
+                </ol>
+            </nav>
+            @endif
 
             @if(session('success'))
                 <div x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 4000)"
                      x-transition:leave="transition ease-in duration-200"
                      x-transition:leave-start="opacity-100 translate-y-0"
                      x-transition:leave-end="opacity-0 -translate-y-2"
-                     class="mb-5 flex items-center gap-3 bg-emerald-50 dark:bg-emerald-900/30 border border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-300 px-4 py-3 rounded-xl">
-                    <i class="fa-solid fa-circle-check text-emerald-500"></i>
-                    <span class="text-sm">{{ session('success') }}</span>
-                    <button @click="show = false" class="ml-auto text-emerald-400 hover:text-emerald-600">
+                     class="mb-5 flex items-center gap-3 bg-emerald-50 dark:bg-emerald-900/30 border border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-300 px-4 py-3 rounded-xl shadow-sm">
+                    <i class="fa-solid fa-circle-check text-emerald-500 flex-shrink-0"></i>
+                    <span class="text-sm flex-1">{{ session('success') }}</span>
+                    <button @click="show = false" class="text-emerald-400 hover:text-emerald-600 flex-shrink-0">
                         <i class="fa-solid fa-xmark"></i>
                     </button>
                 </div>
             @endif
 
             @if(session('error'))
+                <div x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 5000)"
+                     x-transition:leave="transition ease-in duration-200"
+                     x-transition:leave-start="opacity-100 translate-y-0"
+                     x-transition:leave-end="opacity-0 -translate-y-2"
+                     class="mb-5 flex items-center gap-3 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 text-red-800 dark:text-red-300 px-4 py-3 rounded-xl shadow-sm">
+                    <i class="fa-solid fa-circle-xmark text-red-500 flex-shrink-0"></i>
+                    <span class="text-sm flex-1">{{ session('error') }}</span>
+                    <button @click="show = false" class="text-red-400 hover:text-red-600 flex-shrink-0">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
+            @endif
+
+            @if(session('warning'))
+                <div x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 5000)"
+                     x-transition:leave="transition ease-in duration-200"
+                     x-transition:leave-start="opacity-100 translate-y-0"
+                     x-transition:leave-end="opacity-0 -translate-y-2"
+                     class="mb-5 flex items-center gap-3 bg-amber-50 border border-amber-200 text-amber-800 px-4 py-3 rounded-xl shadow-sm">
+                    <i class="fa-solid fa-triangle-exclamation text-amber-500 flex-shrink-0"></i>
+                    <span class="text-sm flex-1">{{ session('warning') }}</span>
+                    <button @click="show = false" class="text-amber-400 hover:text-amber-600 flex-shrink-0">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
+            @endif
+
+            @if(session('info'))
                 <div x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 4000)"
                      x-transition:leave="transition ease-in duration-200"
                      x-transition:leave-start="opacity-100 translate-y-0"
                      x-transition:leave-end="opacity-0 -translate-y-2"
-                     class="mb-5 flex items-center gap-3 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 text-red-800 dark:text-red-300 px-4 py-3 rounded-xl">
-                    <i class="fa-solid fa-circle-xmark text-red-500"></i>
-                    <span class="text-sm">{{ session('error') }}</span>
-                    <button @click="show = false" class="ml-auto text-red-400 hover:text-red-600">
+                     class="mb-5 flex items-center gap-3 bg-blue-50 border border-blue-200 text-blue-800 px-4 py-3 rounded-xl shadow-sm">
+                    <i class="fa-solid fa-circle-info text-blue-500 flex-shrink-0"></i>
+                    <span class="text-sm flex-1">{{ session('info') }}</span>
+                    <button @click="show = false" class="text-blue-400 hover:text-blue-600 flex-shrink-0">
                         <i class="fa-solid fa-xmark"></i>
                     </button>
                 </div>
@@ -216,5 +392,31 @@
 </div>
 
 @stack('scripts')
+
+{{-- Global page loader --}}
+<script>
+(function(){
+    // Show spinner on navigation
+    const spinner = document.createElement('div');
+    spinner.id = 'page-loader';
+    spinner.innerHTML = `
+        <div style="position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.7);backdrop-filter:blur(4px);transition:opacity .3s">
+            <div style="width:44px;height:44px;border-radius:50%;border:3px solid #e5e7eb;border-top-color:#3B59FF;animation:spin .7s linear infinite"></div>
+        </div>`;
+    document.head.insertAdjacentHTML('beforeend','<style>@keyframes spin{to{transform:rotate(360deg)}}</style>');
+
+    document.addEventListener('click', e => {
+        const a = e.target.closest('a[href]');
+        if (a && !a.target && !a.href.startsWith('#') && !a.href.startsWith('javascript') && !e.ctrlKey && !e.metaKey) {
+            document.body.appendChild(spinner.firstElementChild.cloneNode(true));
+        }
+    });
+    document.addEventListener('submit', () => {
+        const el = spinner.firstElementChild.cloneNode(true);
+        el.style.background = 'rgba(255,255,255,.85)';
+        document.body.appendChild(el);
+    });
+})();
+</script>
 </body>
 </html>

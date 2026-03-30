@@ -261,6 +261,7 @@ function CheckoutModal({ cart, onClose, onSuccess }) {
   const [phone,     setPhone]     = useState('');
   const [notes,     setNotes]     = useState('');
   const [payMethod, setPayMethod] = useState(null);
+  const [pseBank,   setPseBank]   = useState('');
   const [cardNum,   setCardNum]   = useState('');
   const [cardExp,   setCardExp]   = useState('');
   const [cardCvv,   setCardCvv]   = useState('');
@@ -304,8 +305,8 @@ function CheckoutModal({ cart, onClose, onSuccess }) {
       <div className="absolute inset-0" onClick={onClose}
         style={{background:'rgba(0,0,0,.75)',backdropFilter:'blur(10px)',WebkitBackdropFilter:'blur(10px)'}} />
 
-      <div className="modal-enter relative w-full sm:max-w-lg overflow-hidden"
-        style={{background:'linear-gradient(160deg,#0c0c1e,#111128)',border:'1px solid rgba(255,255,255,.08)',borderRadius:'28px 28px 0 0',boxShadow:'0 -24px 80px rgba(59,89,255,.35)'}}>
+      <div className="modal-enter relative w-full sm:max-w-lg overflow-hidden flex flex-col"
+        style={{background:'linear-gradient(160deg,#0c0c1e,#111128)',border:'1px solid rgba(255,255,255,.08)',borderRadius:'28px 28px 0 0',boxShadow:'0 -24px 80px rgba(59,89,255,.35)',maxHeight:'92dvh'}}>
 
         {/* Shimmer bar */}
         <div className="h-1" style={{background:'linear-gradient(90deg,#3B59FF,#7B2FBE,#06b6d4,#3B59FF)',backgroundSize:'300% 100%',animation:'shimmer 3s infinite'}}></div>
@@ -409,109 +410,124 @@ function CheckoutModal({ cart, onClose, onSuccess }) {
 
         {/* ── Step 3: Pago ── */}
         {step===3 && (
-          <div className="px-6 py-5 space-y-4">
-            {err&&<div className="flex items-center gap-2 rounded-xl px-4 py-3 text-sm"
-              style={{background:'rgba(239,68,68,.1)',border:'1px solid rgba(239,68,68,.25)',color:'#fca5a5'}}>
-              <i className="fa-solid fa-circle-exclamation"></i> {err}</div>}
+          <div className="flex flex-col" style={{maxHeight:'60vh'}}>
+            {/* Scrollable content */}
+            <div className="flex-1 overflow-y-auto px-6 py-4 space-y-4" style={{scrollbarWidth:'thin',scrollbarColor:'rgba(255,255,255,.1) transparent'}}>
+              {err&&<div className="flex items-center gap-2 rounded-xl px-4 py-3 text-sm"
+                style={{background:'rgba(239,68,68,.1)',border:'1px solid rgba(239,68,68,.25)',color:'#fca5a5'}}>
+                <i className="fa-solid fa-circle-exclamation"></i> {err}</div>}
 
-            <p className="text-xs font-bold uppercase tracking-widest" style={{color:'rgba(255,255,255,.35)'}}>Elige cómo pagar</p>
+              <p className="text-xs font-bold uppercase tracking-widest" style={{color:'rgba(255,255,255,.35)'}}>Elige cómo pagar</p>
 
-            {/* Payment grid */}
-            <div className="grid grid-cols-3 gap-2">
-              {PAYMENT_METHODS.map(m => (
-                <button key={m.id} onClick={()=>setPayMethod(m.id)}
-                  className="flex flex-col items-center gap-2 rounded-2xl p-3 transition-all hover:scale-[1.04] active:scale-[.97]"
-                  style={{
-                    background: payMethod===m.id ? m.bg : 'rgba(255,255,255,.04)',
-                    border: payMethod===m.id ? `1.5px solid ${m.border}` : '1.5px solid rgba(255,255,255,.07)',
-                    boxShadow: payMethod===m.id ? `0 4px 20px ${m.bg}` : 'none',
-                  }}>
-                  <div className="w-9 h-9 rounded-xl flex items-center justify-center"
-                    style={{background: payMethod===m.id ? m.bg : 'rgba(255,255,255,.08)'}}>
-                    <i className={`fa-solid ${m.icon} text-base`} style={{color: m.color}}></i>
-                  </div>
-                  <span className="text-xs font-bold text-white leading-tight text-center">{m.label}</span>
-                  <span className="text-[10px] leading-tight text-center" style={{color:'rgba(255,255,255,.35)'}}>{m.sub}</span>
-                  {payMethod===m.id&&(
-                    <div className="w-4 h-4 rounded-full flex items-center justify-center" style={{background:'linear-gradient(135deg,#3B59FF,#7B2FBE)'}}>
-                      <i className="fa-solid fa-check text-white" style={{fontSize:'8px'}}></i>
+              {/* Payment grid */}
+              <div className="grid grid-cols-3 gap-2">
+                {PAYMENT_METHODS.map(m => (
+                  <button key={m.id} onClick={()=>setPayMethod(m.id)}
+                    className="flex flex-col items-center gap-2 rounded-2xl p-3 transition-all hover:scale-[1.04] active:scale-[.97]"
+                    style={{
+                      background: payMethod===m.id ? m.bg : 'rgba(255,255,255,.04)',
+                      border: payMethod===m.id ? `1.5px solid ${m.border}` : '1.5px solid rgba(255,255,255,.07)',
+                      boxShadow: payMethod===m.id ? `0 4px 20px ${m.bg}` : 'none',
+                    }}>
+                    <div className="w-9 h-9 rounded-xl flex items-center justify-center"
+                      style={{background: payMethod===m.id ? m.bg : 'rgba(255,255,255,.08)'}}>
+                      <i className={`fa-solid ${m.icon} text-base`} style={{color: m.color}}></i>
                     </div>
-                  )}
-                </button>
-              ))}
-            </div>
+                    <span className="text-xs font-bold text-white leading-tight text-center">{m.label}</span>
+                    <span className="text-[10px] leading-tight text-center" style={{color:'rgba(255,255,255,.35)'}}>{m.sub}</span>
+                    {payMethod===m.id&&(
+                      <div className="w-4 h-4 rounded-full flex items-center justify-center" style={{background:'linear-gradient(135deg,#3B59FF,#7B2FBE)'}}>
+                        <i className="fa-solid fa-check text-white" style={{fontSize:'8px'}}></i>
+                      </div>
+                    )}
+                  </button>
+                ))}
+              </div>
 
-            {/* Tarjeta fields */}
-            {payMethod==='tarjeta'&&(
-              <div className="space-y-3 rounded-2xl p-4" style={{background:'rgba(59,89,255,.08)',border:'1px solid rgba(59,89,255,.2)'}}>
-                <p className="text-xs font-bold uppercase tracking-widest" style={{color:'rgba(255,255,255,.4)'}}>Datos de la tarjeta</p>
-                <input value={cardNum} onChange={e=>setCardNum(fmtCard(e.target.value))} placeholder="0000 0000 0000 0000" maxLength={19} className={iCls} style={iSty}/>
-                <input value={cardName} onChange={e=>setCardName(e.target.value)} placeholder="Nombre en la tarjeta" className={iCls} style={iSty}/>
-                <div className="grid grid-cols-2 gap-3">
-                  <input value={cardExp} onChange={e=>setCardExp(fmtExp(e.target.value))} placeholder="MM/AA" maxLength={5} className={iCls} style={iSty}/>
-                  <input value={cardCvv} onChange={e=>setCardCvv(e.target.value.replace(/\D/g,'').slice(0,4))} placeholder="CVV" maxLength={4} className={iCls} style={iSty}/>
+              {/* Tarjeta fields */}
+              {payMethod==='tarjeta'&&(
+                <div className="space-y-3 rounded-2xl p-4" style={{background:'rgba(59,89,255,.08)',border:'1px solid rgba(59,89,255,.2)'}}>
+                  <p className="text-xs font-bold uppercase tracking-widest" style={{color:'rgba(255,255,255,.4)'}}>Datos de la tarjeta</p>
+                  <input value={cardNum} onChange={e=>setCardNum(fmtCard(e.target.value))} placeholder="0000 0000 0000 0000" maxLength={19} className={iCls} style={iSty}/>
+                  <input value={cardName} onChange={e=>setCardName(e.target.value)} placeholder="Nombre en la tarjeta" className={iCls} style={iSty}/>
+                  <div className="grid grid-cols-2 gap-3">
+                    <input value={cardExp} onChange={e=>setCardExp(fmtExp(e.target.value))} placeholder="MM/AA" maxLength={5} className={iCls} style={iSty}/>
+                    <input value={cardCvv} onChange={e=>setCardCvv(e.target.value.replace(/\D/g,'').slice(0,4))} placeholder="CVV" maxLength={4} className={iCls} style={iSty}/>
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
 
-            {/* PSE */}
-            {payMethod==='pse'&&(
-              <div className="rounded-2xl p-4 space-y-2" style={{background:'rgba(0,168,89,.08)',border:'1px solid rgba(0,168,89,.2)'}}>
-                <p className="text-xs font-bold uppercase tracking-widest" style={{color:'rgba(255,255,255,.4)'}}>Selecciona tu banco</p>
-                <select className={iCls} style={iSty}>
-                  <option value="">— Elige tu banco —</option>
-                  {['Bancolombia','Davivienda','BBVA','Banco de Bogotá','Banco Popular','Colpatria','Occidente','Caja Social','Itaú','Scotiabank'].map(b=>(
-                    <option key={b}>{b}</option>
-                  ))}
-                </select>
-              </div>
-            )}
+              {/* PSE */}
+              {payMethod==='pse'&&(
+                <div className="rounded-2xl p-4 space-y-3" style={{background:'rgba(0,168,89,.08)',border:'1px solid rgba(0,168,89,.2)'}}>
+                  <p className="text-xs font-bold uppercase tracking-widest" style={{color:'rgba(255,255,255,.4)'}}>Selecciona tu banco</p>
+                  <div className="grid grid-cols-2 gap-2">
+                    {['Bancolombia','Davivienda','BBVA','Banco de Bogotá','Banco Popular','Colpatria','Occidente','Caja Social','Itaú','Scotiabank'].map(b=>(
+                      <button key={b} type="button"
+                        onClick={()=>setPseBank(b)}
+                        className="flex items-center gap-2 px-3 py-2.5 rounded-xl text-left text-xs font-semibold transition-all"
+                        style={{
+                          background: pseBank===b ? 'rgba(0,168,89,.2)' : 'rgba(255,255,255,.05)',
+                          border: pseBank===b ? '1.5px solid rgba(0,168,89,.5)' : '1.5px solid rgba(255,255,255,.08)',
+                          color: pseBank===b ? '#6ee7b7' : 'rgba(255,255,255,.6)',
+                        }}>
+                        {pseBank===b && <i className="fa-solid fa-check text-emerald-400" style={{fontSize:'9px'}}></i>}
+                        {b}
+                      </button>
+                    ))}
+                  </div>
+                  {pseBank && <p className="text-xs text-emerald-400 font-medium"><i className="fa-solid fa-circle-check mr-1"></i>{pseBank} seleccionado</p>}
+                </div>
+              )}
 
-            {/* Nequi / Daviplata */}
-            {(payMethod==='nequi'||payMethod==='daviplata')&&(
-              <div className="rounded-2xl p-4 space-y-2"
-                style={{background:payMethod==='nequi'?'rgba(123,47,190,.08)':'rgba(232,0,28,.08)',
-                        border:payMethod==='nequi'?'1px solid rgba(123,47,190,.25)':'1px solid rgba(232,0,28,.25)'}}>
-                <p className="text-xs font-bold uppercase tracking-widest" style={{color:'rgba(255,255,255,.4)'}}>
-                  Número {payMethod==='nequi'?'Nequi':'Daviplata'}
-                </p>
-                <input type="tel" placeholder="300 000 0000" className={iCls} style={iSty}/>
-                <p className="text-xs" style={{color:'rgba(255,255,255,.3)'}}>Recibirás una notificación en tu app para confirmar.</p>
-              </div>
-            )}
+              {/* Nequi / Daviplata */}
+              {(payMethod==='nequi'||payMethod==='daviplata')&&(
+                <div className="rounded-2xl p-4 space-y-2"
+                  style={{background:payMethod==='nequi'?'rgba(123,47,190,.08)':'rgba(232,0,28,.08)',
+                          border:payMethod==='nequi'?'1px solid rgba(123,47,190,.25)':'1px solid rgba(232,0,28,.25)'}}>
+                  <p className="text-xs font-bold uppercase tracking-widest" style={{color:'rgba(255,255,255,.4)'}}>
+                    Número {payMethod==='nequi'?'Nequi':'Daviplata'}
+                  </p>
+                  <input type="tel" placeholder="300 000 0000" className={iCls} style={iSty}/>
+                  <p className="text-xs" style={{color:'rgba(255,255,255,.3)'}}>Recibirás una notificación en tu app para confirmar.</p>
+                </div>
+              )}
 
-            {/* Efecty / Bancolombia */}
-            {(payMethod==='efecty'||payMethod==='bancolombia')&&(
-              <div className="rounded-2xl p-4"
-                style={{background:payMethod==='efecty'?'rgba(255,184,0,.08)':'rgba(253,218,36,.08)',
-                        border:payMethod==='efecty'?'1px solid rgba(255,184,0,.25)':'1px solid rgba(253,218,36,.25)'}}>
-                <p className="text-xs font-bold uppercase tracking-widest mb-2" style={{color:'rgba(255,255,255,.4)'}}>Instrucciones</p>
-                {payMethod==='efecty'
-                  ? <p className="text-xs leading-relaxed" style={{color:'rgba(255,255,255,.5)'}}>Ve al punto Efecty más cercano y paga con el número de pedido que recibirás por email.</p>
-                  : <p className="text-xs leading-relaxed" style={{color:'rgba(255,255,255,.5)'}}>Transfiere a <span className="font-bold text-white">Bancolombia Ahorros 123-456789-00</span>. Envía el comprobante al WhatsApp del negocio.</p>
-                }
-              </div>
-            )}
-
-            {/* Total + confirm */}
-            <div className="flex justify-between items-center rounded-2xl px-4 py-3"
-              style={{background:'linear-gradient(90deg,rgba(59,89,255,.12),rgba(123,47,190,.12))',border:'1px solid rgba(59,89,255,.18)'}}>
-              <span className="text-sm" style={{color:'rgba(255,255,255,.5)'}}>Total</span>
-              <span className="font-black text-xl text-white">{fmt(total)}</span>
+              {/* Efecty / Bancolombia */}
+              {(payMethod==='efecty'||payMethod==='bancolombia')&&(
+                <div className="rounded-2xl p-4"
+                  style={{background:payMethod==='efecty'?'rgba(255,184,0,.08)':'rgba(253,218,36,.08)',
+                          border:payMethod==='efecty'?'1px solid rgba(255,184,0,.25)':'1px solid rgba(253,218,36,.25)'}}>
+                  <p className="text-xs font-bold uppercase tracking-widest mb-2" style={{color:'rgba(255,255,255,.4)'}}>Instrucciones</p>
+                  {payMethod==='efecty'
+                    ? <p className="text-xs leading-relaxed" style={{color:'rgba(255,255,255,.5)'}}>Ve al punto Efecty más cercano y paga con el número de pedido que recibirás por email.</p>
+                    : <p className="text-xs leading-relaxed" style={{color:'rgba(255,255,255,.5)'}}>Transfiere a <span className="font-bold text-white">Bancolombia Ahorros 123-456789-00</span>. Envía el comprobante al WhatsApp del negocio.</p>
+                  }
+                </div>
+              )}
             </div>
-            <div className="flex gap-3">
-              <button onClick={()=>{setStep(2);setErr('');}} className="flex-1 py-3.5 rounded-2xl text-sm font-bold"
-                style={{background:'rgba(255,255,255,.06)',border:'1px solid rgba(255,255,255,.08)',color:'rgba(255,255,255,.5)'}}>
-                <i className="fa-solid fa-arrow-left mr-1 text-xs"></i> Volver
-              </button>
-              <button onClick={submit} disabled={loading||!payMethod}
-                className="flex-[2] py-3.5 rounded-2xl text-white font-black text-sm flex items-center justify-center gap-2 transition-all hover:scale-[1.02] disabled:opacity-50"
-                style={{background:'linear-gradient(90deg,#3B59FF,#7B2FBE)',boxShadow:payMethod?'0 8px 30px rgba(59,89,255,.45)':'none'}}>
-                {loading
-                  ? <><i className="fa-solid fa-spinner fa-spin"></i> Procesando...</>
-                  : <><i className="fa-solid fa-shield-halved text-xs"></i> Pagar {fmt(total)}</>
-                }
-              </button>
+
+            {/* Footer fijo — total + botones */}
+            <div className="px-6 pb-6 pt-3 space-y-3" style={{borderTop:'1px solid rgba(255,255,255,.07)'}}>
+              <div className="flex justify-between items-center rounded-2xl px-4 py-3"
+                style={{background:'linear-gradient(90deg,rgba(59,89,255,.12),rgba(123,47,190,.12))',border:'1px solid rgba(59,89,255,.18)'}}>
+                <span className="text-sm" style={{color:'rgba(255,255,255,.5)'}}>Total</span>
+                <span className="font-black text-xl text-white">{fmt(total)}</span>
+              </div>
+              <div className="flex gap-3">
+                <button onClick={()=>{setStep(2);setErr('');}} className="flex-1 py-3.5 rounded-2xl text-sm font-bold"
+                  style={{background:'rgba(255,255,255,.06)',border:'1px solid rgba(255,255,255,.08)',color:'rgba(255,255,255,.5)'}}>
+                  <i className="fa-solid fa-arrow-left mr-1 text-xs"></i> Volver
+                </button>
+                <button onClick={submit} disabled={loading||!payMethod}
+                  className="flex-[2] py-3.5 rounded-2xl text-white font-black text-sm flex items-center justify-center gap-2 transition-all hover:scale-[1.02] disabled:opacity-50"
+                  style={{background:'linear-gradient(90deg,#3B59FF,#7B2FBE)',boxShadow:payMethod?'0 8px 30px rgba(59,89,255,.45)':'none'}}>
+                  {loading
+                    ? <><i className="fa-solid fa-spinner fa-spin"></i> Procesando...</>
+                    : <><i className="fa-solid fa-shield-halved text-xs"></i> Pagar {fmt(total)}</>
+                  }
+                </button>
+              </div>
             </div>
           </div>
         )}
@@ -815,6 +831,98 @@ function Testimonials() {
   );
 }
 
+// ── System Section ─────────────────────────────────────────────────────────
+function SystemSection() {
+  const features = [
+    { icon:'fa-box',          color:'#3B59FF', bg:'rgba(59,89,255,.12)',  title:'Gestión de productos',   desc:'Crea, edita y organiza tu catálogo con imágenes, categorías, precios y control de stock en tiempo real.' },
+    { icon:'fa-bag-shopping', color:'#7B2FBE', bg:'rgba(123,47,190,.12)', title:'Pedidos en línea',        desc:'Recibe y gestiona pedidos directamente desde la tienda. Actualiza estados y notifica a tus clientes automáticamente.' },
+    { icon:'fa-chart-line',   color:'#0891b2', bg:'rgba(8,145,178,.12)',  title:'Reportes y analytics',   desc:'Visualiza ventas, inventario y productos más vendidos con gráficas interactivas y exportación a CSV o PDF.' },
+    { icon:'fa-bell',         color:'#059669', bg:'rgba(5,150,105,.12)',  title:'Notificaciones',          desc:'Alertas internas de stock bajo y pedidos pendientes. Emails automáticos al cliente en cada cambio de estado.' },
+    { icon:'fa-users',        color:'#d97706', bg:'rgba(217,119,6,.12)',  title:'Gestión de usuarios',     desc:'Administra los accesos al panel. Importa usuarios desde CSV y filtra por fecha de registro.' },
+    { icon:'fa-shield-halved',color:'#6366f1', bg:'rgba(99,102,241,.12)', title:'Panel seguro',            desc:'Autenticación protegida, modo oscuro, diseño responsivo y accesibilidad integrada en todo el sistema.' },
+  ];
+
+  const stats = [
+    { value:'100%', label:'Responsivo', icon:'fa-mobile-screen-button' },
+    { value:'3',    label:'Reportes',   icon:'fa-chart-bar' },
+    { value:'∞',    label:'Productos',  icon:'fa-box' },
+    { value:'24/7', label:'Disponible', icon:'fa-clock' },
+  ];
+
+  return (
+    <section id="sistema" className="py-24 bg-white">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
+        {/* Header */}
+        <div className="text-center mb-16">
+          <span className="inline-block text-xs font-bold uppercase tracking-widest px-4 py-1.5 rounded-full mb-4"
+            style={{background:'rgba(59,89,255,.08)',color:'#3B59FF',border:'1px solid rgba(59,89,255,.15)'}}>
+            Sistema de gestión
+          </span>
+          <h2 className="text-4xl sm:text-5xl font-black text-gray-900 leading-tight">
+            Todo lo que necesitas<br/>
+            <span style={{background:'linear-gradient(90deg,#3B59FF,#7B2FBE)',WebkitBackgroundClip:'text',WebkitTextFillColor:'transparent'}}>
+              en un solo lugar
+            </span>
+          </h2>
+          <p className="text-gray-500 mt-4 max-w-xl mx-auto text-base leading-relaxed">
+            FiftyOne incluye un panel de administración completo para gestionar tu tienda de ropa oversize sin complicaciones.
+          </p>
+        </div>
+
+        {/* Stats */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-16">
+          {stats.map(s => (
+            <div key={s.label} className="text-center p-6 rounded-2xl border border-gray-100 bg-gray-50">
+              <i className={`fa-solid ${s.icon} text-xl mb-3 block`} style={{background:'linear-gradient(135deg,#3B59FF,#7B2FBE)',WebkitBackgroundClip:'text',WebkitTextFillColor:'transparent'}}></i>
+              <p className="text-3xl font-black text-gray-900">{s.value}</p>
+              <p className="text-xs text-gray-400 font-semibold uppercase tracking-wide mt-1">{s.label}</p>
+            </div>
+          ))}
+        </div>
+
+        {/* Features grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-16">
+          {features.map(f => (
+            <div key={f.title} className="group p-6 rounded-2xl border border-gray-100 hover:border-indigo-200 hover:shadow-lg transition-all duration-300 bg-white">
+              <div className="w-12 h-12 rounded-2xl flex items-center justify-center mb-4 transition-transform group-hover:scale-110 duration-300"
+                style={{background:f.bg}}>
+                <i className={`fa-solid ${f.icon} text-base`} style={{color:f.color}}></i>
+              </div>
+              <h3 className="font-bold text-gray-900 mb-2">{f.title}</h3>
+              <p className="text-sm text-gray-500 leading-relaxed">{f.desc}</p>
+            </div>
+          ))}
+        </div>
+
+        {/* CTA */}
+        <div className="relative rounded-3xl overflow-hidden p-10 sm:p-14 text-center"
+          style={{background:'linear-gradient(135deg,#0d0d1a 0%,#0a0e2e 55%,#1a0a2e 100%)'}}>
+          <div className="absolute inset-0 opacity-20"
+            style={{backgroundImage:'radial-gradient(circle at 20% 50%,#3B59FF 0%,transparent 50%),radial-gradient(circle at 80% 50%,#7B2FBE 0%,transparent 50%)'}}></div>
+          <div className="relative z-10">
+            <h3 className="text-3xl sm:text-4xl font-black text-white mb-3">¿Listo para gestionar tu tienda?</h3>
+            <p className="text-gray-400 mb-8 max-w-md mx-auto">Accede al panel de administración y toma el control de tu negocio.</p>
+            <div className="flex flex-col sm:flex-row gap-3 justify-center">
+              <a href="/admin/dashboard"
+                className="inline-flex items-center justify-center gap-2 px-8 py-4 rounded-2xl text-white font-bold text-sm transition-all hover:scale-105 hover:shadow-2xl"
+                style={{background:'linear-gradient(90deg,#3B59FF,#7B2FBE)',boxShadow:'0 8px 30px rgba(59,89,255,.4)'}}>
+                <i className="fa-solid fa-gauge-high"></i> Ir al panel admin
+              </a>
+              <a href="/catalogo"
+                className="inline-flex items-center justify-center gap-2 px-8 py-4 rounded-2xl font-bold text-sm transition-all hover:bg-white/20"
+                style={{background:'rgba(255,255,255,.08)',color:'white',border:'1px solid rgba(255,255,255,.15)'}}>
+                <i className="fa-solid fa-shirt"></i> Ver catálogo
+              </a>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+  );
+}
+
 // ── Footer ─────────────────────────────────────────────────────────────────
 function Footer() {
   return (
@@ -892,6 +1000,7 @@ function App() {
       <Products onAdd={addToCart} />
       <PromoBanner />
       <Testimonials />
+      <SystemSection />
       <Footer />
       <CartDrawer open={drawerOpen} onClose={() => setDrawer(false)} cart={cart}
         onUpdateQty={updateQty} onRemove={removeItem} onClear={clearCart} onCheckout={openCheckout} />

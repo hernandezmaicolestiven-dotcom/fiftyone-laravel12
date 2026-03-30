@@ -14,6 +14,15 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->redirectGuestsTo(fn () => route('admin.login'));
         $middleware->redirectUsersTo(fn () => route('admin.dashboard'));
+
+        // Security headers en todas las respuestas web
+        $middleware->web(append: [
+            \App\Http\Middleware\SecurityHeaders::class,
+            \App\Http\Middleware\SanitizeInput::class,
+        ]);
+
+        // Rate limiting para login: máx 5 intentos / minuto por IP+email
+        // (usa cache driver configurado en .env, no requiere Redis)
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //
