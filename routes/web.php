@@ -1,0 +1,103 @@
+<?php
+
+use App\Http\Controllers\Admin\AdminProductController;
+use App\Http\Controllers\Admin\AnalyticsController;
+use App\Http\Controllers\Admin\AuthController;
+use App\Http\Controllers\Admin\CategoryController;
+use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\ForgotPasswordController;
+use App\Http\Controllers\Admin\MessageController;
+use App\Http\Controllers\Admin\OrderController;
+use App\Http\Controllers\Admin\ProfileController;
+use App\Http\Controllers\Admin\ReportController;
+use App\Http\Controllers\Admin\ResetPasswordController;
+use App\Http\Controllers\Admin\SettingsController;
+use App\Http\Controllers\Admin\UserController;
+use App\Http\Controllers\CustomerAuthController;
+use App\Http\Controllers\OrderController as PublicOrderController;
+use App\Http\Controllers\ProductController;
+use App\Models\Product;
+use Illuminate\Support\Facades\Route;
+
+// Public
+Route::get('/', function () {
+    $products = Product::with('category')->latest()->get();
+    $authUser = auth()->user();
+    $authData = [
+        'loggedIn' => $authUser && $authUser->role !== 'admin',
+        'name'     => ($authUser && $authUser->role !== 'admin') ? $authUser->name : null,
+    ];
+    return view('welcome', compact('products', 'authData'));
+});
+
+// Admin Auth
+Route::prefix('admin')->name('admin.')->group(function () {
+    Route::get('login', [AuthController::class, 'showLogin'])->name('login')->middleware('guest');
+    Route::post('login', [AuthController::class, 'login'])->name('login.post')->middleware(['guest', 'throttle:5,1']);
+    Route::post('logout', [AuthController::class, 'logout'])->name('logout')->middleware('auth');
+
+    // Recuperación de contraseña
+    Route::get('forgot-password', [ForgotPasswordController::class, 'showForm'])->name('password.request')->middleware('guest');
+    Route::post('forgot-password', [ForgotPasswordController::class, 'sendLink'])->name('password.email')->middleware('guest');
+    Route::get('reset-password/{token}', [ResetPasswordController::class, 'showForm'])->name('password.reset')->middleware('guest');
+    Route::post('reset-password', [ResetPasswordController::class, 'reset'])->name('password.update')->middleware('guest');
+
+    // Protected admin routes — solo role=admin
+    Route::middleware(['auth', 'admin.only'])->group(function () {
+        Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
+        Route::get('products/export/csv', [AdminProductController::class, 'exportCsv'])->name('products.export.csv');
+        Route::get('products/export/excel', [AdminProductController::class, 'exportExcel'])->name('products.export.excel');
+        Route::post('products/import/csv', [AdminProductController::class, 'importCsv'])->name('products.import.csv');
+        Route::resource('products', AdminProductController::class);
+        Route::resource('categories', CategoryController::class);
+        Route::post('users/import/csv', [UserController::class, 'importCsv'])->name('users.import.csv');
+        Route::resource('users', UserController::class);
+        Route::get('orders/export/csv', [OrderController::class, 'exportCsv'])->name('orders.export.csv');
+        Route::get('orders/export/pdf', [OrderController::class, 'exportPdf'])->name('orders.export.pdf');
+        Route::resource('orders', OrderController::class)->only(['index', 'show', 'destroy']);
+        Route::patch('orders/{order}/status', [OrderController::class, 'updateStatus'])->name('orders.status');
+
+        // Reportes
+        Route::get('reports/sales', [ReportController::class, 'sales'])->name('reports.sales');
+        Route::get('reports/inventory', [ReportController::class, 'inventory'])->name('reports.inventory');
+        Route::get('reports/top-products', [ReportController::class, 'topProducts'])->name('reports.top-products');
+
+        // Analytics avanzado + IA
+        Route::get('analytics', [AnalyticsController::class, 'index'])->name('analytics');
+
+        // Chat interno
+        Route::get('messages', [MessageController::class, 'index'])->name('messages.index');
+        Route::post('messages', [MessageController::class, 'store'])->name('messages.store');
+        Route::get('messages/poll', [MessageController::class, 'poll'])->name('messages.poll');
+
+        // Configuración
+        Route::get('settings', [SettingsController::class, 'index'])->name('settings');
+        Route::put('settings/profile', [SettingsController::class, 'updateProfile'])->name('settings.profile');
+        Route::put('settings/password', [SettingsController::class, 'updatePassword'])->name('settings.password');
+        Route::delete('settings/account', [SettingsController::class, 'deleteAccount'])->name('settings.delete');
+
+        // Perfil
+        Route::get('profile', [ProfileController::class, 'edit'])->name('profile');
+        Route::put('profile', [ProfileController::class, 'update'])->name('profile.update');
+        Route::put('profile/password', [ProfileController::class, 'updatePassword'])->name('profile.password');
+    });
+});
+
+// Public order endpoint — requiere sesión de cliente
+Route::post('/orders', [PublicOrderController::class, 'store'])->name('orders.store')->middleware('auth');
+
+// Customer auth
+Route::middleware('guest')->group(function () {
+    Route::get('/registro', [CustomerAuthController::class, 'showRegister'])->name('customer.register');
+    Route::post('/registro', [CustomerAuthController::class, 'register'])->name('customer.register.post');
+    Route::get('/login', [CustomerAuthController::class, 'showLogin'])->name('customer.login');
+    Route::post('/login', [CustomerAuthController::class, 'login'])->name('customer.login.post');
+});
+Route::middleware('auth')->group(function () {
+    Route::get('/mi-cuenta', [CustomerAuthController::class, 'account'])->name('customer.account');
+    Route::post('/logout', [CustomerAuthController::class, 'logout'])->name('customer.logout');
+});
+
+// Public catalog routes
+Route::get('/productos', [ProductController::class, 'index'])->name('products.index');
+Route::get('/catalogo', [ProductController::class, 'index'])->name('catalogo');
