@@ -141,6 +141,19 @@
                 @endif
             </a>
             @endforeach
+
+            {{-- Colaboradores — solo admin --}}
+            @if(auth()->user()->role === 'admin')
+            @php $activeColab = request()->routeIs('admin.colaboradores*'); @endphp
+            <a href="{{ route('admin.colaboradores.index') }}"
+               class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-300 transition-all {{ $activeColab ? 'text-white' : 'hover:text-white' }}"
+               style="{{ $activeColab ? 'background: linear-gradient(90deg, #3B59FF, #7B2FBE);' : '' }}"
+               onmouseover="{{ !$activeColab ? "this.style.background='linear-gradient(90deg,rgba(59,89,255,0.3),rgba(123,47,190,0.3))'" : '' }}"
+               onmouseout="{{ !$activeColab ? "this.style.background=''" : '' }}">
+                <i class="fa-solid fa-user-shield w-5 text-center"></i>
+                <span x-show="sidebarOpen" class="text-sm font-medium flex-1">Colaboradores</span>
+            </a>
+            @endif
         </nav>
 
         {{-- User footer --}}

@@ -70,9 +70,13 @@
                 <label class="block text-sm font-medium text-gray-700 mb-1">Contraseña</label>
                 <div class="relative">
                     <span class="absolute inset-y-0 left-3 flex items-center text-gray-400"><i class="fa-solid fa-lock text-sm"></i></span>
-                    <input type="password" name="password" required
-                           class="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 bg-gray-50 focus:bg-white transition"
+                    <input type="password" name="password" id="reg_password" required
+                           class="w-full pl-10 pr-10 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 bg-gray-50 focus:bg-white transition"
                            placeholder="Mínimo 8 caracteres">
+                    <button type="button" onclick="togglePass('reg_password','eye-reg1')"
+                            class="absolute inset-y-0 right-3 flex items-center text-gray-400 hover:text-indigo-500 transition">
+                        <i id="eye-reg1" class="fa-solid fa-eye text-sm"></i>
+                    </button>
                 </div>
             </div>
 
@@ -80,9 +84,13 @@
                 <label class="block text-sm font-medium text-gray-700 mb-1">Confirmar contraseña</label>
                 <div class="relative">
                     <span class="absolute inset-y-0 left-3 flex items-center text-gray-400"><i class="fa-solid fa-lock text-sm"></i></span>
-                    <input type="password" name="password_confirmation" required
-                           class="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 bg-gray-50 focus:bg-white transition"
+                    <input type="password" name="password_confirmation" id="reg_confirm" required
+                           class="w-full pl-10 pr-10 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 bg-gray-50 focus:bg-white transition"
                            placeholder="Repite la contraseña">
+                    <button type="button" onclick="togglePass('reg_confirm','eye-reg2')"
+                            class="absolute inset-y-0 right-3 flex items-center text-gray-400 hover:text-indigo-500 transition">
+                        <i id="eye-reg2" class="fa-solid fa-eye text-sm"></i>
+                    </button>
                 </div>
             </div>
 
@@ -108,3 +116,16 @@
 
 </body>
 </html>
+<script>
+function togglePass(id, eyeId) {
+    const input = document.getElementById(id);
+    const eye   = document.getElementById(eyeId);
+    if (input.type === 'password') {
+        input.type = 'text';
+        eye.classList.replace('fa-eye', 'fa-eye-slash');
+    } else {
+        input.type = 'password';
+        eye.classList.replace('fa-eye-slash', 'fa-eye');
+    }
+}
+</script>

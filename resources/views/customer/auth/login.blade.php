@@ -55,9 +55,13 @@
                 <label class="block text-sm font-medium text-gray-700 mb-1">Contraseña</label>
                 <div class="relative">
                     <span class="absolute inset-y-0 left-3 flex items-center text-gray-400"><i class="fa-solid fa-lock text-sm"></i></span>
-                    <input type="password" name="password" required
-                           class="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 bg-gray-50 focus:bg-white transition"
+                    <input type="password" name="password" id="password" required
+                           class="w-full pl-10 pr-10 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 bg-gray-50 focus:bg-white transition"
                            placeholder="••••••••">
+                    <button type="button" onclick="togglePass('password','eye-login')"
+                            class="absolute inset-y-0 right-3 flex items-center text-gray-400 hover:text-indigo-500 transition">
+                        <i id="eye-login" class="fa-solid fa-eye text-sm"></i>
+                    </button>
                 </div>
             </div>
 
@@ -87,5 +91,18 @@
     </p>
 </div>
 
+<script>
+function togglePass(id, eyeId) {
+    const input = document.getElementById(id);
+    const eye = document.getElementById(eyeId);
+    if (input.type === 'password') {
+        input.type = 'text';
+        eye.classList.replace('fa-eye', 'fa-eye-slash');
+    } else {
+        input.type = 'password';
+        eye.classList.replace('fa-eye-slash', 'fa-eye');
+    }
+}
+</script>
 </body>
 </html>

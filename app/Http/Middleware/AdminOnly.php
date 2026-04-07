@@ -15,8 +15,8 @@ class AdminOnly
             return redirect()->route('admin.login');
         }
 
-        // Si está autenticado pero NO es admin → redirigir a su cuenta
-        if (auth()->user()->role !== 'admin') {
+        // Solo admin y colaborador pueden entrar al panel
+        if (! in_array(auth()->user()->role, ['admin', 'colaborador'])) {
             return redirect('/mi-cuenta')->with('error', 'No tienes acceso al panel de administración.');
         }
 

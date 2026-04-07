@@ -68,20 +68,17 @@
 
     {{-- Stats --}}
     @php
-        $delivered = $orders->where('status', 'delivered')->count();
-        $pending   = $orders->whereIn('status', ['pending','confirmed','shipped'])->count();
-        $total     = $orders->sum('total');
+        $pending = $orders->whereIn('status', ['pending','confirmed','shipped'])->count();
+        $total   = $orders->sum('total');
     @endphp
     <div class="grid grid-cols-3 gap-4 mb-8 fade-up" style="animation-delay:.1s">
         @foreach([
-            ['Pedidos totales', $orders->count(), 'fa-bag-shopping', '#3B59FF','#7B2FBE'],
-            ['En proceso',      $pending,          'fa-clock',        '#d97706','#f59e0b'],
-            ['Total comprado',  '$'.number_format($total,0,',','.'), 'fa-dollar-sign','#059669','#10b981'],
+            ['Pedidos totales', $orders->count(),                          'fa-bag-shopping', '#3B59FF','#7B2FBE'],
+            ['En proceso',      $pending,                                  'fa-clock',        '#d97706','#f59e0b'],
+            ['Total comprado',  '$ '.number_format($total,0,',','.'),      'fa-dollar-sign',  '#059669','#10b981'],
         ] as [$label,$value,$icon,$c1,$c2])
-        <div class="rounded-2xl p-5 border border-white/10 hover:border-white/20 transition"
-             style="background:rgba(255,255,255,.04)">
-            <div class="w-9 h-9 rounded-xl mb-3 flex items-center justify-center"
-                 style="background:linear-gradient(135deg,{{ $c1 }}22,{{ $c2 }}22)">
+        <div class="rounded-2xl p-5 border border-white/10 hover:border-white/20 transition" style="background:rgba(255,255,255,.04)">
+            <div class="w-9 h-9 rounded-xl mb-3 flex items-center justify-center" style="background:linear-gradient(135deg,{{ $c1 }}22,{{ $c2 }}22)">
                 <i class="fa-solid {{ $icon }} text-sm" style="background:linear-gradient(135deg,{{ $c1 }},{{ $c2 }});-webkit-background-clip:text;-webkit-text-fill-color:transparent"></i>
             </div>
             <p class="text-2xl font-black text-white">{{ $value }}</p>
@@ -91,7 +88,7 @@
     </div>
 
     {{-- Historial de pedidos --}}
-    <div class="rounded-2xl overflow-hidden border border-white/10 fade-up" style="animation-delay:.2s;background:rgba(255,255,255,.03)">
+    <div class="rounded-2xl overflow-hidden border border-white/10 fade-up" style="background:rgba(255,255,255,.03)">
         <div class="px-6 py-4 border-b border-white/10 flex items-center justify-between">
             <div>
                 <h2 class="text-base font-bold text-white">Mis pedidos</h2>
@@ -133,7 +130,6 @@
                     <p class="font-black text-lg" style="background:linear-gradient(90deg,#3B59FF,#7B2FBE);-webkit-background-clip:text;-webkit-text-fill-color:transparent">
                         ${{ number_format($order->total, 0, ',', '.') }}
                     </p>
-                    <p class="text-xs text-gray-600 mt-0.5">{{ $order->items->count() }} producto(s)</p>
                 </div>
             </div>
         </div>
@@ -155,6 +151,5 @@
     </div>
 
 </div>
-
 </body>
 </html>

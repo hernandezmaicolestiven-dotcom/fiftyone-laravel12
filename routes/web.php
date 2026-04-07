@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\ColaboradorController;
 use App\Http\Controllers\Admin\AdminProductController;
 use App\Http\Controllers\Admin\AnalyticsController;
 use App\Http\Controllers\Admin\AuthController;
@@ -75,6 +76,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::put('settings/profile', [SettingsController::class, 'updateProfile'])->name('settings.profile');
         Route::put('settings/password', [SettingsController::class, 'updatePassword'])->name('settings.password');
         Route::delete('settings/account', [SettingsController::class, 'deleteAccount'])->name('settings.delete');
+
+        // Colaboradores — solo admin
+        Route::get('colaboradores', [ColaboradorController::class, 'index'])->name('colaboradores.index');
+        Route::post('colaboradores', [ColaboradorController::class, 'store'])->name('colaboradores.store');
+        Route::delete('colaboradores/{user}', [ColaboradorController::class, 'destroy'])->name('colaboradores.destroy');
 
         // Perfil
         Route::get('profile', [ProfileController::class, 'edit'])->name('profile');
