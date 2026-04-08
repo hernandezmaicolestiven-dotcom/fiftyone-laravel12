@@ -64,6 +64,11 @@
         .dark ::-webkit-scrollbar { width: 6px; }
         .dark ::-webkit-scrollbar-track { background: #12121f; }
         .dark ::-webkit-scrollbar-thumb { background: #3B59FF55; border-radius: 3px; }
+        /* Sidebar scrollbar siempre oscuro */
+        aside ::-webkit-scrollbar { width: 4px; }
+        aside ::-webkit-scrollbar-track { background: #0a0e2e; }
+        aside ::-webkit-scrollbar-thumb { background: rgba(59,89,255,.4); border-radius: 3px; }
+        aside { scrollbar-color: rgba(59,89,255,.4) #0a0e2e; scrollbar-width: thin; }
         /* Code tags */
         .dark code { background-color: #2d2d44 !important; color: #a5b4fc !important; }
         /* Dividers */
@@ -118,15 +123,16 @@
                 ['admin.categories.index',  'fa-tags',          'Categorías',       'admin.categories*'],
                 ['admin.orders.index',      'fa-bag-shopping',  'Pedidos',          'admin.orders*'],
                 ['admin.users.index',       'fa-users',         'Usuarios',         'admin.users*'],
+                ['admin.reviews.index',     'fa-star',          'Reseñas',          'admin.reviews*'],
                 ['admin.reports.sales',     'fa-chart-line',    'Reportes',         'admin.reports*'],
-                ['admin.analytics',         'fa-brain',         'Analytics IA',     'admin.analytics*'],
+                ['admin.analytics',         'fa-brain',         'Analytics',        'admin.analytics*'],
                 ['admin.messages.index',    'fa-comments',      'Chat',             'admin.messages*'],
                 ['admin.settings',          'fa-gear',          'Configuración',    'admin.settings*'],
             ] as [$route, $icon, $label, $pattern])
             @php
                 $active = request()->routeIs($pattern);
                 $unread = ($route === 'admin.messages.index')
-                    ? \App\Models\Message::where('is_read', false)->where('user_id', '!=', auth()->id())->count()
+                    ? cache()->remember('admin_unread_msgs_'.auth()->id(), 30, fn() => \App\Models\Message::where('is_read', false)->where('user_id', '!=', auth()->id())->count())
                     : 0;
             @endphp
             <a href="{{ route($route) }}"
@@ -191,9 +197,9 @@
 
                 {{-- CAMPANA DE NOTIFICACIONES --}}
                 @php
-                    $pendingOrders = \App\Models\Order::where('status','pending')->count();
-                    $lowStock      = \App\Models\Product::where('stock','<',5)->where('stock','>',0)->count();
-                    $outStock      = \App\Models\Product::where('stock',0)->count();
+                    $pendingOrders = cache()->remember('admin_pending_orders', 60, fn() => \App\Models\Order::where('status','pending')->count());
+                    $lowStock      = cache()->remember('admin_low_stock', 60, fn() => \App\Models\Product::where('stock','<',5)->where('stock','>',0)->count());
+                    $outStock      = cache()->remember('admin_out_stock', 60, fn() => \App\Models\Product::where('stock',0)->count());
                     $notifCount    = ($pendingOrders > 0 ? 1 : 0) + ($lowStock > 0 ? 1 : 0) + ($outStock > 0 ? 1 : 0);
                 @endphp
                 <div class="relative" x-data="{ open: false }">
@@ -206,7 +212,7 @@
                         @endif
                     </button>
 
-                    <div x-show="open" x-transition
+                    <div x-show="open" x-cloak x-transition
                          class="absolute right-0 mt-2 w-80 bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden z-50">
                         <div class="px-4 py-3 border-b border-gray-100 flex items-center justify-between">
                             <h3 class="text-sm font-bold text-gray-800">Notificaciones</h3>
@@ -433,11 +439,6 @@
         if (a && !a.target && !a.href.startsWith('#') && !a.href.startsWith('javascript') && !e.ctrlKey && !e.metaKey) {
             document.body.appendChild(spinner.firstElementChild.cloneNode(true));
         }
-    });
-    document.addEventListener('submit', () => {
-        const el = spinner.firstElementChild.cloneNode(true);
-        el.style.background = 'rgba(255,255,255,.85)';
-        document.body.appendChild(el);
     });
 })();
 </script>

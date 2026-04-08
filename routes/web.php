@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\Admin\ReviewController as AdminReviewController;
+use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\Admin\ColaboradorController;
 use App\Http\Controllers\Admin\AdminProductController;
 use App\Http\Controllers\Admin\AnalyticsController;
@@ -22,13 +24,24 @@ use Illuminate\Support\Facades\Route;
 
 // Public
 Route::get('/', function () {
-    $products = Product::with('category')->latest()->get();
+    $products = Product::with(['category', 'reviews.user'])->latest()->get();
     $authUser = auth()->user();
     $authData = [
         'loggedIn' => $authUser && $authUser->role !== 'admin',
         'name'     => ($authUser && $authUser->role !== 'admin') ? $authUser->name : null,
+        'id'       => ($authUser && $authUser->role !== 'admin') ? $authUser->id : null,
     ];
-    return view('welcome', compact('products', 'authData'));
+    // Reseñas para mostrar en home (últimas 6)
+    $reviews = \App\Models\Review::with('user', 'product')
+        ->latest()->take(6)->get()
+        ->map(fn($r) => [
+            'name'    => $r->user->name,
+            'product' => $r->product->name ?? '',
+            'rating'  => $r->rating,
+            'comment' => $r->comment,
+            'date'    => $r->created_at->format('d/m/Y'),
+        ]);
+    return view('welcome', compact('products', 'authData', 'reviews'));
 });
 
 // Admin Auth
@@ -77,6 +90,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::put('settings/password', [SettingsController::class, 'updatePassword'])->name('settings.password');
         Route::delete('settings/account', [SettingsController::class, 'deleteAccount'])->name('settings.delete');
 
+        // Reseñas
+        Route::get('reviews', [AdminReviewController::class, 'index'])->name('reviews.index');
+        Route::delete('reviews/{review}', [AdminReviewController::class, 'destroy'])->name('reviews.destroy');
+
         // Colaboradores — solo admin
         Route::get('colaboradores', [ColaboradorController::class, 'index'])->name('colaboradores.index');
         Route::post('colaboradores', [ColaboradorController::class, 'store'])->name('colaboradores.store');
@@ -91,6 +108,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
 // Public order endpoint — requiere sesión de cliente
 Route::post('/orders', [PublicOrderController::class, 'store'])->name('orders.store')->middleware('auth');
+
+// Reseñas públicas (requiere auth cliente)
+Route::middleware('auth')->group(function () {
+    Route::post('/reviews', [ReviewController::class, 'store'])->name('reviews.store');
+    Route::get('/reviews', [ReviewController::class, 'index'])->name('reviews.index');
+});
 
 // Customer auth
 Route::middleware('guest')->group(function () {
@@ -107,3 +130,14 @@ Route::middleware('auth')->group(function () {
 // Public catalog routes
 Route::get('/productos', [ProductController::class, 'index'])->name('products.index');
 Route::get('/catalogo', [ProductController::class, 'index'])->name('catalogo');
+
+// Páginas estáticas
+Route::view('/sobre-nosotros', 'pages.sobre-nosotros')->name('sobre-nosotros');
+Route::view('/blog', 'pages.blog')->name('blog');
+Route::view('/trabaja-con-nosotros', 'pages.trabaja')->name('trabaja');
+Route::view('/contacto', 'pages.contacto')->name('contacto');
+Route::view('/envios', 'pages.envios')->name('envios');
+Route::view('/devoluciones', 'pages.devoluciones')->name('devoluciones');
+Route::view('/faq', 'pages.faq')->name('faq');
+Route::view('/privacidad', 'pages.privacidad')->name('privacidad');
+Route::view('/terminos', 'pages.terminos')->name('terminos');

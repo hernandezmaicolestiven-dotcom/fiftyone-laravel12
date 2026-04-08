@@ -12,6 +12,17 @@
         .hero-bg { background: linear-gradient(135deg,#000 0%,#0d0d0d 40%,#0a0e2e 70%,#1a0a2e 100%); }
         @keyframes fadeUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
         .fade-up { animation: fadeUp .5s ease forwards; }
+        /* Light mode */
+        body.light { background:#f1f5f9; color:#1e293b; }
+        body.light .hero-bg { background: linear-gradient(135deg,#3B59FF 0%,#7B2FBE 100%); }
+        body.light .card-dark { background:rgba(0,0,0,.04) !important; border-color:rgba(0,0,0,.08) !important; }
+        body.light .text-white { color:#1e293b !important; }
+        body.light .text-gray-400 { color:#64748b !important; }
+        body.light .text-gray-500 { color:#94a3b8 !important; }
+        body.light .text-gray-600 { color:#475569 !important; }
+        body.light .border-white\/10 { border-color:rgba(0,0,0,.08) !important; }
+        body.light .border-white\/5 { border-color:rgba(0,0,0,.05) !important; }
+        body.light .bg-gray-950 { background:#f1f5f9 !important; }
     </style>
 </head>
 <body class="bg-gray-950 text-white min-h-screen">
@@ -27,6 +38,15 @@
         </a>
         <div class="flex items-center gap-4">
             <span class="text-gray-400 text-sm hidden sm:block">{{ $user->name }}</span>
+            {{-- Toggle tema --}}
+            <button id="themeToggle" onclick="toggleTheme()"
+                    class="w-12 h-6 rounded-full relative transition-all duration-300 flex-shrink-0"
+                    style="background:rgba(255,255,255,.15)">
+                <span id="themeThumb"
+                      class="absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white shadow flex items-center justify-center transition-all duration-300">
+                    <i id="themeIcon" class="fa-solid fa-moon text-indigo-600 text-xs"></i>
+                </span>
+            </button>
             <form method="POST" action="{{ route('customer.logout') }}">
                 @csrf
                 <button type="submit" class="flex items-center gap-1.5 text-sm text-gray-400 hover:text-red-400 transition px-3 py-1.5 rounded-xl hover:bg-white/5">
@@ -109,9 +129,19 @@
                 'cancelled' => ['bg-red-500/15 text-red-400 border-red-500/30',          'Cancelado'],
             ];
             [$badgeClass, $badgeLabel] = $statusStyles[$order->status] ?? ['bg-gray-500/15 text-gray-400 border-gray-500/30', $order->status];
+
+            $steps = [
+                ['key'=>'pending',   'label'=>'Recibido',   'icon'=>'fa-circle-check'],
+                ['key'=>'confirmed', 'label'=>'Confirmado', 'icon'=>'fa-box'],
+                ['key'=>'shipped',   'label'=>'Enviado',    'icon'=>'fa-truck'],
+                ['key'=>'delivered', 'label'=>'Entregado',  'icon'=>'fa-house'],
+            ];
+            $stepOrder = ['pending'=>0,'confirmed'=>1,'shipped'=>2,'delivered'=>3];
+            $currentStep = $stepOrder[$order->status] ?? -1;
         @endphp
-        <div class="px-6 py-4 border-b border-white/5 last:border-0 hover:bg-white/[0.02] transition">
-            <div class="flex items-start justify-between gap-4">
+        <div class="px-6 py-5 border-b border-white/5 last:border-0">
+            {{-- Header del pedido --}}
+            <div class="flex items-start justify-between gap-4 mb-4">
                 <div class="flex-1 min-w-0">
                     <div class="flex flex-wrap items-center gap-2 mb-2">
                         <span class="font-mono text-xs text-gray-500">#{{ $order->id }}</span>
@@ -132,6 +162,38 @@
                     </p>
                 </div>
             </div>
+
+            {{-- Línea de tiempo (solo si no está cancelado) --}}
+            @if($order->status !== 'cancelled')
+            <div class="flex items-center gap-0 mt-3">
+                @foreach($steps as $i => $step)
+                @php
+                    $done    = $currentStep >= $i;
+                    $current = $currentStep === $i;
+                @endphp
+                {{-- Paso --}}
+                <div class="flex flex-col items-center flex-shrink-0">
+                    <div class="w-8 h-8 rounded-full flex items-center justify-center text-xs transition-all"
+                         style="{{ $done ? 'background:linear-gradient(135deg,#3B59FF,#7B2FBE);color:white' : 'background:rgba(255,255,255,.07);color:#4b5563' }}">
+                        <i class="fa-solid {{ $step['icon'] }} text-xs"></i>
+                    </div>
+                    <span class="text-[10px] mt-1 font-medium {{ $done ? 'text-indigo-400' : 'text-gray-600' }} whitespace-nowrap">
+                        {{ $step['label'] }}
+                    </span>
+                </div>
+                {{-- Línea conectora --}}
+                @if(!$loop->last)
+                <div class="flex-1 h-0.5 mx-1 mb-4 rounded-full"
+                     style="{{ $currentStep > $i ? 'background:linear-gradient(90deg,#3B59FF,#7B2FBE)' : 'background:rgba(255,255,255,.07)' }}"></div>
+                @endif
+                @endforeach
+            </div>
+            @else
+            <div class="mt-3 flex items-center gap-2 text-xs text-red-400">
+                <i class="fa-solid fa-circle-xmark"></i>
+                <span>Este pedido fue cancelado</span>
+            </div>
+            @endif
         </div>
         @empty
         <div class="px-6 py-20 text-center">
@@ -151,5 +213,30 @@
     </div>
 
 </div>
+
+<script>
+function toggleTheme() {
+    const body  = document.body;
+    const thumb = document.getElementById('themeThumb');
+    const icon  = document.getElementById('themeIcon');
+    const isLight = body.classList.toggle('light');
+    localStorage.setItem('customerTheme', isLight ? 'light' : 'dark');
+    thumb.style.transform = isLight ? 'translateX(24px)' : 'translateX(0)';
+    icon.className = isLight
+        ? 'fa-solid fa-sun text-amber-500 text-xs'
+        : 'fa-solid fa-moon text-indigo-600 text-xs';
+}
+// Aplicar tema guardado
+(function(){
+    const saved = localStorage.getItem('customerTheme');
+    if (saved === 'light') {
+        document.body.classList.add('light');
+        const thumb = document.getElementById('themeThumb');
+        const icon  = document.getElementById('themeIcon');
+        if (thumb) thumb.style.transform = 'translateX(24px)';
+        if (icon)  icon.className = 'fa-solid fa-sun text-amber-500 text-xs';
+    }
+})();
+</script>
 </body>
 </html>

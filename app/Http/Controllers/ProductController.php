@@ -18,6 +18,11 @@ class ProductController extends Controller
             $query->where('category_id', request('category'));
         }
 
+        // Filtro por nombre de categoría (desde el home)
+        if (request()->filled('categoria')) {
+            $query->whereHas('category', fn($q) => $q->where('name', request('categoria')));
+        }
+
         $products = $query->paginate(12);
         $categories = Category::orderBy('name')->get();
 

@@ -52,16 +52,18 @@
 <div id="root"></div>
 
 @php
-$products = \App\Models\Product::with('category')->latest()->take(6)->get()->map(fn($p) => [
-  'id'    => $p->id,
-  'name'  => $p->name,
-  'price' => (float) $p->price,
-  'badge' => $p->stock < 5 ? 'Oferta' : ($p->created_at->diffInDays() < 30 ? 'Nuevo' : null),
-  'img'   => $p->image ? (str_starts_with($p->image,'http') ? $p->image : Storage::url($p->image)) : 'https://images.unsplash.com/photo-1556821840-3a63f15732ce?w=400&q=80',
-  'rating'=> 5,
+$productosJS = $products->map(fn($p) => [
+  'id'     => $p->id,
+  'name'   => $p->name,
+  'price'  => (float) $p->price,
+  'badge'  => $p->stock < 5 ? 'Oferta' : ($p->created_at->diffInDays() < 30 ? 'Nuevo' : null),
+  'img'    => $p->image ? (str_starts_with($p->image,'http') ? $p->image : Storage::url($p->image)) : 'https://images.unsplash.com/photo-1556821840-3a63f15732ce?w=400&q=80',
+  'rating' => $p->reviews->count() ? round($p->reviews->avg('rating'),1) : 5,
+  'reviews'=> $p->reviews->count(),
 ]);
 @endphp
-<script type="text/plain" id="products-data">{!! json_encode($products) !!}</script>
+<script type="text/plain" id="products-data">{!! json_encode($productosJS) !!}</script>
+<script type="text/plain" id="reviews-data">{!! json_encode($reviews) !!}</script>
 @verbatim
 <script type="text/babel">
 const { useState, useEffect } = React;
@@ -77,11 +79,8 @@ const categories = [
   { id:3, name:'Pantalones', icon:'fa-person',     color:'from-[#333333] to-[#000000]', img:'https://images.unsplash.com/photo-1542272604-787c3835535d?w=400&q=80' },
   { id:4, name:'Accesorios', icon:'fa-hat-cowboy', color:'from-[#3B59FF] to-[#000000]', img:'https://images.unsplash.com/photo-1588850561407-ed78c282e89b?w=400&q=80' },
 ];
-const testimonials = [
-  { name:'Valentina R.', role:'Cliente frecuente',  text:'La calidad de las telas es increíble. Los hoodies son súper cómodos y el fit oversize queda perfecto.', avatar:'VR', stars:5 },
-  { name:'Sebastián M.', role:'Streetwear lover',   text:'Llevo 3 pedidos y siempre llegan rápido y bien empacados. La camiseta boxy es mi favorita.', avatar:'SM', stars:5 },
-  { name:'Camila T.',    role:'Influencer de moda', text:'FiftyOne tiene el mejor estilo oversize del mercado. Mis seguidores siempre me preguntan dónde compro.', avatar:'CT', stars:5 },
-];
+const testimonials = JSON.parse(document.getElementById('reviews-data').textContent);
+window.__AUTH__ = window.__AUTH__ || {};
 
 const fmt = n => '$ ' + Math.round(parseFloat(n)).toLocaleString('es-CO');
 
@@ -591,15 +590,17 @@ function Navbar({ cartCount, onCartOpen }) {
   const [open, setOpen] = useState(false);
   const auth = window.__AUTH__ || {};
   const links = [
-    { label:'Inicio', href:'#inicio' }, { label:'Productos', href:'#productos' },
-    { label:'Categorías', href:'#categorias' }, { label:'Ofertas', href:'#ofertas' },
-    { label:'Contacto', href:'#contacto' },
+    { label:'Inicio',     href:'#inicio' },
+    { label:'Productos',  href:'#productos' },
+    { label:'Categorías', href:'#categorias' },
+    { label:'Ofertas',    href:'#productos' },
+    { label:'Contacto',   href:'#contacto' },
   ];
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-black/95 backdrop-blur-sm border-b border-white/10">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
-          <a href="#" className="flex items-center gap-2">
+          <a href="/" className="flex items-center gap-2">
             <div className="w-8 h-8 bg-[#3B59FF] rounded-lg flex items-center justify-center">
               <i className="fa-solid fa-shirt text-white text-sm"></i>
             </div>
@@ -732,7 +733,7 @@ function Categories() {
                     <i className={`fa-solid ${cat.icon} text-xl`}></i>
                   </div>
                   <h3 className="font-bold text-lg">{cat.name}</h3>
-                  <a href="/productos" className="mt-3 bg-white/20 hover:bg-white/30 text-white text-xs font-semibold px-4 py-2 rounded-lg transition-all">Ver más</a>
+                  <a href={`/catalogo?categoria=${encodeURIComponent(cat.name)}`} className="mt-3 bg-white/20 hover:bg-white/30 text-white text-xs font-semibold px-4 py-2 rounded-lg transition-all">Ver más</a>
                 </div>
               </div>
             </div>
@@ -822,8 +823,38 @@ function PromoBanner() {
   );
 }
 
-// ── Testimonials ───────────────────────────────────────────────────────────
+// ── Testimonials / Reviews ─────────────────────────────────────────────────
 function Testimonials() {
+  const auth = window.__AUTH__ || {};
+  const [reviews, setReviews] = React.useState(testimonials);
+  const [rating, setRating] = React.useState(5);
+  const [comment, setComment] = React.useState('');
+  const [productId, setProductId] = React.useState(dbProducts[0]?.id || '');
+  const [sending, setSending] = React.useState(false);
+  const [sent, setSent] = React.useState(false);
+
+  const submitReview = async () => {
+    if (!auth.loggedIn) { alert('Debes iniciar sesión para dejar una reseña.'); return; }
+    setSending(true);
+    try {
+      const res = await fetch('/reviews', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content },
+        body: JSON.stringify({ product_id: productId, rating, comment }),
+      });
+      if (res.ok) {
+        setSent(true);
+        setComment('');
+        setTimeout(() => setSent(false), 3000);
+        // Recargar reseñas
+        const r = await fetch('/reviews?product_id=' + productId);
+        const data = await r.json();
+        if (data.length) setReviews(prev => [...data.map(d => ({name:d.user, product:d.product||'', rating:d.rating, comment:d.comment, date:d.date})), ...prev].slice(0,6));
+      }
+    } catch(e) {}
+    setSending(false);
+  };
+
   return (
     <section className="py-20 bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -831,111 +862,75 @@ function Testimonials() {
           <span className="text-[#3B59FF] text-sm font-semibold uppercase tracking-widest">Opiniones</span>
           <h2 className="text-4xl font-black text-black mt-2">Lo que dicen nuestros clientes</h2>
         </div>
-        <div className="grid md:grid-cols-3 gap-6">
-          {testimonials.map((t,i) => (
-            <div key={i} className="card-hover bg-white rounded-2xl p-6 shadow-sm border border-gray-200">
-              <Stars count={t.stars} />
-              <p className="text-gray-600 mt-4 leading-relaxed text-sm">"{t.text}"</p>
-              <div className="flex items-center gap-3 mt-6">
-                <div className="w-10 h-10 rounded-full flex items-center justify-center text-white text-sm font-bold flex-shrink-0"
-                  style={{background:gradientBg}}>{t.avatar}</div>
-                <div><p className="font-semibold text-black text-sm">{t.name}</p><p className="text-gray-500 text-xs">{t.role}</p></div>
+
+        {/* Formulario reseña — siempre visible */}
+        <div className="max-w-xl mx-auto mb-12 bg-white rounded-2xl p-6 shadow-sm border border-gray-200">
+          <h3 className="font-bold text-gray-800 mb-1">Deja tu opinión</h3>
+          <p className="text-xs text-gray-400 mb-4">Tu experiencia ayuda a otros clientes</p>
+
+          {auth.loggedIn ? (
+            <>
+              <select value={productId} onChange={e => setProductId(e.target.value)}
+                      className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm mb-3 focus:outline-none focus:ring-2 focus:ring-indigo-300">
+                {dbProducts.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
+              </select>
+              <div className="flex gap-2 mb-3">
+                {[1,2,3,4,5].map(s => (
+                  <button key={s} type="button" onClick={() => setRating(s)} className="text-3xl transition-transform hover:scale-125 focus:outline-none">
+                    <i className={`fa-star ${s <= rating ? 'fa-solid text-amber-400' : 'fa-regular text-gray-300'}`}></i>
+                  </button>
+                ))}
+                <span className="ml-2 text-sm text-gray-500 self-center">{rating} de 5</span>
               </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-// ── System Section ─────────────────────────────────────────────────────────
-function SystemSection() {
-  const features = [
-    { icon:'fa-box',          color:'#3B59FF', bg:'rgba(59,89,255,.12)',  title:'Gestión de productos',   desc:'Crea, edita y organiza tu catálogo con imágenes, categorías, precios y control de stock en tiempo real.' },
-    { icon:'fa-bag-shopping', color:'#7B2FBE', bg:'rgba(123,47,190,.12)', title:'Pedidos en línea',        desc:'Recibe y gestiona pedidos directamente desde la tienda. Actualiza estados y notifica a tus clientes automáticamente.' },
-    { icon:'fa-chart-line',   color:'#0891b2', bg:'rgba(8,145,178,.12)',  title:'Reportes y analytics',   desc:'Visualiza ventas, inventario y productos más vendidos con gráficas interactivas y exportación a CSV o PDF.' },
-    { icon:'fa-bell',         color:'#059669', bg:'rgba(5,150,105,.12)',  title:'Notificaciones',          desc:'Alertas internas de stock bajo y pedidos pendientes. Emails automáticos al cliente en cada cambio de estado.' },
-    { icon:'fa-users',        color:'#d97706', bg:'rgba(217,119,6,.12)',  title:'Gestión de usuarios',     desc:'Administra los accesos al panel. Importa usuarios desde CSV y filtra por fecha de registro.' },
-    { icon:'fa-shield-halved',color:'#6366f1', bg:'rgba(99,102,241,.12)', title:'Panel seguro',            desc:'Autenticación protegida, modo oscuro, diseño responsivo y accesibilidad integrada en todo el sistema.' },
-  ];
-
-  const stats = [
-    { value:'100%', label:'Responsivo', icon:'fa-mobile-screen-button' },
-    { value:'3',    label:'Reportes',   icon:'fa-chart-bar' },
-    { value:'∞',    label:'Productos',  icon:'fa-box' },
-    { value:'24/7', label:'Disponible', icon:'fa-clock' },
-  ];
-
-  return (
-    <section id="sistema" className="py-24 bg-white">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-
-        {/* Header */}
-        <div className="text-center mb-16">
-          <span className="inline-block text-xs font-bold uppercase tracking-widest px-4 py-1.5 rounded-full mb-4"
-            style={{background:'rgba(59,89,255,.08)',color:'#3B59FF',border:'1px solid rgba(59,89,255,.15)'}}>
-            Sistema de gestión
-          </span>
-          <h2 className="text-4xl sm:text-5xl font-black text-gray-900 leading-tight">
-            Todo lo que necesitas<br/>
-            <span style={{background:'linear-gradient(90deg,#3B59FF,#7B2FBE)',WebkitBackgroundClip:'text',WebkitTextFillColor:'transparent'}}>
-              en un solo lugar
-            </span>
-          </h2>
-          <p className="text-gray-500 mt-4 max-w-xl mx-auto text-base leading-relaxed">
-            FiftyOne incluye un panel de administración completo para gestionar tu tienda de ropa oversize sin complicaciones.
-          </p>
-        </div>
-
-        {/* Stats */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-16">
-          {stats.map(s => (
-            <div key={s.label} className="text-center p-6 rounded-2xl border border-gray-100 bg-gray-50">
-              <i className={`fa-solid ${s.icon} text-xl mb-3 block`} style={{background:'linear-gradient(135deg,#3B59FF,#7B2FBE)',WebkitBackgroundClip:'text',WebkitTextFillColor:'transparent'}}></i>
-              <p className="text-3xl font-black text-gray-900">{s.value}</p>
-              <p className="text-xs text-gray-400 font-semibold uppercase tracking-wide mt-1">{s.label}</p>
-            </div>
-          ))}
-        </div>
-
-        {/* Features grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-16">
-          {features.map(f => (
-            <div key={f.title} className="group p-6 rounded-2xl border border-gray-100 hover:border-indigo-200 hover:shadow-lg transition-all duration-300 bg-white">
-              <div className="w-12 h-12 rounded-2xl flex items-center justify-center mb-4 transition-transform group-hover:scale-110 duration-300"
-                style={{background:f.bg}}>
-                <i className={`fa-solid ${f.icon} text-base`} style={{color:f.color}}></i>
+              <textarea value={comment} onChange={e => setComment(e.target.value)}
+                        placeholder="Cuéntanos tu experiencia con el producto..." rows={3}
+                        className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm mb-3 focus:outline-none focus:ring-2 focus:ring-indigo-300 resize-none"></textarea>
+              <button onClick={submitReview} disabled={sending}
+                      className="w-full py-3 rounded-xl text-white text-sm font-bold transition hover:opacity-90 flex items-center justify-center gap-2"
+                      style={{background: sent ? 'linear-gradient(90deg,#10b981,#059669)' : 'linear-gradient(90deg,#3B59FF,#7B2FBE)'}}>
+                <i className={`fa-solid ${sent ? 'fa-check' : sending ? 'fa-spinner fa-spin' : 'fa-star'} text-xs`}></i>
+                {sent ? '¡Reseña publicada!' : sending ? 'Enviando...' : 'Publicar reseña'}
+              </button>
+            </>
+          ) : (
+            <div className="text-center py-4">
+              <div className="flex justify-center gap-1 mb-3">
+                {[1,2,3,4,5].map(s => <i key={s} className="fa-solid fa-star text-2xl text-amber-400"></i>)}
               </div>
-              <h3 className="font-bold text-gray-900 mb-2">{f.title}</h3>
-              <p className="text-sm text-gray-500 leading-relaxed">{f.desc}</p>
-            </div>
-          ))}
-        </div>
-
-        {/* CTA */}
-        <div className="relative rounded-3xl overflow-hidden p-10 sm:p-14 text-center"
-          style={{background:'linear-gradient(135deg,#0d0d1a 0%,#0a0e2e 55%,#1a0a2e 100%)'}}>
-          <div className="absolute inset-0 opacity-20"
-            style={{backgroundImage:'radial-gradient(circle at 20% 50%,#3B59FF 0%,transparent 50%),radial-gradient(circle at 80% 50%,#7B2FBE 0%,transparent 50%)'}}></div>
-          <div className="relative z-10">
-            <h3 className="text-3xl sm:text-4xl font-black text-white mb-3">¿Listo para gestionar tu tienda?</h3>
-            <p className="text-gray-400 mb-8 max-w-md mx-auto">Accede al panel de administración y toma el control de tu negocio.</p>
-            <div className="flex flex-col sm:flex-row gap-3 justify-center">
-              <a href="/admin/dashboard"
-                className="inline-flex items-center justify-center gap-2 px-8 py-4 rounded-2xl text-white font-bold text-sm transition-all hover:scale-105 hover:shadow-2xl"
-                style={{background:'linear-gradient(90deg,#3B59FF,#7B2FBE)',boxShadow:'0 8px 30px rgba(59,89,255,.4)'}}>
-                <i className="fa-solid fa-gauge-high"></i> Ir al panel admin
-              </a>
-              <a href="/catalogo"
-                className="inline-flex items-center justify-center gap-2 px-8 py-4 rounded-2xl font-bold text-sm transition-all hover:bg-white/20"
-                style={{background:'rgba(255,255,255,.08)',color:'white',border:'1px solid rgba(255,255,255,.15)'}}>
-                <i className="fa-solid fa-shirt"></i> Ver catálogo
+              <p className="text-gray-500 text-sm mb-4">Inicia sesión para dejar tu opinión</p>
+              <a href="/login"
+                 className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl text-white text-sm font-bold transition hover:opacity-90"
+                 style={{background:'linear-gradient(90deg,#3B59FF,#7B2FBE)'}}>
+                <i className="fa-solid fa-right-to-bracket text-xs"></i>
+                Iniciar sesión
               </a>
             </div>
+          )}
+        </div>
+
+        {/* Lista reseñas */}
+        {reviews.length > 0 ? (
+          <div className="grid md:grid-cols-3 gap-6">
+            {reviews.map((t,i) => (
+              <div key={i} className="card-hover bg-white rounded-2xl p-6 shadow-sm border border-gray-200">
+                <Stars count={t.rating || t.stars || 5} />
+                <p className="text-gray-600 mt-4 leading-relaxed text-sm">"{t.comment || t.text || 'Sin comentario'}"</p>
+                <div className="flex items-center gap-3 mt-6">
+                  <div className="w-10 h-10 rounded-full flex items-center justify-center text-white text-sm font-bold flex-shrink-0"
+                    style={{background:gradientBg}}>{(t.name||'U').charAt(0).toUpperCase()}</div>
+                  <div>
+                    <p className="font-semibold text-black text-sm">{t.name}</p>
+                    <p className="text-gray-500 text-xs">{t.product || ''} {t.date ? '· '+t.date : ''}</p>
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
-        </div>
-
+        ) : (
+          <div className="text-center py-8 text-gray-400">
+            <p className="text-sm">Aún no hay reseñas. ¡Sé el primero!</p>
+          </div>
+        )}
       </div>
     </section>
   );
@@ -957,14 +952,28 @@ function Footer() {
             <p className="text-sm leading-relaxed mb-5 text-gray-400">Tu tienda de ropa oversize. Estilo streetwear, telas premium y envíos a todo el país.</p>
           </div>
           {[
-            { title:'Tienda',  links:['Hoodies','Camisetas','Pantalones','Accesorios'] },
-            { title:'Empresa', links:['Sobre nosotros','Blog','Trabaja con nosotros','Prensa'] },
-            { title:'Soporte', links:['Contacto','Envíos','Devoluciones','FAQ'] },
+            { title:'Tienda',  links:[
+              {l:'Hoodies',    h:'/catalogo?categoria=Hoodies'},
+              {l:'Camisetas',  h:'/catalogo?categoria=Camisetas'},
+              {l:'Pantalones', h:'/catalogo?categoria=Pantalones'},
+              {l:'Accesorios', h:'/catalogo?categoria=Accesorios'},
+            ]},
+            { title:'Empresa', links:[
+              {l:'Sobre nosotros',       h:'/sobre-nosotros'},
+              {l:'Blog',                 h:'/blog'},
+              {l:'Trabaja con nosotros', h:'/trabaja-con-nosotros'},
+            ]},
+            { title:'Soporte', links:[
+              {l:'Contacto',     h:'/contacto'},
+              {l:'Envíos',       h:'/envios'},
+              {l:'Devoluciones', h:'/devoluciones'},
+              {l:'FAQ',          h:'/faq'},
+            ]},
           ].map(col => (
             <div key={col.title}>
               <h4 className="text-white font-semibold text-sm mb-4">{col.title}</h4>
               <ul className="space-y-2.5">
-                {col.links.map(l => <li key={l}><a href="#" className="text-sm text-gray-400 hover:text-[#3B59FF] transition-colors">{l}</a></li>)}
+                {col.links.map(item => <li key={item.l}><a href={item.h} className="text-sm text-gray-400 hover:text-[#3B59FF] transition-colors">{item.l}</a></li>)}
               </ul>
             </div>
           ))}
@@ -972,8 +981,8 @@ function Footer() {
         <div className="border-t border-white/10 pt-8 flex flex-col sm:flex-row items-center justify-between gap-4">
           <p className="text-xs text-gray-600">© 2026 FiftyOne. Todos los derechos reservados.</p>
           <div className="flex items-center gap-4 text-xs text-gray-400">
-            <a href="#" className="hover:text-[#3B59FF] transition-colors">Privacidad</a>
-            <a href="#" className="hover:text-[#3B59FF] transition-colors">Términos</a>
+            <a href="/privacidad" className="hover:text-[#3B59FF] transition-colors">Privacidad</a>
+            <a href="/terminos" className="hover:text-[#3B59FF] transition-colors">Términos</a>
             <a href="/admin/login" className="hover:text-[#3B59FF] transition-colors">Admin</a>
           </div>
         </div>
@@ -1018,7 +1027,6 @@ function App() {
       <Products onAdd={addToCart} />
       <PromoBanner />
       <Testimonials />
-      <SystemSection />
       <Footer />
       <CartDrawer open={drawerOpen} onClose={() => setDrawer(false)} cart={cart}
         onUpdateQty={updateQty} onRemove={removeItem} onClear={clearCart} onCheckout={openCheckout} />

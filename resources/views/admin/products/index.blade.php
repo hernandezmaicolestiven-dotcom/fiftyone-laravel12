@@ -54,7 +54,7 @@
             </div>
 
             {{-- Botón Importar --}}
-            <button @click="$dispatch('open-import')"
+            <button type="button" @click="$dispatch('open-import')"
                     class="inline-flex items-center gap-2 text-sm font-medium px-4 py-2.5 rounded-xl border border-gray-200 text-gray-600 hover:bg-gray-50 transition">
                 <i class="fa-solid fa-arrow-down-to-bracket text-violet-500"></i>
                 Importar
@@ -69,7 +69,7 @@
     </div>
 
     {{-- Modal Importar --}}
-    <div x-data="{ show: false }" @open-import.window="show = true">
+    <div x-data="{ show: false }" @open-import.window="show = true" x-cloak>
         <div x-show="show" x-transition.opacity
              class="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/50 backdrop-blur-sm p-4"
              @click.self="show = false">
