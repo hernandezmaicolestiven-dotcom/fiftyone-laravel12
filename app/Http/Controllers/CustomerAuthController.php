@@ -57,10 +57,14 @@ class CustomerAuthController extends Controller
         if (Auth::attempt(['email' => $request->email, 'password' => $request->password], $request->boolean('remember'))) {
             $request->session()->regenerate();
 
-            // Si es admin, no dejarlo entrar por aquí
+            // Si es admin → panel de administración
             if (Auth::user()->role === 'admin') {
-                Auth::logout();
-                return back()->withErrors(['email' => 'Usa el panel de administración para iniciar sesión.'])->onlyInput('email');
+                return redirect()->route('admin.dashboard');
+            }
+
+            // Si es colaborador → panel también
+            if (Auth::user()->role === 'colaborador') {
+                return redirect()->route('admin.dashboard');
             }
 
             return redirect()->route('customer.account');

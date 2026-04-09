@@ -23,15 +23,12 @@ return Application::configure(basePath: dirname(__DIR__))
             return route('customer.login');
         });
 
-        // Usuarios autenticados que visitan rutas guest redirigen según su rol
+        // Usuarios autenticados que visitan login/registro → redirigir según rol
         $middleware->redirectUsersTo(function ($request) {
             $user = auth()->user();
-            if ($user && $user->role === 'admin') {
-                // Solo redirigir al dashboard si viene de rutas admin
-                if ($request->is('admin/*') || $request->is('login') || $request->is('registro')) {
-                    return route('admin.dashboard');
-                }
-                return '/';
+            if (!$user) return '/';
+            if (in_array($user->role, ['admin', 'colaborador'])) {
+                return route('admin.dashboard');
             }
             return route('customer.account');
         });

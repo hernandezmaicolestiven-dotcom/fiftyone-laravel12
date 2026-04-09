@@ -128,7 +128,7 @@ Route::middleware('auth')->group(function () {
 });
 
 // Public catalog routes
-Route::get('/productos', [ProductController::class, 'index'])->name('products.index');
+Route::get('/productos', [ProductController::class, 'index'])->name('catalogo.productos');
 Route::get('/catalogo', [ProductController::class, 'index'])->name('catalogo');
 
 // Páginas estáticas

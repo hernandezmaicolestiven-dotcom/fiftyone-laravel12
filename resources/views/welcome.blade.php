@@ -622,8 +622,11 @@ function Navbar({ cartCount, onCartOpen }) {
             {auth.loggedIn ? (
               <a href="/mi-cuenta"
                  className="hidden sm:inline-flex items-center gap-2 text-white text-sm font-semibold px-3 py-2 rounded-xl border border-white/20 hover:bg-white/10 transition">
-                <span className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold text-white" style={{background:gradientBg}}>{auth.name ? auth.name.charAt(0).toUpperCase() : 'U'}</span>
-                <span>Hola, {auth.name}</span>
+                <span className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-black text-white flex-shrink-0"
+                      style={{background:gradientBg}}>
+                  {auth.name ? auth.name.charAt(0).toUpperCase() : 'U'}
+                </span>
+                <span>Hola, {auth.name ? auth.name.split(' ')[0] : ''}</span>
               </a>
             ) : (
               <a href="/login"
@@ -631,13 +634,6 @@ function Navbar({ cartCount, onCartOpen }) {
                 <i className="fa-solid fa-right-to-bracket text-xs"></i>
                 <span>Iniciar sesión</span>
               </a>
-            )}
-            {!auth.loggedIn && (
-            <a href="/admin/login"
-               className="hidden sm:inline-flex items-center gap-1.5 text-white text-sm font-semibold px-3 py-2 rounded-xl border border-white/20 hover:bg-white/10 transition">
-              <i className="fa-solid fa-gauge-high text-xs"></i>
-              <span>Admin</span>
-            </a>
             )}
             <button onClick={() => setOpen(!open)} className="md:hidden text-gray-300 p-2">
               <i className={`fa-solid ${open ? 'fa-xmark' : 'fa-bars'} text-lg`}></i>
@@ -983,7 +979,6 @@ function Footer() {
           <div className="flex items-center gap-4 text-xs text-gray-400">
             <a href="/privacidad" className="hover:text-[#3B59FF] transition-colors">Privacidad</a>
             <a href="/terminos" className="hover:text-[#3B59FF] transition-colors">Términos</a>
-            <a href="/admin/login" className="hover:text-[#3B59FF] transition-colors">Admin</a>
           </div>
         </div>
       </div>

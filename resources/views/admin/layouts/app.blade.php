@@ -308,57 +308,6 @@
         {{-- CONTENT --}}
         <main class="flex-1 overflow-y-auto p-6 bg-gray-100 dark:bg-gray-950" role="main" id="main-content">
 
-            {{-- Breadcrumbs --}}
-            @php
-                $segments = collect(explode('/', trim(request()->path(), '/')))
-                    ->filter()
-                    ->values();
-                $breadcrumbs = [];
-                $path = '';
-                $labels = [
-                    'admin'      => 'Admin',
-                    'dashboard'  => 'Dashboard',
-                    'products'   => 'Productos',
-                    'categories' => 'Categorías',
-                    'orders'     => 'Pedidos',
-                    'users'      => 'Usuarios',
-                    'reports'    => 'Reportes',
-                    'sales'      => 'Ventas',
-                    'inventory'  => 'Inventario',
-                    'top-products' => 'Más vendidos',
-                    'settings'   => 'Configuración',
-                    'profile'    => 'Perfil',
-                    'create'     => 'Crear',
-                    'edit'       => 'Editar',
-                ];
-                foreach ($segments as $i => $seg) {
-                    $path .= '/' . $seg;
-                    $label = $labels[$seg] ?? ucfirst($seg);
-                    $isLast = $i === $segments->count() - 1;
-                    if (!is_numeric($seg)) {
-                        $breadcrumbs[] = ['label' => $label, 'url' => $path, 'last' => $isLast];
-                    }
-                }
-            @endphp
-            @if(count($breadcrumbs) > 1)
-            <nav aria-label="Breadcrumb" class="mb-4">
-                <ol class="flex flex-wrap items-center gap-1 text-xs text-gray-400">
-                    @foreach($breadcrumbs as $crumb)
-                        @if(!$loop->first)
-                            <li aria-hidden="true"><i class="fa-solid fa-chevron-right text-[10px]"></i></li>
-                        @endif
-                        <li>
-                            @if($crumb['last'])
-                                <span class="font-semibold text-gray-600 dark:text-gray-300" aria-current="page">{{ $crumb['label'] }}</span>
-                            @else
-                                <a href="{{ $crumb['url'] }}" class="hover:text-indigo-600 transition-colors">{{ $crumb['label'] }}</a>
-                            @endif
-                        </li>
-                    @endforeach
-                </ol>
-            </nav>
-            @endif
-
             @if(session('success'))
                 <div x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 4000)"
                      x-transition:leave="transition ease-in duration-200"
@@ -422,25 +371,9 @@
 
 @stack('scripts')
 
-{{-- Global page loader --}}
+{{-- Global page loader removido para mejor performance --}}
 <script>
-(function(){
-    // Show spinner on navigation
-    const spinner = document.createElement('div');
-    spinner.id = 'page-loader';
-    spinner.innerHTML = `
-        <div style="position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.7);backdrop-filter:blur(4px);transition:opacity .3s">
-            <div style="width:44px;height:44px;border-radius:50%;border:3px solid #e5e7eb;border-top-color:#3B59FF;animation:spin .7s linear infinite"></div>
-        </div>`;
-    document.head.insertAdjacentHTML('beforeend','<style>@keyframes spin{to{transform:rotate(360deg)}}</style>');
-
-    document.addEventListener('click', e => {
-        const a = e.target.closest('a[href]');
-        if (a && !a.target && !a.href.startsWith('#') && !a.href.startsWith('javascript') && !e.ctrlKey && !e.metaKey) {
-            document.body.appendChild(spinner.firstElementChild.cloneNode(true));
-        }
-    });
-})();
+// Sin spinner - navegación directa
 </script>
 </body>
 </html>
