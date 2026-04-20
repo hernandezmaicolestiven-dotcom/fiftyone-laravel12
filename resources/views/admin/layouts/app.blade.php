@@ -124,6 +124,7 @@
                 ['admin.orders.index',      'fa-bag-shopping',  'Pedidos',          'admin.orders*'],
                 ['admin.users.index',       'fa-users',         'Usuarios',         'admin.users*'],
                 ['admin.reviews.index',     'fa-star',          'Reseñas',          'admin.reviews*'],
+                ['admin.coupons.index',     'fa-ticket',        'Cupones',          'admin.coupons*'],
                 ['admin.reports.sales',     'fa-chart-line',    'Reportes',         'admin.reports*'],
                 ['admin.analytics',         'fa-brain',         'Analytics',        'admin.analytics*'],
                 ['admin.messages.index',    'fa-comments',      'Chat',             'admin.messages*'],

@@ -112,6 +112,16 @@
            class="flex items-center gap-2 text-sm text-gray-500 hover:text-indigo-600 transition px-2">
             <i class="fa-solid fa-arrow-left"></i> Volver a pedidos
         </a>
+        <div class="flex gap-2 mt-3">
+            <a href="{{ route('admin.generators.invoice', $order) }}" target="_blank"
+               class="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl text-xs font-semibold border border-gray-200 text-gray-600 hover:bg-gray-50 transition">
+                <i class="fa-solid fa-file-invoice text-indigo-500"></i> Factura
+            </a>
+            <a href="{{ route('admin.generators.label', $order) }}" target="_blank"
+               class="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl text-xs font-semibold border border-gray-200 text-gray-600 hover:bg-gray-50 transition">
+                <i class="fa-solid fa-tag text-purple-500"></i> Etiqueta
+            </a>
+        </div>
     </div>
 </div>
 @endsection

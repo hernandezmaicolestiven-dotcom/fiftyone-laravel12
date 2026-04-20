@@ -72,6 +72,11 @@
                     <i class="fa-solid fa-arrow-down-to-bracket text-violet-500"></i>
                     <span class="hidden sm:inline">Importar CSV</span>
                 </button>
+                <a href="{{ route('admin.users.export.csv') }}"
+                   class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-gray-200 text-gray-600 text-sm font-semibold hover:bg-gray-50 transition">
+                    <i class="fa-solid fa-file-csv text-emerald-500"></i>
+                    <span class="hidden sm:inline">Exportar CSV</span>
+                </a>
                 <a href="{{ route('admin.users.create') }}"
                    class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-white text-sm font-semibold whitespace-nowrap shadow-sm hover:opacity-90 transition"
                    style="background: linear-gradient(90deg, #3B59FF, #7B2FBE)">

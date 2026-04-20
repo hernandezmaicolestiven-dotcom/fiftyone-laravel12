@@ -85,9 +85,45 @@ class CustomerAuthController extends Controller
     /** Área de cuenta del cliente — historial de pedidos */
     public function account()
     {
-        $user = auth()->user();
-        $orders = $user->orders()->with('items')->latest()->get();
+        $user    = auth()->user();
+        $orders  = $user->orders()->with('items')->latest()->get();
+        $wishlist = \App\Models\Wishlist::with('product.category')
+            ->where('user_id', $user->id)->latest()->get();
+        return view('customer.account', compact('user', 'orders', 'wishlist'));
+    }
 
-        return view('customer.account', compact('user', 'orders'));
+    public function cancelOrder(\App\Models\Order $order)
+    {
+        if ($order->user_id !== auth()->id()) abort(403);
+        if ($order->status !== 'pending') {
+            return back()->with('error', 'Solo puedes cancelar pedidos pendientes.');
+        }
+        $order->update(['status' => 'cancelled']);
+        return back()->with('success', 'Pedido #'.$order->id.' cancelado.');
+    }
+
+    public function updateProfile(Request $request)
+    {
+        $user = auth()->user();
+        $request->validate([
+            'name'  => 'required|string|max:255',
+            'phone' => 'nullable|string|max:30',
+            'email' => 'required|email|unique:users,email,'.$user->id,
+        ]);
+        $user->update($request->only('name', 'email', 'phone'));
+        return back()->with('success', 'Perfil actualizado correctamente.');
+    }
+
+    public function updatePassword(Request $request)
+    {
+        $request->validate([
+            'current_password' => 'required',
+            'password'         => 'required|confirmed|min:8',
+        ]);
+        if (!\Hash::check($request->current_password, auth()->user()->password)) {
+            return back()->withErrors(['current_password' => 'La contraseña actual no es correcta.']);
+        }
+        auth()->user()->update(['password' => \Hash::make($request->password)]);
+        return back()->with('success', 'Contraseña actualizada.');
     }
 }

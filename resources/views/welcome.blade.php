@@ -46,6 +46,8 @@
   </style>
   <script>
   window.__AUTH__ = {!! json_encode($authData) !!};
+  window.__WISHLIST__ = {!! json_encode($wishlistIds ?? []) !!};
+  window.__STATS__ = {!! json_encode(['customers' => \App\Models\User::where('role','customer')->count(), 'products' => \App\Models\Product::count(), 'orders' => \App\Models\Order::count()]) !!};
   </script>
 </head>
 <body class="bg-white text-gray-900 antialiased">
@@ -53,13 +55,18 @@
 
 @php
 $productosJS = $products->map(fn($p) => [
-  'id'     => $p->id,
-  'name'   => $p->name,
-  'price'  => (float) $p->price,
-  'badge'  => $p->stock < 5 ? 'Oferta' : ($p->created_at->diffInDays() < 30 ? 'Nuevo' : null),
-  'img'    => $p->image ? (str_starts_with($p->image,'http') ? $p->image : Storage::url($p->image)) : 'https://images.unsplash.com/photo-1556821840-3a63f15732ce?w=400&q=80',
-  'rating' => $p->reviews->count() ? round($p->reviews->avg('rating'),1) : 5,
-  'reviews'=> $p->reviews->count(),
+  'id'          => $p->id,
+  'name'        => $p->name,
+  'price'       => (float) $p->price,
+  'badge'       => $p->stock < 5 ? 'Oferta' : ($p->created_at->diffInDays() < 30 ? 'Nuevo' : null),
+  'img'         => $p->image ? (str_starts_with($p->image,'http') ? $p->image : Storage::url($p->image)) : 'https://images.unsplash.com/photo-1556821840-3a63f15732ce?w=400&q=80',
+  'rating'      => $p->reviews->count() ? round($p->reviews->avg('rating'),1) : 5,
+  'reviews'     => $p->reviews->count(),
+  'sizes'       => $p->sizes ?? ['S','M','L','XL'],
+  'colors'      => $p->colors ?? [],
+  'stock'       => $p->stock,
+  'category_id' => $p->category_id,
+  'wishlisted'  => in_array($p->id, $wishlistIds ?? []),
 ]);
 @endphp
 <script type="text/plain" id="products-data">{!! json_encode($productosJS) !!}</script>
@@ -269,7 +276,28 @@ function CheckoutModal({ cart, onClose, onSuccess }) {
   const [cardName,  setCardName]  = useState('');
   const [err,       setErr]       = useState('');
   const [loading,   setLoading]   = useState(false);
-  const total = cart.reduce((s,i) => s + i.price * i.qty, 0);
+  const [coupon,    setCoupon]    = useState('');
+  const [discount,  setDiscount]  = useState(0);
+  const [couponMsg, setCouponMsg] = useState('');
+  const rawTotal = cart.reduce((s,i) => s + i.price * i.qty, 0);
+  const total = Math.max(0, rawTotal - discount);
+
+  const applyCoupon = async () => {
+    if (!coupon.trim()) return;
+    try {
+      const res = await fetch('/coupon/validate?code=' + encodeURIComponent(coupon.trim()) + '&total=' + rawTotal, {
+        headers: {'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content}
+      });
+      const data = await res.json();
+      if (data.valid) {
+        setDiscount(data.discount);
+        setCouponMsg('✅ Cupón aplicado: -' + fmt(data.discount));
+      } else {
+        setDiscount(0);
+        setCouponMsg('❌ ' + (data.message || 'Cupón inválido'));
+      }
+    } catch { setCouponMsg('❌ Error al validar el cupón'); }
+  };
 
   const goStep2 = () => { setErr(''); setStep(2); };
   const goStep3 = () => { if (!name.trim()) { setErr('El nombre es requerido'); return; } setErr(''); setStep(3); };
@@ -284,8 +312,9 @@ function CheckoutModal({ cart, onClose, onSuccess }) {
         headers:{'Content-Type':'application/json','X-CSRF-TOKEN':document.querySelector('meta[name="csrf-token"]').content},
         body: JSON.stringify({
           customer_name: name.trim(), customer_email: email||null, customer_phone: phone||null,
-          notes: (notes ? notes+' | ' : '')+'Pago: '+payMethod,
+          notes: (notes ? notes+' | ' : '')+'Pago: '+payMethod+(coupon?' | Cupón: '+coupon:''),
           items: cart.map(i => ({product_id:i.id, quantity:i.qty})),
+          coupon_code: coupon || null,
         }),
       });
       const data = await res.json();
@@ -360,11 +389,28 @@ function CheckoutModal({ cart, onClose, onSuccess }) {
                 </div>
               ))}
             </div>
-            <div className="flex justify-between items-center rounded-2xl px-5 py-3.5 mb-5"
+            <div className="flex justify-between items-center rounded-2xl px-5 py-3.5 mb-3"
               style={{background:'linear-gradient(90deg,rgba(59,89,255,.15),rgba(123,47,190,.15))',border:'1px solid rgba(59,89,255,.2)'}}>
               <span className="text-sm font-medium" style={{color:'rgba(255,255,255,.55)'}}>Total a pagar</span>
-              <span className="font-black text-2xl text-white">{fmt(total)}</span>
+              <div className="text-right">
+                {discount > 0 && <p className="text-xs line-through" style={{color:'rgba(255,255,255,.3)'}}>{fmt(rawTotal)}</p>}
+                <span className="font-black text-2xl text-white">{fmt(total)}</span>
+              </div>
             </div>
+            {/* Campo cupón */}
+            <div className="flex gap-2 mb-4">
+              <input value={coupon} onChange={e=>setCoupon(e.target.value.toUpperCase())}
+                     placeholder="Código de cupón"
+                     className="flex-1 rounded-xl px-4 py-2.5 text-sm text-white font-medium focus:outline-none"
+                     style={{background:'rgba(255,255,255,.07)',border:'1.5px solid rgba(255,255,255,.1)'}}
+                     onKeyDown={e=>e.key==='Enter'&&applyCoupon()} />
+              <button onClick={applyCoupon}
+                      className="px-4 py-2.5 rounded-xl text-xs font-bold text-white transition hover:opacity-80"
+                      style={{background:'rgba(59,89,255,.4)',border:'1px solid rgba(59,89,255,.5)'}}>
+                Aplicar
+              </button>
+            </div>
+            {couponMsg && <p className="text-xs mb-3" style={{color: couponMsg.startsWith('✅') ? '#6ee7b7' : '#fca5a5'}}>{couponMsg}</p>}
             <button onClick={goStep2} className="w-full py-4 rounded-2xl text-white font-black text-sm flex items-center justify-center gap-2 transition-all hover:scale-[1.02]"
               style={{background:'linear-gradient(90deg,#3B59FF,#7B2FBE)',boxShadow:'0 10px 35px rgba(59,89,255,.45)'}}>
               Continuar <i className="fa-solid fa-arrow-right text-xs"></i>
@@ -590,17 +636,19 @@ function Navbar({ cartCount, onCartOpen }) {
   const [open, setOpen] = useState(false);
   const auth = window.__AUTH__ || {};
   const links = [
-    { label:'Inicio',     href:'#inicio' },
-    { label:'Productos',  href:'#productos' },
-    { label:'Categorías', href:'#categorias' },
-    { label:'Ofertas',    href:'#productos' },
-    { label:'Contacto',   href:'#contacto' },
+    { label:'Inicio',       href:'#inicio' },
+    { label:'Categorías',   href:'#categorias' },
+    { label:'Productos',    href:'#productos' },
+    { label:'Ofertas',      href:'#ofertas' },
+    { label:'Inspiración',  href:'#inspiracion' },
+    { label:'Contacto',     href:'#contacto' },
   ];
+
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-black/95 backdrop-blur-sm border-b border-white/10">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
-          <a href="/" className="flex items-center gap-2">
+          <a href="/" className="flex items-center gap-2 flex-shrink-0">
             <div className="w-8 h-8 bg-[#3B59FF] rounded-lg flex items-center justify-center">
               <i className="fa-solid fa-shirt text-white text-sm"></i>
             </div>
@@ -681,7 +729,11 @@ function Hero() {
               </a>
             </div>
             <div className="mt-12 flex gap-8">
-              {[['500+','Prendas'],['5K+','Clientes'],['4.9★','Valoración']].map(([n,l]) => (
+              {[
+                [dbProducts.length + '+', 'Productos'],
+                [window.__STATS__?.customers || '500+', 'Clientes'],
+                ['4.9★', 'Valoración']
+              ].map(([n,l]) => (
                 <div key={l}><p className="text-2xl font-black text-white">{n}</p><p className="text-sm text-gray-500">{l}</p></div>
               ))}
             </div>
@@ -741,50 +793,224 @@ function Categories() {
 }
 
 // ── Product Card ───────────────────────────────────────────────────────────
-function ProductCard({ product, onAdd }) {
-  const [added, setAdded] = useState(false);
-  const handleAdd = () => { setAdded(true); onAdd(product); setTimeout(() => setAdded(false), 1500); };
+function ProductCard({ product, onAdd, forceOpen, onForceOpenDone }) {
+  const auth = window.__AUTH__ || {};
+  const [added, setAdded]         = useState(false);
+  const [selectedSize, setSize]   = useState('');
+  const [selectedColor, setColor] = useState('');
+  const [wishlisted, setWish]     = useState(product.wishlisted || false);
+  const [showDetail, setDetail]   = useState(false);
+  const [sizeError, setSizeError] = useState(false);
+
+  React.useEffect(() => {
+    if (forceOpen) { setDetail(true); if(onForceOpenDone) onForceOpenDone(); }
+  }, [forceOpen]);
+
+  const handleAdd = () => {
+    if (!auth.loggedIn) { window.location.href = '/login'; return; }
+    if (product.sizes && product.sizes.length > 1 && !selectedSize) {
+      setSizeError(true);
+      setTimeout(() => setSizeError(false), 2000);
+      return;
+    }
+    setSizeError(false);
+    setAdded(true);
+    onAdd({...product, selectedSize, selectedColor});
+    setTimeout(() => setAdded(false), 1500);
+  };
+
+  const toggleWish = async () => {
+    if (!auth.loggedIn) { window.location.href = '/login'; return; }
+    try {
+      const res = await fetch('/wishlist/toggle', {
+        method: 'POST',
+        headers: {'Content-Type':'application/json','X-CSRF-TOKEN':document.querySelector('meta[name="csrf-token"]').content},
+        body: JSON.stringify({product_id: product.id}),
+      });
+      const data = await res.json();
+      setWish(data.wishlisted);
+    } catch(e) {}
+  };
+
   return (
-    <div className="card-hover bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-200 group transition-all">
-      <div className="relative aspect-square overflow-hidden bg-gray-100">
+    <div className="card-hover bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-200 group transition-all relative">
+      {/* Wishlist button */}
+      <button onClick={toggleWish}
+              className="absolute top-3 right-3 z-10 w-8 h-8 rounded-full flex items-center justify-center transition-all"
+              style={{background: wishlisted ? 'rgba(239,68,68,.9)' : 'rgba(255,255,255,.85)', backdropFilter:'blur(4px)'}}>
+        <i className={`fa-heart text-sm ${wishlisted ? 'fa-solid text-white' : 'fa-regular text-gray-400'}`}></i>
+      </button>
+
+      <div className="relative aspect-square overflow-hidden bg-gray-100 cursor-pointer" onClick={() => setDetail(true)}>
         <img src={product.img} alt={product.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
         {product.badge && (
           <span className={`absolute top-3 left-3 text-xs font-bold px-2.5 py-1 rounded-full ${product.badge === 'Oferta' ? 'bg-red-500 text-white' : 'bg-[#3B59FF] text-white'}`}>
             {product.badge}
           </span>
         )}
+        {product.stock === 0 && (
+          <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+            <span className="text-white font-bold text-sm bg-black/70 px-3 py-1 rounded-full">Agotado</span>
+          </div>
+        )}
+        {product.stock > 0 && product.stock <= 3 && (
+          <span className="absolute bottom-3 left-3 text-xs font-bold px-2 py-0.5 rounded-full bg-amber-500 text-white">
+            ¡Solo {product.stock} left!
+          </span>
+        )}
       </div>
+
       <div className="p-4 flex flex-col gap-2">
         <Stars count={product.rating} />
-        <h3 className="font-semibold text-black text-sm leading-tight">{product.name}</h3>
+        <h3 className="font-semibold text-black text-sm leading-tight cursor-pointer hover:text-[#3B59FF] transition-colors" onClick={() => setDetail(true)}>{product.name}</h3>
+
+        {/* Tallas */}
+        {product.sizes && product.sizes.length > 1 && (
+          <div className="flex flex-col gap-1">
+            <div className="flex flex-wrap gap-1">
+              {product.sizes.map(s => (
+                <button key={s} onClick={() => { setSize(s); setSizeError(false); }}
+                        className="text-xs px-2 py-0.5 rounded-lg border transition-all font-medium"
+                        style={{
+                          background: selectedSize===s ? 'linear-gradient(90deg,#3B59FF,#7B2FBE)' : 'transparent',
+                          color: selectedSize===s ? 'white' : '#6b7280',
+                          borderColor: selectedSize===s ? 'transparent' : sizeError ? '#ef4444' : '#e5e7eb',
+                        }}>
+                  {s}
+                </button>
+              ))}
+            </div>
+            {sizeError && <p className="text-xs text-red-500 font-medium">⚠ Selecciona una talla</p>}
+          </div>
+        )}
+
         <span className="text-xl font-black text-[#3B59FF]">{fmt(product.price)}</span>
-        <button onClick={handleAdd}
-          className="w-full flex items-center justify-center gap-2 text-sm font-bold px-4 py-2.5 rounded-xl transition-all text-white hover:scale-[1.02] active:scale-95 mt-1"
-          style={{background: added ? 'linear-gradient(90deg,#10b981,#059669)' : 'linear-gradient(90deg,#3B59FF,#7B2FBE)',boxShadow: added ? '0 4px 15px rgba(16,185,129,.4)' : '0 4px 15px rgba(59,89,255,.3)'}}>
+        <button onClick={handleAdd} disabled={product.stock === 0}
+                className="w-full flex items-center justify-center gap-2 text-sm font-bold px-4 py-2.5 rounded-xl transition-all text-white hover:scale-[1.02] active:scale-95 mt-1 disabled:opacity-50 disabled:cursor-not-allowed"
+                style={{background: added ? 'linear-gradient(90deg,#10b981,#059669)' : product.stock===0 ? '#9ca3af' : 'linear-gradient(90deg,#3B59FF,#7B2FBE)',
+                        boxShadow: added ? '0 4px 15px rgba(16,185,129,.4)' : '0 4px 15px rgba(59,89,255,.3)'}}>
           <i className={`fa-solid ${added ? 'fa-check' : 'fa-cart-shopping'} text-xs`}></i>
-          {added ? '¡Agregado!' : 'Agregar al carrito'}
+          {added ? '¡Agregado!' : product.stock===0 ? 'Agotado' : 'Agregar al carrito'}
         </button>
       </div>
+
+      {/* Modal detalle producto */}
+      {showDetail && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onClick={() => setDetail(false)}
+             style={{background:'rgba(0,0,0,.7)',backdropFilter:'blur(8px)'}}>
+          <div className="bg-white rounded-3xl overflow-hidden max-w-lg w-full shadow-2xl" onClick={e => e.stopPropagation()}>
+            <div className="relative aspect-video overflow-hidden bg-gray-100">
+              <img src={product.img} alt={product.name} className="w-full h-full object-cover" />
+              <button onClick={() => setDetail(false)} className="absolute top-3 right-3 w-9 h-9 rounded-full bg-white/90 flex items-center justify-center shadow">
+                <i className="fa-solid fa-xmark text-gray-700"></i>
+              </button>
+            </div>
+            <div className="p-6">
+              <div className="flex items-start justify-between gap-3 mb-3">
+                <h2 className="text-xl font-black text-gray-900">{product.name}</h2>
+                <span className="text-2xl font-black text-[#3B59FF] flex-shrink-0">{fmt(product.price)}</span>
+              </div>
+              <Stars count={product.rating} />
+              <p className="text-xs text-gray-400 mt-1">{product.reviews} reseña(s)</p>
+              {product.sizes && product.sizes.length > 1 && (
+                <div className="mt-4">
+                  <p className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-2">Talla</p>
+                  <div className="flex flex-wrap gap-2">
+                    {product.sizes.map(s => (
+                      <button key={s} onClick={() => setSize(s)}
+                              className="px-3 py-1.5 rounded-xl border-2 text-sm font-bold transition-all"
+                              style={{borderColor: selectedSize===s ? '#3B59FF' : '#e5e7eb', color: selectedSize===s ? '#3B59FF' : '#6b7280', background: selectedSize===s ? 'rgba(59,89,255,.05)' : 'white'}}>
+                        {s}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+              {product.stock > 0 && product.stock <= 5 && (
+                <p className="text-xs text-amber-600 font-semibold mt-3">⚡ Solo quedan {product.stock} unidades</p>
+              )}
+              {/* Botones compartir */}
+              <div className="flex gap-2 mt-4">
+                <a href={`https://wa.me/?text=${encodeURIComponent('¡Mira este producto de FiftyOne! ' + product.name + ' - ' + fmt(product.price) + ' 👉 ' + window.location.origin)}`}
+                   target="_blank" rel="noopener"
+                   className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-white text-xs font-bold transition hover:opacity-80"
+                   style={{background:'#25D366'}}>
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white" width="14" height="14"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+                  WhatsApp
+                </a>
+                <button onClick={() => { navigator.clipboard.writeText(window.location.origin + '/#productos'); alert('¡Enlace copiado!'); }}
+                        className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-white text-xs font-bold transition hover:opacity-80"
+                        style={{background:'linear-gradient(135deg,#833ab4,#fd1d1d,#fcb045)'}}>
+                  <i className="fa-brands fa-instagram text-sm"></i>
+                  Compartir
+                </button>
+              </div>
+              <button onClick={() => { handleAdd(); setDetail(false); }} disabled={product.stock===0}
+                      className="w-full mt-5 py-3.5 rounded-2xl text-white font-black text-sm flex items-center justify-center gap-2 transition hover:opacity-90 disabled:opacity-50"
+                      style={{background:'linear-gradient(90deg,#3B59FF,#7B2FBE)',boxShadow:'0 8px 25px rgba(59,89,255,.35)'}}>
+                <i className="fa-solid fa-cart-shopping text-xs"></i>
+                {product.stock===0 ? 'Agotado' : 'Agregar al carrito'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
 
 // ── Products Section ───────────────────────────────────────────────────────
 function Products({ onAdd }) {
+  const [activeCategory, setActiveCategory] = React.useState('Todos');
+  const [openProductId, setOpenProductId]   = React.useState(null);
+
+  // Polling liviano para detectar producto seleccionado desde el buscador
+  React.useEffect(() => {
+    const interval = setInterval(() => {
+      if (window.__openProductId__) {
+        setOpenProductId(window.__openProductId__);
+        window.__openProductId__ = null;
+      }
+    }, 100);
+    return () => clearInterval(interval);
+  }, []);
+  const allCats = ['Todos', 'Hoodies', 'Camisetas', 'Pantalones', 'Accesorios'];
+  // Mapeo de nombre de categoría a category_id real de la BD
+  const catMap = { 'Hoodies':1, 'Camisetas':2, 'Pantalones':3, 'Accesorios':4 };
+  const filtered = activeCategory === 'Todos'
+    ? dbProducts
+    : dbProducts.filter(p => p.category_id === catMap[activeCategory]);
+
   return (
     <section id="productos" className="py-20 bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-12 gap-4">
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-8 gap-4">
           <div>
-            <span className="text-[#3B59FF] text-sm font-semibold uppercase tracking-widest">Catálogo</span>
+            <span className="text-[#3B59FF] text-sm font-semibold uppercase tracking-widest">Productos</span>
             <h2 className="text-4xl font-black text-black mt-2">Prendas destacadas</h2>
           </div>
           <a href="/productos" className="inline-flex items-center gap-2 text-sm font-semibold text-gray-600 hover:text-[#3B59FF] transition-colors">
             Ver todos <i className="fa-solid fa-arrow-right text-xs"></i>
           </a>
         </div>
+        {/* Filtros por categoría */}
+        <div className="flex flex-wrap gap-2 mb-8">
+          {allCats.map(cat => (
+            <button key={cat} onClick={() => setActiveCategory(cat)}
+                    className="px-4 py-2 rounded-full text-sm font-semibold transition-all"
+                    style={{
+                      background: activeCategory===cat ? 'linear-gradient(90deg,#3B59FF,#7B2FBE)' : 'transparent',
+                      color: activeCategory===cat ? 'white' : '#6b7280',
+                      border: activeCategory===cat ? 'none' : '1.5px solid #e5e7eb',
+                    }}>
+              {cat}
+            </button>
+          ))}
+        </div>
         <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-5">
-          {dbProducts.map(p => <ProductCard key={p.id} product={p} onAdd={onAdd} />)}
+          {filtered.map(p => <ProductCard key={p.id} product={p} onAdd={onAdd}
+            forceOpen={openProductId === p.id}
+            onForceOpenDone={() => setOpenProductId(null)} />)}
         </div>
       </div>
     </section>
@@ -986,6 +1212,156 @@ function Footer() {
   );
 }
 
+// ── Top Banner ─────────────────────────────────────────────────────────────
+function TopBanner() {
+  const [visible, setVisible] = React.useState(true);
+  if (!visible) return null;
+  return (
+    <div className="relative overflow-hidden text-white text-xs font-semibold py-2.5 flex items-center justify-center gap-3"
+         style={{background:'linear-gradient(90deg,#3B59FF,#7B2FBE,#3B59FF)',backgroundSize:'200% 100%',animation:'shimmer 3s infinite'}}>
+      <span>🚚 Envío gratis en compras mayores a $200.000</span>
+      <span className="opacity-40">·</span>
+      <span>Usa el código <strong className="bg-white/20 px-2 py-0.5 rounded-md tracking-widest">FIFTY25</strong> y obtén 25% de descuento</span>
+      <button onClick={() => setVisible(false)}
+              className="absolute right-3 top-1/2 -translate-y-1/2 opacity-50 hover:opacity-100 transition">
+        <i className="fa-solid fa-xmark text-xs"></i>
+      </button>
+    </div>
+  );
+}
+
+// ── How To Buy ─────────────────────────────────────────────────────────────
+function HowToBuy() {
+  const steps = [
+    { icon:'fa-shirt',         color:'#3B59FF', title:'Elige tu prenda',  desc:'Explora el catálogo, selecciona tu talla y color favorito.' },
+    { icon:'fa-shield-halved', color:'#7B2FBE', title:'Paga seguro',      desc:'Acepta Nequi, Daviplata, PSE, Bancolombia y tarjetas.' },
+    { icon:'fa-house',         color:'#059669', title:'Recibe en casa',   desc:'Envíos a todo Colombia en 3 a 5 días hábiles.' },
+  ];
+  return (
+    <section className="py-16 bg-white">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="text-center mb-10">
+          <span className="text-[#3B59FF] text-sm font-semibold uppercase tracking-widest">Simple y rápido</span>
+          <h2 className="text-3xl font-black text-gray-900 mt-2">¿Cómo comprar?</h2>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          {steps.map((s,i) => (
+            <div key={i} className="text-center group">
+              <div className="relative inline-flex items-center justify-center w-20 h-20 rounded-3xl mb-5 transition-transform group-hover:scale-110 duration-300"
+                   style={{background:`${s.color}18`}}>
+                <i className={`fa-solid ${s.icon} text-2xl`} style={{color:s.color}}></i>
+                <span className="absolute -top-2 -right-2 w-7 h-7 rounded-full flex items-center justify-center text-xs font-black text-white"
+                      style={{background:s.color}}>{i+1}</span>
+              </div>
+              <h3 className="font-bold text-gray-900 text-lg mb-2">{s.title}</h3>
+              <p className="text-gray-500 text-sm leading-relaxed">{s.desc}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// ── Looks del Mes ──────────────────────────────────────────────────────────
+function LooksDelMes({ onAdd }) {
+  const auth = window.__AUTH__ || {};
+
+  // Semilla basada en el día actual — cambia cada día automáticamente
+  const today = new Date();
+  const seed  = today.getFullYear() * 10000 + (today.getMonth()+1) * 100 + today.getDate();
+
+  // Generador pseudoaleatorio determinista con semilla
+  const rng = (s) => { let x = Math.sin(s) * 10000; return x - Math.floor(x); };
+
+  // Separar productos por categoría
+  const hoodies    = dbProducts.filter(p => p.category_id === 1);
+  const camisetas  = dbProducts.filter(p => p.category_id === 2);
+  const pantalones = dbProducts.filter(p => p.category_id === 3);
+  const accesorios = dbProducts.filter(p => p.category_id === 4);
+
+  const pick = (arr, s) => arr[Math.floor(rng(s) * arr.length)] || arr[0];
+
+  const looks = [
+    {
+      title: 'Look Urbano',
+      desc: 'Sudadera + Pantalón + Accesorio',
+      products: [
+        pick(hoodies,    seed + 1),
+        pick(pantalones, seed + 2),
+        pick(accesorios, seed + 3),
+      ].filter(Boolean),
+      bg: 'from-[#0d0d1a] to-[#1a0a2e]',
+    },
+    {
+      title: 'Look Casual',
+      desc: 'Camiseta + Pantalón + Accesorio',
+      products: [
+        pick(camisetas,  seed + 4),
+        pick(pantalones, seed + 5),
+        pick(accesorios, seed + 6),
+      ].filter(Boolean),
+      bg: 'from-[#0a0e2e] to-[#0d0d1a]',
+    },
+    {
+      title: 'Look Femenino',
+      desc: 'Sudadera Crop + Pantalón + Accesorio',
+      products: [
+        pick(hoodies.filter(p => p.name.toLowerCase().includes('crop') || p.name.toLowerCase().includes('mujer')) || hoodies, seed + 7),
+        pick(pantalones, seed + 8),
+        pick(accesorios, seed + 9),
+      ].filter(Boolean),
+      bg: 'from-[#1a0a2e] to-[#0a0e2e]',
+    },
+  ];
+
+  // Fecha legible
+  const fechaHoy = today.toLocaleDateString('es-CO', { weekday:'long', day:'numeric', month:'long' });
+
+  return (
+    <section id="inspiracion" className="py-20 bg-gray-50">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="text-center mb-12">
+          <span className="text-[#3B59FF] text-sm font-semibold uppercase tracking-widest">Inspiración</span>
+          <h2 className="text-4xl font-black text-gray-900 mt-2">Looks del día</h2>
+          <p className="text-gray-500 mt-2 capitalize">Outfits de hoy · {fechaHoy}</p>
+        </div>
+        <div className="grid md:grid-cols-3 gap-6">
+          {looks.map((look,i) => (
+            <div key={i} className={`rounded-3xl overflow-hidden bg-gradient-to-br ${look.bg} p-6 text-white`}>
+              <h3 className="font-black text-xl mb-1">{look.title}</h3>
+              <p className="text-xs mb-5" style={{color:'rgba(255,255,255,.5)'}}>{look.desc}</p>
+              <div className="space-y-3">
+                {look.products.map(p => p && (
+                  <div key={p.id} className="flex items-center gap-3 rounded-2xl p-3"
+                       style={{background:'rgba(255,255,255,.07)',border:'1px solid rgba(255,255,255,.1)'}}>
+                    <div className="w-12 h-12 rounded-xl overflow-hidden flex-shrink-0">
+                      {p.img && <img src={p.img} className="w-full h-full object-cover" alt={p.name}/>}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-semibold truncate">{p.name}</p>
+                      <p className="text-xs" style={{color:'rgba(255,255,255,.4)'}}>{fmt(p.price)}</p>
+                    </div>
+                    <button onClick={() => { if(!auth.loggedIn){window.location.href='/login';return;} onAdd(p); }}
+                            className="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0 transition hover:scale-110"
+                            style={{background:'rgba(59,89,255,.5)'}}>
+                      <i className="fa-solid fa-plus text-xs"></i>
+                    </button>
+                  </div>
+                ))}
+              </div>
+              <div className="mt-4 pt-4 border-t border-white/10 flex justify-between items-center">
+                <span className="text-xs" style={{color:'rgba(255,255,255,.4)'}}>Total del look</span>
+                <span className="font-black text-lg">{fmt(look.products.reduce((s,p) => s + (p?.price||0), 0))}</span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
 // ── App ────────────────────────────────────────────────────────────────────
 function App() {
   const [cart, setCart]           = useState(() => JSON.parse(localStorage.getItem('fiftyone_cart') || '[]'));
@@ -1016,11 +1392,14 @@ function App() {
 
   return (
     <>
+      <TopBanner />
       <Navbar cartCount={totalItems} onCartOpen={() => setDrawer(true)} />
       <Hero />
+      <HowToBuy />
       <Categories />
       <Products onAdd={addToCart} />
       <PromoBanner />
+      <LooksDelMes onAdd={addToCart} />
       <Testimonials />
       <Footer />
       <CartDrawer open={drawerOpen} onClose={() => setDrawer(false)} cart={cart}
@@ -1041,5 +1420,33 @@ if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('/sw.js').catch(() => {});
 }
 </script>
+
+{{-- Botón flotante WhatsApp --}}
+<style>
+@keyframes waPulse {
+    0%   { box-shadow: 0 0 0 0 rgba(37,211,102,.6); }
+    70%  { box-shadow: 0 0 0 14px rgba(37,211,102,0); }
+    100% { box-shadow: 0 0 0 0 rgba(37,211,102,0); }
+}
+.wa-btn { animation: waPulse 2s infinite; }
+.wa-btn:hover { transform: scale(1.12) rotate(-5deg) !important; }
+.wa-tooltip { opacity:0; transform:translateX(10px); transition:all .25s ease; pointer-events:none; }
+.wa-wrap:hover .wa-tooltip { opacity:1; transform:translateX(0); }
+</style>
+<div class="wa-wrap" style="position:fixed;bottom:28px;right:28px;z-index:9999;display:flex;align-items:center;gap:10px;flex-direction:row-reverse">
+    <a href="https://wa.me/573118422192?text=Hola%20FiftyOne%20%F0%9F%91%8D%20me%20interesa%20conocer%20m%C3%A1s%20sobre%20sus%20productos"
+       target="_blank" rel="noopener"
+       class="wa-btn"
+       style="width:60px;height:60px;border-radius:50%;background:linear-gradient(135deg,#25D366,#128C7E);display:flex;align-items:center;justify-content:center;box-shadow:0 4px 20px rgba(37,211,102,.5);transition:transform .2s ease;text-decoration:none;flex-shrink:0">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white" width="32" height="32">
+            <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+        </svg>
+    </a>
+    <div class="wa-tooltip"
+         style="background:linear-gradient(135deg,#0d0d1a,#0a0e2e);color:white;padding:10px 16px;border-radius:14px;font-family:Inter,sans-serif;font-size:13px;font-weight:600;white-space:nowrap;border:1px solid rgba(37,211,102,.3);box-shadow:0 8px 24px rgba(0,0,0,.3)">
+        <span style="color:#25D366">●</span> ¡Chatea con nosotros!
+        <div style="font-size:11px;font-weight:400;color:#94a3b8;margin-top:2px">Respondemos en minutos</div>
+    </div>
+</div>
 </body>
 </html>

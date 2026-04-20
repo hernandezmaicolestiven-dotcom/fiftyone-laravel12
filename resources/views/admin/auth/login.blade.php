@@ -6,6 +6,22 @@
     <title>Login — FiftyOne Admin</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <script>
+    // Refrescar token CSRF cada 10 minutos para evitar 419
+    setInterval(function() {
+        fetch('/up').then(function() {
+            document.querySelectorAll('input[name="_token"]').forEach(function(el) {
+                fetch('/sanctum/csrf-cookie').catch(function(){});
+            });
+        });
+    }, 600000);
+    // Si la página lleva más de 5 min abierta sin interacción, recargar al hacer focus
+    var loaded = Date.now();
+    window.addEventListener('focus', function() {
+        if (Date.now() - loaded > 300000) { window.location.reload(); }
+    });
+    </script>
 </head>
 <body class="bg-gradient-to-br from-gray-900 via-indigo-950 to-gray-900 min-h-screen flex items-center justify-center">
 

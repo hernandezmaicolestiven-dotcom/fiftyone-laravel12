@@ -173,6 +173,9 @@ class AdminProductController extends Controller
             $data['image'] = $request->file('image')->store('products', 'public');
         }
 
+        $data['sizes']  = $request->input('sizes', []);
+        $data['colors'] = array_filter(array_map('trim', explode(',', $request->input('colors_input', ''))));
+
         Product::create($data);
 
         return redirect()->route('admin.products.index')
@@ -203,6 +206,9 @@ class AdminProductController extends Controller
             }
             $data['image'] = $request->file('image')->store('products', 'public');
         }
+
+        $data['sizes']  = $request->input('sizes', []);
+        $data['colors'] = array_filter(array_map('trim', explode(',', $request->input('colors_input', ''))));
 
         $product->update($data);
 

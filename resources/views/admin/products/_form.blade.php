@@ -53,6 +53,27 @@
     @error('category_id') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
 </div>
 
+<div>
+    <label class="block text-sm font-medium text-gray-700 mb-1">Tallas disponibles</label>
+    <div class="flex flex-wrap gap-2">
+        @foreach(['XS','S','M','L','XL','XXL','Talla única'] as $size)
+        @php $selected = in_array($size, old('sizes', isset($product) ? ($product->sizes ?? []) : [])); @endphp
+        <label class="flex items-center gap-1.5 cursor-pointer">
+            <input type="checkbox" name="sizes[]" value="{{ $size }}" {{ $selected ? 'checked' : '' }}
+                   class="rounded border-gray-300 text-indigo-600">
+            <span class="text-sm text-gray-700">{{ $size }}</span>
+        </label>
+        @endforeach
+    </div>
+</div>
+
+<div>
+    <label class="block text-sm font-medium text-gray-700 mb-1">Colores disponibles <span class="text-gray-400 text-xs font-normal">(separados por coma)</span></label>
+    <input type="text" name="colors_input" value="{{ old('colors_input', isset($product) ? implode(', ', $product->colors ?? []) : '') }}"
+           class="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
+           placeholder="Negro, Blanco, Gris, Azul Marino">
+</div>
+
 <div x-data="{ preview: '{{ isset($product) && $product->image ? (str_starts_with($product->image, "http") ? $product->image : Storage::url($product->image)) : "" }}' }">
     <label class="block text-sm font-medium text-gray-700 mb-1">Imagen</label>
 

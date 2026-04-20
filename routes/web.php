@@ -1,6 +1,9 @@
 <?php
 
+use App\Http\Controllers\Admin\CouponController;
+use App\Http\Controllers\Admin\GeneratorController;
 use App\Http\Controllers\Admin\ReviewController as AdminReviewController;
+use App\Http\Controllers\WishlistController;
 use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\Admin\ColaboradorController;
 use App\Http\Controllers\Admin\AdminProductController;
@@ -31,6 +34,11 @@ Route::get('/', function () {
         'name'     => ($authUser && $authUser->role !== 'admin') ? $authUser->name : null,
         'id'       => ($authUser && $authUser->role !== 'admin') ? $authUser->id : null,
     ];
+    // Wishlist del usuario
+    $wishlistIds = [];
+    if ($authUser && $authUser->role !== 'admin') {
+        $wishlistIds = \App\Models\Wishlist::where('user_id', $authUser->id)->pluck('product_id')->toArray();
+    }
     // Reseñas para mostrar en home (últimas 6)
     $reviews = \App\Models\Review::with('user', 'product')
         ->latest()->take(6)->get()
@@ -41,7 +49,7 @@ Route::get('/', function () {
             'comment' => $r->comment,
             'date'    => $r->created_at->format('d/m/Y'),
         ]);
-    return view('welcome', compact('products', 'authData', 'reviews'));
+    return view('welcome', compact('products', 'authData', 'reviews', 'wishlistIds'));
 });
 
 // Admin Auth
@@ -65,6 +73,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::resource('products', AdminProductController::class);
         Route::resource('categories', CategoryController::class);
         Route::post('users/import/csv', [UserController::class, 'importCsv'])->name('users.import.csv');
+        Route::get('users/export/csv', [UserController::class, 'exportCsv'])->name('users.export.csv');
         Route::resource('users', UserController::class);
         Route::get('orders/export/csv', [OrderController::class, 'exportCsv'])->name('orders.export.csv');
         Route::get('orders/export/pdf', [OrderController::class, 'exportPdf'])->name('orders.export.pdf');
@@ -94,6 +103,16 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('reviews', [AdminReviewController::class, 'index'])->name('reviews.index');
         Route::delete('reviews/{review}', [AdminReviewController::class, 'destroy'])->name('reviews.destroy');
 
+        // Cupones
+        Route::get('coupons', [CouponController::class, 'index'])->name('coupons.index');
+        Route::post('coupons', [CouponController::class, 'store'])->name('coupons.store');
+        Route::patch('coupons/{coupon}/toggle', [CouponController::class, 'toggle'])->name('coupons.toggle');
+        Route::delete('coupons/{coupon}', [CouponController::class, 'destroy'])->name('coupons.destroy');
+
+        // Generadores
+        Route::get('generators/invoice/{order}', [GeneratorController::class, 'invoice'])->name('generators.invoice');
+        Route::get('generators/label/{order}', [GeneratorController::class, 'label'])->name('generators.label');
+
         // Colaboradores — solo admin
         Route::get('colaboradores', [ColaboradorController::class, 'index'])->name('colaboradores.index');
         Route::post('colaboradores', [ColaboradorController::class, 'store'])->name('colaboradores.store');
@@ -109,10 +128,22 @@ Route::prefix('admin')->name('admin.')->group(function () {
 // Public order endpoint — requiere sesión de cliente
 Route::post('/orders', [PublicOrderController::class, 'store'])->name('orders.store')->middleware('auth');
 
+// Validar cupón (público)
+Route::get('/coupon/validate', function (\Illuminate\Http\Request $request) {
+    $coupon = \App\Models\Coupon::where('code', strtoupper($request->code))->first();
+    if (!$coupon || !$coupon->isValid()) {
+        return response()->json(['valid' => false, 'message' => 'Cupón inválido o expirado']);
+    }
+    $discount = $coupon->discount((float) $request->total);
+    return response()->json(['valid' => true, 'discount' => $discount]);
+});
+
 // Reseñas públicas (requiere auth cliente)
 Route::middleware('auth')->group(function () {
     Route::post('/reviews', [ReviewController::class, 'store'])->name('reviews.store');
     Route::get('/reviews', [ReviewController::class, 'index'])->name('reviews.index');
+    Route::post('/wishlist/toggle', [WishlistController::class, 'toggle'])->name('wishlist.toggle');
+    Route::get('/wishlist', [WishlistController::class, 'index'])->name('wishlist.index');
 });
 
 // Customer auth
@@ -125,6 +156,9 @@ Route::middleware('guest')->group(function () {
 Route::middleware('auth')->group(function () {
     Route::get('/mi-cuenta', [CustomerAuthController::class, 'account'])->name('customer.account');
     Route::post('/logout', [CustomerAuthController::class, 'logout'])->name('customer.logout');
+    Route::put('/mi-cuenta/perfil', [CustomerAuthController::class, 'updateProfile'])->name('customer.profile.update');
+    Route::put('/mi-cuenta/password', [CustomerAuthController::class, 'updatePassword'])->name('customer.password.update');
+    Route::patch('/mi-cuenta/orders/{order}/cancel', [CustomerAuthController::class, 'cancelOrder'])->name('customer.order.cancel');
 });
 
 // Public catalog routes

@@ -5,8 +5,26 @@
 @section('content')
 <div class="bg-white rounded-2xl shadow-sm overflow-hidden">
     <div class="px-6 py-5 border-b border-gray-100">
-        <h2 class="text-lg font-bold text-gray-800">Reseñas de clientes</h2>
-        <p class="text-sm text-gray-400 mt-0.5">{{ $reviews->total() }} reseña{{ $reviews->total() !== 1 ? 's' : '' }} en total</p>
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+                <h2 class="text-lg font-bold text-gray-800">Reseñas de clientes</h2>
+                <p class="text-sm text-gray-400 mt-0.5">{{ $reviews->total() }} reseña(s) en total</p>
+            </div>
+            <form method="GET" class="flex gap-2">
+                <select name="product_id" onchange="this.form.submit()"
+                        class="border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300 bg-gray-50">
+                    <option value="">Todos los productos</option>
+                    @foreach($products as $p)
+                    <option value="{{ $p->id }}" {{ $productId == $p->id ? 'selected' : '' }}>{{ $p->name }}</option>
+                    @endforeach
+                </select>
+                @if($productId)
+                <a href="{{ route('admin.reviews.index') }}" class="px-3 py-2 rounded-xl border border-gray-200 text-sm text-gray-500 hover:bg-gray-50 transition">
+                    Limpiar
+                </a>
+                @endif
+            </form>
+        </div>
     </div>
 
     <div class="overflow-x-auto">

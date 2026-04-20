@@ -107,6 +107,87 @@
         @endforeach
     </div>
 
+    {{-- Perfil editable --}}
+    <div class="rounded-2xl overflow-hidden border border-white/10 fade-up mb-6" style="background:rgba(255,255,255,.03)">
+        <div class="px-6 py-4 border-b border-white/10">
+            <h2 class="text-base font-bold text-white">Mi perfil</h2>
+        </div>
+        <div class="p-6 grid md:grid-cols-2 gap-6">
+            <form method="POST" action="{{ route('customer.profile.update') }}" class="space-y-3">
+                @csrf @method('PUT')
+                <div>
+                    <label class="block text-xs font-semibold text-gray-400 mb-1">Nombre</label>
+                    <input type="text" name="name" value="{{ $user->name }}" required
+                           class="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2.5 text-sm text-white focus:outline-none focus:border-indigo-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-gray-400 mb-1">Email</label>
+                    <input type="email" name="email" value="{{ $user->email }}" required
+                           class="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2.5 text-sm text-white focus:outline-none focus:border-indigo-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-gray-400 mb-1">Teléfono</label>
+                    <input type="tel" name="phone" value="{{ $user->phone }}"
+                           class="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2.5 text-sm text-white focus:outline-none focus:border-indigo-500">
+                </div>
+                <button type="submit" class="w-full py-2.5 rounded-xl text-white text-sm font-semibold hover:opacity-90 transition"
+                        style="background:linear-gradient(90deg,#3B59FF,#7B2FBE)">Guardar cambios</button>
+            </form>
+            <form method="POST" action="{{ route('customer.password.update') }}" class="space-y-3">
+                @csrf @method('PUT')
+                <div>
+                    <label class="block text-xs font-semibold text-gray-400 mb-1">Contraseña actual</label>
+                    <input type="password" name="current_password" required
+                           class="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2.5 text-sm text-white focus:outline-none focus:border-indigo-500">
+                    @error('current_password')<p class="text-xs text-red-400 mt-1">{{ $message }}</p>@enderror
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-gray-400 mb-1">Nueva contraseña</label>
+                    <input type="password" name="password" required
+                           class="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2.5 text-sm text-white focus:outline-none focus:border-indigo-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-gray-400 mb-1">Confirmar contraseña</label>
+                    <input type="password" name="password_confirmation" required
+                           class="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2.5 text-sm text-white focus:outline-none focus:border-indigo-500">
+                </div>
+                <button type="submit" class="w-full py-2.5 rounded-xl text-white text-sm font-semibold hover:opacity-90 transition"
+                        style="background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.15)">Cambiar contraseña</button>
+            </form>
+        </div>
+    </div>
+
+    {{-- Wishlist --}}
+    @if($wishlist->count() > 0)
+    <div class="rounded-2xl overflow-hidden border border-white/10 fade-up mt-6" style="background:rgba(255,255,255,.03)">
+        <div class="px-6 py-4 border-b border-white/10">
+            <h2 class="text-base font-bold text-white">Mi lista de deseos</h2>
+            <p class="text-xs text-gray-500 mt-0.5">{{ $wishlist->count() }} producto(s) guardado(s)</p>
+        </div>
+        <div class="grid grid-cols-2 sm:grid-cols-3 gap-4 p-4">
+            @foreach($wishlist as $w)
+            @php $p = $w->product; @endphp
+            <div class="rounded-2xl overflow-hidden border border-white/10 hover:border-white/20 transition" style="background:rgba(255,255,255,.04)">
+                <div class="aspect-square overflow-hidden bg-gray-800">
+                    @if($p->image)
+                    <img src="{{ str_starts_with($p->image,'http') ? $p->image : Storage::url($p->image) }}"
+                         alt="{{ $p->name }}" class="w-full h-full object-cover">
+                    @endif
+                </div>
+                <div class="p-3">
+                    <p class="text-white text-xs font-semibold truncate">{{ $p->name }}</p>
+                    <p class="font-black text-sm mt-1" style="background:linear-gradient(90deg,#3B59FF,#7B2FBE);-webkit-background-clip:text;-webkit-text-fill-color:transparent">
+                        $ {{ number_format($p->price,0,',','.') }}
+                    </p>
+                    <a href="/" class="mt-2 block text-center text-xs py-1.5 rounded-xl text-white font-semibold transition hover:opacity-80"
+                       style="background:linear-gradient(90deg,#3B59FF,#7B2FBE)">Ver producto</a>
+                </div>
+            </div>
+            @endforeach
+        </div>
+    </div>
+    @endif
+
     {{-- Historial de pedidos --}}
     <div class="rounded-2xl overflow-hidden border border-white/10 fade-up" style="background:rgba(255,255,255,.03)">
         <div class="px-6 py-4 border-b border-white/10 flex items-center justify-between">
@@ -160,6 +241,15 @@
                     <p class="font-black text-lg" style="background:linear-gradient(90deg,#3B59FF,#7B2FBE);-webkit-background-clip:text;-webkit-text-fill-color:transparent">
                         ${{ number_format($order->total, 0, ',', '.') }}
                     </p>
+                    @if($order->status === 'pending')
+                    <form method="POST" action="{{ route('customer.order.cancel', $order) }}"
+                          onsubmit="return confirm('¿Cancelar este pedido?')" class="mt-2">
+                        @csrf @method('PATCH')
+                        <button type="submit" class="text-xs text-red-400 hover:text-red-300 transition font-semibold">
+                            Cancelar pedido
+                        </button>
+                    </form>
+                    @endif
                 </div>
             </div>
 

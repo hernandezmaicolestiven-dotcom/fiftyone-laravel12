@@ -33,6 +33,23 @@ class UserController extends Controller
         return view('admin.users.index', compact('users'));
     }
 
+    public function exportCsv()
+    {
+        $users = User::latest()->get();
+        return response()->stream(function () use ($users) {
+            $handle = fopen('php://output', 'w');
+            fprintf($handle, chr(0xEF).chr(0xBB).chr(0xBF));
+            fputcsv($handle, ['ID','Nombre','Email','Teléfono','Rol','Fecha registro']);
+            foreach ($users as $u) {
+                fputcsv($handle, [$u->id, $u->name, $u->email, $u->phone ?? '', $u->role, $u->created_at->format('d/m/Y')]);
+            }
+            fclose($handle);
+        }, 200, [
+            'Content-Type' => 'text/csv; charset=UTF-8',
+            'Content-Disposition' => 'attachment; filename="clientes_'.now()->format('Ymd_His').'.csv"',
+        ]);
+    }
+
     public function importCsv(Request $request)
     {
         $request->validate(['file' => 'required|file|mimes:csv,txt|max:2048']);

@@ -48,15 +48,26 @@ class OrderService
                 ];
             }
 
+            // Aplicar cupón si viene
+            if (!empty($data['coupon_code'])) {
+                $coupon = \App\Models\Coupon::where('code', strtoupper($data['coupon_code']))->first();
+                if ($coupon && $coupon->isValid()) {
+                    $total = max(0, $total - $coupon->discount($total));
+                    if ($coupon->uses_left !== null) {
+                        $coupon->decrement('uses_left');
+                    }
+                }
+            }
+
             // Crear pedido (vincular al usuario si está autenticado)
             $order = Order::create([
-                'user_id' => auth()->id(),
-                'customer_name' => $data['customer_name'],
+                'user_id'        => auth()->id(),
+                'customer_name'  => $data['customer_name'],
                 'customer_email' => $data['customer_email'] ?? null,
                 'customer_phone' => $data['customer_phone'] ?? null,
-                'notes' => $data['notes'] ?? null,
-                'total' => $total,
-                'status' => 'pending',
+                'notes'          => $data['notes'] ?? null,
+                'total'          => $total,
+                'status'         => 'pending',
             ]);
 
             $order->items()->createMany($itemsData);
@@ -116,6 +127,11 @@ class OrderService
 
             $admins = User::where('role', 'admin')->get();
             Notification::send($admins, new NewOrderNotification($order));
+
+            // Notificación WhatsApp al admin via wa.me link (log)
+            $waMsg = urlencode("🛍️ Nuevo pedido #{$order->id} de {$order->customer_name} por $" . number_format($order->total, 0, ',', '.') . " COP. Estado: Pendiente.");
+            Log::info("WhatsApp admin: https://wa.me/573118422192?text={$waMsg}");
+
         } catch (\Exception $e) {
             Log::warning('Error enviando notificación de nuevo pedido', [
                 'order_id' => $order->id,
