@@ -131,6 +131,7 @@
         </div>
         @php
             $predMonths = ['Mes +1', 'Mes +2', 'Mes +3'];
+            $maxPred = max($prediction) ?: 1;
         @endphp
         <div class="space-y-4">
             @foreach($prediction as $i => $val)
@@ -143,8 +144,7 @@
                     ${{ number_format($val, 0, ',', '.') }}
                 </p>
                 <div class="mt-2 h-1.5 bg-purple-100 rounded-full overflow-hidden">
-                    @php $maxPred = max($prediction) ?: 1; @endphp
-                    <div class="h-full rounded-full" style="width:{{ round($val/$maxPred*100) }}%;background:linear-gradient(90deg,#7c3aed,#a855f7)"></div>
+                    <div class="h-full rounded-full transition-all duration-700" style="width:{{ round($val/$maxPred*100) }}%;background:linear-gradient(90deg,#7c3aed,#a855f7)"></div>
                 </div>
             </div>
             @endforeach

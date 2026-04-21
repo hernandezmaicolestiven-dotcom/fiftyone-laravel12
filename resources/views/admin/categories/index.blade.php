@@ -12,10 +12,16 @@
             <h2 class="text-lg font-semibold text-gray-800">Lista de categorías</h2>
             <p class="text-sm text-gray-500">{{ $categories->total() }} categorías en total</p>
         </div>
-        <a href="{{ route('admin.categories.create') }}"
-           class="inline-flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium px-4 py-2.5 rounded-lg transition">
-            <i class="fa-solid fa-plus"></i> Nueva categoría
-        </a>
+        <div class="flex gap-2">
+            <a href="{{ route('admin.categories.trashed') }}"
+               class="inline-flex items-center gap-2 text-sm font-medium px-4 py-2.5 rounded-xl border border-gray-200 text-gray-500 hover:bg-gray-50 transition">
+                <i class="fa-solid fa-trash text-red-400"></i> Papelera
+            </a>
+            <a href="{{ route('admin.categories.create') }}"
+               class="inline-flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium px-4 py-2.5 rounded-lg transition">
+                <i class="fa-solid fa-plus"></i> Nueva categoría
+            </a>
+        </div>
     </div>
 
     {{-- Search --}}

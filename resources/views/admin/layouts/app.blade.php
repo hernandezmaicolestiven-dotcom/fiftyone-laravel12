@@ -127,7 +127,6 @@
                 ['admin.coupons.index',     'fa-ticket',        'Cupones',          'admin.coupons*'],
                 ['admin.reports.sales',     'fa-chart-line',    'Reportes',         'admin.reports*'],
                 ['admin.analytics',         'fa-brain',         'Analytics',        'admin.analytics*'],
-                ['admin.messages.index',    'fa-comments',      'Chat',             'admin.messages*'],
                 ['admin.settings',          'fa-gear',          'Configuración',    'admin.settings*'],
             ] as [$route, $icon, $label, $pattern])
             @php

@@ -76,6 +76,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::delete('products/{id}/force-delete', [AdminProductController::class, 'forceDelete'])->name('products.force-delete');
         Route::resource('products', AdminProductController::class);
         Route::resource('categories', CategoryController::class);
+        Route::get('categories/trashed', [CategoryController::class, 'trashed'])->name('categories.trashed');
+        Route::patch('categories/{id}/restore', [CategoryController::class, 'restore'])->name('categories.restore');
+        Route::delete('categories/{id}/force-delete', [CategoryController::class, 'forceDelete'])->name('categories.force-delete');
         Route::post('users/import/csv', [UserController::class, 'importCsv'])->name('users.import.csv');
         Route::get('users/export/csv', [UserController::class, 'exportCsv'])->name('users.export.csv');
         Route::resource('users', UserController::class);

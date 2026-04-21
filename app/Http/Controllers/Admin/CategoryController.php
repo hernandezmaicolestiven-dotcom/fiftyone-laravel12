@@ -64,9 +64,26 @@ class CategoryController extends Controller
 
     public function destroy(Category $category)
     {
-        $category->delete();
-
+        $category->delete(); // Soft delete
         return redirect()->route('admin.categories.index')
-            ->with('success', 'Categoría eliminada correctamente.');
+            ->with('success', 'Categoría eliminada. Puedes restaurarla desde la papelera.');
+    }
+
+    public function trashed()
+    {
+        $categories = Category::onlyTrashed()->latest()->paginate(10);
+        return view('admin.categories.trashed', compact('categories'));
+    }
+
+    public function restore($id)
+    {
+        Category::withTrashed()->findOrFail($id)->restore();
+        return redirect()->route('admin.categories.trashed')->with('success', 'Categoría restaurada.');
+    }
+
+    public function forceDelete($id)
+    {
+        Category::withTrashed()->findOrFail($id)->forceDelete();
+        return redirect()->route('admin.categories.trashed')->with('success', 'Categoría eliminada permanentemente.');
     }
 }

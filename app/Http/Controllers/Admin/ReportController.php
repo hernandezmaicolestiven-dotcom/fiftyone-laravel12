@@ -67,15 +67,20 @@ class ReportController extends Controller
             'Cancelado' => $orders->where('status', 'cancelled')->count(),
         ];
 
-        // Top 5 clientes
-        $topCustomers = $orders->groupBy('customer_email')
+        // Top clientes con paginación manual
+        $perPage = 10;
+        $page    = (int) request('customers_page', 1);
+        $allCustomers = $orders->groupBy('customer_email')
             ->map(fn ($g) => ['name' => $g->first()->customer_name, 'email' => $g->first()->customer_email, 'total' => $g->sum('total'), 'count' => $g->count()])
-            ->sortByDesc('total')->take(5)->values();
+            ->sortByDesc('total')->values();
+        $totalCustomers = $allCustomers->count();
+        $topCustomers   = $allCustomers->slice(($page - 1) * $perPage, $perPage)->values();
+        $customersPages = (int) ceil($totalCustomers / $perPage);
 
         return view('admin.reports.sales', compact(
             'totalRevenue', 'totalOrders', 'avgOrder', 'delivered',
             'chartLabels', 'chartOrders', 'chartRevenue',
-            'statusCounts', 'topCustomers',
+            'statusCounts', 'topCustomers', 'totalCustomers', 'customersPages', 'page',
             'dateFrom', 'dateTo', 'status'
         ));
     }

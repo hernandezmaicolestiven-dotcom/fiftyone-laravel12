@@ -108,7 +108,7 @@
     <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
         <div>
             <h3 class="text-sm font-bold text-gray-800">Top clientes</h3>
-            <p class="text-xs text-gray-400">Por ingresos generados en el período</p>
+            <p class="text-xs text-gray-400">{{ $totalCustomers }} clientes · Por ingresos generados en el período</p>
         </div>
     </div>
     <div class="overflow-x-auto">
@@ -123,7 +123,7 @@
             <tbody class="divide-y divide-gray-100">
                 @forelse($topCustomers as $i => $c)
                 <tr class="hover:bg-gray-50 transition">
-                    <td class="px-6 py-3 text-gray-400 font-mono">{{ $i+1 }}</td>
+                    <td class="px-6 py-3 text-gray-400 font-mono">{{ ($page - 1) * 10 + $i + 1 }}</td>
                     <td class="px-6 py-3 font-semibold text-gray-800">{{ $c['name'] }}</td>
                     <td class="px-6 py-3 text-gray-500">{{ $c['email'] }}</td>
                     <td class="px-6 py-3 text-center">
@@ -137,6 +137,26 @@
             </tbody>
         </table>
     </div>
+    {{-- Paginación --}}
+    @if($customersPages > 1)
+    <div class="px-6 py-4 border-t border-gray-100 flex items-center justify-between">
+        <p class="text-xs text-gray-400">Página {{ $page }} de {{ $customersPages }}</p>
+        <div class="flex gap-2">
+            @if($page > 1)
+            <a href="{{ request()->fullUrlWithQuery(['customers_page' => $page - 1]) }}"
+               class="px-3 py-1.5 rounded-lg text-xs font-medium border border-gray-200 text-gray-600 hover:bg-gray-50 transition">
+                ← Anterior
+            </a>
+            @endif
+            @if($page < $customersPages)
+            <a href="{{ request()->fullUrlWithQuery(['customers_page' => $page + 1]) }}"
+               class="px-3 py-1.5 rounded-lg text-xs font-medium border border-gray-200 text-gray-600 hover:bg-gray-50 transition">
+                Siguiente →
+            </a>
+            @endif
+        </div>
+    </div>
+    @endif
 </div>
 
 @endsection

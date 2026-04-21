@@ -60,10 +60,6 @@
                 Importar
             </button>
 
-            <a href="{{ route('admin.products.trashed') }}"
-               class="inline-flex items-center gap-2 text-sm font-medium px-4 py-2.5 rounded-xl border border-gray-200 text-gray-500 hover:bg-gray-50 transition">
-                <i class="fa-solid fa-trash text-red-400"></i> Papelera
-            </a>
             <a href="{{ route('admin.products.create') }}"
                class="inline-flex items-center gap-2 text-white text-sm font-medium px-4 py-2.5 rounded-xl transition shadow-sm hover:opacity-90"
                style="background: linear-gradient(90deg, #3B59FF, #7B2FBE)">

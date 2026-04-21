@@ -93,20 +93,29 @@ class AnalyticsController extends Controller
      */
     private function predictNextMonths(array $data, int $steps): array
     {
-        $n = count($data);
-        if ($n < 2) {
-            return array_fill(0, $steps, 0);
+        // Filtrar solo meses con datos
+        $nonZero = array_filter($data, fn($v) => $v > 0);
+
+        if (count($nonZero) < 2) {
+            // Si hay solo 1 mes con datos, proyectar con crecimiento del 10% mensual
+            $base = count($nonZero) === 1 ? max($nonZero) : 0;
+            if ($base === 0) {
+                // Sin datos históricos — usar promedio de pedidos recientes
+                $base = (float) Order::where('created_at', '>=', now()->subDays(30))->sum('total');
+            }
+            $predictions = [];
+            for ($i = 0; $i < $steps; $i++) {
+                $predictions[] = max(0, round($base * pow(1.10, $i + 1), 0));
+            }
+            return $predictions;
         }
 
-        // Calcular pendiente (m) e intercepto (b) de y = mx + b
-        $sumX = 0;
-        $sumY = 0;
-        $sumXY = 0;
-        $sumX2 = 0;
+        $n = count($data);
+        $sumX = $sumY = $sumXY = $sumX2 = 0;
 
         for ($i = 0; $i < $n; $i++) {
-            $sumX += $i;
-            $sumY += $data[$i];
+            $sumX  += $i;
+            $sumY  += $data[$i];
             $sumXY += $i * $data[$i];
             $sumX2 += $i * $i;
         }
@@ -119,7 +128,6 @@ class AnalyticsController extends Controller
         $m = ($n * $sumXY - $sumX * $sumY) / $denom;
         $b = ($sumY - $m * $sumX) / $n;
 
-        // Predecir los próximos $steps períodos
         $predictions = [];
         for ($i = 0; $i < $steps; $i++) {
             $predictions[] = max(0, round($m * ($n + $i) + $b, 0));
