@@ -27,7 +27,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->redirectUsersTo(function ($request) {
             $user = auth()->user();
             if (!$user) return '/';
-            if (in_array($user->role, ['admin', 'colaborador'])) {
+            if (in_array($user->role, ['admin', 'superadmin', 'colaborador'])) {
                 return route('admin.dashboard');
             }
             return route('customer.account');

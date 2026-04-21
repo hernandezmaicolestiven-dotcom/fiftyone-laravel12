@@ -50,6 +50,7 @@ body { font-family:Arial,sans-serif; background:#fff; display:flex; align-items:
     <div class="section">
         <h4>📦 Destinatario</h4>
         <p>{{ $order->customer_name }}</p>
+        @if($order->shipping_address)<p class="sub">📍 {{ $order->shipping_address }}{{ $order->city ? ', '.$order->city : '' }}</p>@endif
         @if($order->customer_phone)<p class="sub">📞 {{ $order->customer_phone }}</p>@endif
         @if($order->customer_email)<p class="sub">✉️ {{ $order->customer_email }}</p>@endif
     </div>

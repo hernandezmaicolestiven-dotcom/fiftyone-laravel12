@@ -26,6 +26,45 @@
     </div>
 </div>
 
+{{-- Resumen del día --}}
+@php
+    $diffOrders  = $yesterday['orders']  > 0 ? round((($today['orders']  - $yesterday['orders'])  / $yesterday['orders'])  * 100) : ($today['orders']  > 0 ? 100 : 0);
+    $diffRevenue = $yesterday['revenue'] > 0 ? round((($today['revenue'] - $yesterday['revenue']) / $yesterday['revenue']) * 100) : ($today['revenue'] > 0 ? 100 : 0);
+    $diffClients = $yesterday['clients'] > 0 ? round((($today['clients'] - $yesterday['clients']) / $yesterday['clients']) * 100) : ($today['clients'] > 0 ? 100 : 0);
+@endphp
+<div class="rounded-2xl border border-indigo-100 bg-indigo-50/50 dark:bg-indigo-900/10 dark:border-indigo-900/30 p-5 mb-6">
+    <div class="flex items-center gap-2 mb-4">
+        <div class="w-8 h-8 rounded-xl flex items-center justify-center" style="background:linear-gradient(135deg,#3B59FF,#7B2FBE)">
+            <i class="fa-solid fa-sun text-white text-xs"></i>
+        </div>
+        <div>
+            <h3 class="text-sm font-bold text-gray-800 dark:text-gray-200">Resumen de hoy</h3>
+            <p class="text-xs text-gray-400">{{ now()->format('d/m/Y') }} · Actualizado en tiempo real</p>
+        </div>
+    </div>
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+        @foreach([
+            ['Pedidos hoy',      $today['orders'],                                    $diffOrders,  'fa-bag-shopping', '#3B59FF'],
+            ['Ingresos hoy',     '$ '.number_format($today['revenue'],0,',','.'),     $diffRevenue, 'fa-dollar-sign',  '#059669'],
+            ['Clientes nuevos',  $today['clients'],                                   $diffClients, 'fa-user-plus',    '#7B2FBE'],
+            ['Pendientes hoy',   $today['pending'],                                   null,         'fa-clock',        '#d97706'],
+        ] as [$label, $value, $diff, $icon, $color])
+        <div class="bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-sm border border-gray-100 dark:border-gray-700">
+            <div class="flex items-center justify-between mb-2">
+                <i class="fa-solid {{ $icon }} text-sm" style="color:{{ $color }}"></i>
+                @if($diff !== null)
+                <span class="text-xs font-bold px-2 py-0.5 rounded-full {{ $diff >= 0 ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-600' }}">
+                    {{ $diff >= 0 ? '+' : '' }}{{ $diff }}%
+                </span>
+                @endif
+            </div>
+            <p class="text-2xl font-black text-gray-900 dark:text-white">{{ $value }}</p>
+            <p class="text-xs text-gray-400 mt-0.5 font-semibold uppercase tracking-wide">{{ $label }}</p>
+        </div>
+        @endforeach
+    </div>
+</div>
+
 {{-- Stats Cards --}}
 <div class="grid grid-cols-2 xl:grid-cols-5 gap-4 mb-6">
 

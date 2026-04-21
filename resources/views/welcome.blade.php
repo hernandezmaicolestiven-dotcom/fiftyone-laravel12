@@ -103,6 +103,7 @@ function Stars({ count }) {
 
 // ── Cart Drawer ─────────────────────────────────────────────────────────────
 function CartDrawer({ open, onClose, cart, onUpdateQty, onRemove, onClear, onCheckout }) {
+  const auth = window.__AUTH__ || {};
   const total = cart.reduce((s,i) => s + i.price * i.qty, 0);
   const count = cart.reduce((s,i) => s + i.qty, 0);
 
@@ -231,11 +232,11 @@ function CartDrawer({ open, onClose, cart, onUpdateQty, onRemove, onClear, onChe
             </div>
 
             {/* Checkout btn */}
-            <button onClick={onCheckout}
+            <button onClick={() => { if(!auth.loggedIn){ window.location.href='/login?redirect=checkout'; return; } onCheckout(); }}
               className="w-full py-4 rounded-2xl text-white font-black text-sm flex items-center justify-center gap-2 transition-all hover:scale-[1.02] active:scale-[.98]"
               style={{background:'linear-gradient(90deg,#3B59FF,#7B2FBE)',boxShadow:'0 8px 30px rgba(59,89,255,.4)'}}>
               <i className="fa-solid fa-lock text-xs"></i>
-              Finalizar pedido · {fmt(total)}
+              {auth.loggedIn ? `Finalizar pedido · ${fmt(total)}` : 'Inicia sesión para pagar'}
             </button>
 
             {/* Clear */}
@@ -267,7 +268,9 @@ function CheckoutModal({ cart, onClose, onSuccess }) {
   const [name,      setName]      = useState('');
   const [email,     setEmail]     = useState('');
   const [phone,     setPhone]     = useState('');
-  const [notes,     setNotes]     = useState('');
+  const [notes,    setNotes]   = useState('');
+  const [address,  setAddress] = useState('');
+  const [city,     setCity]    = useState('');
   const [payMethod, setPayMethod] = useState(null);
   const [pseBank,   setPseBank]   = useState('');
   const [cardNum,   setCardNum]   = useState('');
@@ -299,8 +302,16 @@ function CheckoutModal({ cart, onClose, onSuccess }) {
     } catch { setCouponMsg('❌ Error al validar el cupón'); }
   };
 
-  const goStep2 = () => { setErr(''); setStep(2); };
-  const goStep3 = () => { if (!name.trim()) { setErr('El nombre es requerido'); return; } setErr(''); setStep(3); };
+  const goStep2 = () => {
+    if (!auth.loggedIn) { window.location.href = '/login'; return; }
+    setErr(''); setStep(2);
+  };
+  const goStep3 = () => {
+    if (!name.trim()) { setErr('El nombre es requerido'); return; }
+    if (!address.trim()) { setErr('La dirección de envío es requerida'); return; }
+    if (!city.trim()) { setErr('La ciudad es requerida'); return; }
+    setErr(''); setStep(3);
+  };
 
   const submit = async () => {
     if (!payMethod) { setErr('Selecciona un método de pago'); return; }
@@ -312,6 +323,7 @@ function CheckoutModal({ cart, onClose, onSuccess }) {
         headers:{'Content-Type':'application/json','X-CSRF-TOKEN':document.querySelector('meta[name="csrf-token"]').content},
         body: JSON.stringify({
           customer_name: name.trim(), customer_email: email||null, customer_phone: phone||null,
+          shipping_address: address.trim()||null, city: city.trim()||null,
           notes: (notes ? notes+' | ' : '')+'Pago: '+payMethod+(coupon?' | Cupón: '+coupon:''),
           items: cart.map(i => ({product_id:i.id, quantity:i.qty})),
           coupon_code: coupon || null,
@@ -439,8 +451,16 @@ function CheckoutModal({ cart, onClose, onSuccess }) {
               </div>
             </div>
             <div>
-              <label className="block text-xs font-bold mb-2 uppercase tracking-widest" style={{color:'rgba(255,255,255,.35)'}}>Notas</label>
-              <textarea value={notes} onChange={e=>setNotes(e.target.value)} rows={2} placeholder="Dirección, instrucciones..." className={iCls+' resize-none'} style={iSty}/>
+              <label className="block text-xs font-bold mb-2 uppercase tracking-widest" style={{color:'rgba(255,255,255,.35)'}}>Dirección de envío *</label>
+              <input value={address} onChange={e=>setAddress(e.target.value)} placeholder="Calle, carrera, barrio, número..." className={iCls} style={iSty}/>
+            </div>
+            <div>
+              <label className="block text-xs font-bold mb-2 uppercase tracking-widest" style={{color:'rgba(255,255,255,.35)'}}>Ciudad *</label>
+              <input value={city} onChange={e=>setCity(e.target.value)} placeholder="Ej: Medellín, Bogotá, Cali..." className={iCls} style={iSty}/>
+            </div>
+            <div>
+              <label className="block text-xs font-bold mb-2 uppercase tracking-widest" style={{color:'rgba(255,255,255,.35)'}}>Notas adicionales</label>
+              <textarea value={notes} onChange={e=>setNotes(e.target.value)} rows={2} placeholder="Instrucciones especiales, apartamento, etc..." className={iCls+' resize-none'} style={iSty}/>
             </div>
             <div className="flex gap-3 pt-1">
               <button onClick={()=>setStep(1)} className="flex-1 py-3.5 rounded-2xl text-sm font-bold"
@@ -807,7 +827,6 @@ function ProductCard({ product, onAdd, forceOpen, onForceOpenDone }) {
   }, [forceOpen]);
 
   const handleAdd = () => {
-    if (!auth.loggedIn) { window.location.href = '/login'; return; }
     if (product.sizes && product.sizes.length > 1 && !selectedSize) {
       setSizeError(true);
       setTimeout(() => setSizeError(false), 2000);
@@ -931,7 +950,7 @@ function ProductCard({ product, onAdd, forceOpen, onForceOpenDone }) {
               )}
               {/* Botones compartir */}
               <div className="flex gap-2 mt-4">
-                <a href={`https://wa.me/?text=${encodeURIComponent('¡Mira este producto de FiftyOne! ' + product.name + ' - ' + fmt(product.price) + ' 👉 ' + window.location.origin)}`}
+                <a href={`https://wa.me/?text=${encodeURIComponent('👕 *FiftyOne - Ropa Oversize*\n\nTe comparto este producto que me pareció increíble:\n\n*' + product.name + '*\nPrecio: ' + fmt(product.price) + '\n\n¡Visita nuestra tienda y encuentra tu talla! 👉 ' + window.location.origin)}`}
                    target="_blank" rel="noopener"
                    className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-white text-xs font-bold transition hover:opacity-80"
                    style={{background:'#25D366'}}>
@@ -1369,6 +1388,19 @@ function App() {
   const [showCheckout, setCheckout] = useState(false);
   const [successId, setSuccessId] = useState(null);
 
+  // Abrir checkout automáticamente si viene de login con ?checkout=1
+  React.useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('checkout') === '1') {
+      const cart = JSON.parse(localStorage.getItem('fiftyone_cart') || '[]');
+      if (cart.length > 0) {
+        setCheckout(true);
+        // Limpiar el parámetro de la URL sin recargar
+        window.history.replaceState({}, '', '/');
+      }
+    }
+  }, []);
+
   useEffect(() => {
     localStorage.setItem('fiftyone_cart', JSON.stringify(cart));
   }, [cart]);
@@ -1406,7 +1438,46 @@ function App() {
         onUpdateQty={updateQty} onRemove={removeItem} onClear={clearCart} onCheckout={openCheckout} />
       {showCheckout && <CheckoutModal cart={cart} onClose={() => setCheckout(false)} onSuccess={handleSuccess} />}
       {successId && <SuccessModal orderId={successId} onClose={() => setSuccessId(null)} />}
+      {/* Barra navegación móvil */}
+      <MobileNav cartCount={totalItems} onCartOpen={() => setDrawer(true)} />
     </>
+  );
+}
+
+// ── Mobile Nav Bar ─────────────────────────────────────────────────────────
+function MobileNav({ cartCount, onCartOpen }) {
+  const auth = window.__AUTH__ || {};
+  const path = window.location.pathname;
+
+  const items = [
+    { icon:'fa-house',       label:'Inicio',    action: () => { window.location.href='/'; } },
+    { icon:'fa-shirt',       label:'Productos', action: () => { document.getElementById('productos')?.scrollIntoView({behavior:'smooth'}); } },
+    { icon:'fa-bag-shopping',label:'Carrito',   action: onCartOpen, badge: cartCount },
+    { icon:'fa-heart',       label:'Favoritos', action: () => { if(!auth.loggedIn){window.location.href='/login';return;} window.location.href='/mi-cuenta'; } },
+    { icon: auth.loggedIn ? 'fa-circle-user' : 'fa-right-to-bracket',
+      label: auth.loggedIn ? 'Mi cuenta' : 'Entrar',
+      action: () => { window.location.href = auth.loggedIn ? '/mi-cuenta' : '/login'; }
+    },
+  ];
+
+  return (
+    <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 flex items-center justify-around px-2 py-2 safe-area-pb"
+         style={{background:'rgba(0,0,0,.95)',backdropFilter:'blur(20px)',borderTop:'1px solid rgba(255,255,255,.08)'}}>
+      {items.map((item,i) => (
+        <button key={i} onClick={item.action}
+                className="relative flex flex-col items-center gap-1 px-3 py-1.5 rounded-2xl transition-all active:scale-90"
+                style={{color:'rgba(255,255,255,.5)'}}>
+          {item.badge > 0 && (
+            <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-red-500 text-white text-[9px] font-black flex items-center justify-center">
+              {item.badge > 9 ? '9+' : item.badge}
+            </span>
+          )}
+          <i className={`fa-solid ${item.icon} text-lg`}
+             style={{color: item.label==='Carrito' && item.badge > 0 ? '#3B59FF' : 'inherit'}}></i>
+          <span className="text-[10px] font-semibold">{item.label}</span>
+        </button>
+      ))}
+    </div>
   );
 }
 
@@ -1419,6 +1490,69 @@ ReactDOM.createRoot(document.getElementById('root')).render(<App />);
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('/sw.js').catch(() => {});
 }
+</script>
+
+{{-- Barra navegación móvil --}}
+<nav id="mobile-nav" style="display:none;position:fixed;bottom:0;left:0;right:0;z-index:9998;background:linear-gradient(135deg,#0d0d1a,#0a0e2e);border-top:1px solid rgba(255,255,255,.1);padding:8px 0 env(safe-area-inset-bottom,8px)">
+    <div style="display:flex;justify-content:space-around;align-items:center">
+        <a href="#inicio" onclick="closeMobileMenu()" style="display:flex;flex-direction:column;align-items:center;gap:3px;text-decoration:none;padding:4px 16px;border-radius:12px;transition:.2s" class="mob-nav-item">
+            <i class="fa-solid fa-house" style="font-size:18px;color:rgba(255,255,255,.5)"></i>
+            <span style="font-size:10px;color:rgba(255,255,255,.5);font-family:Inter,sans-serif;font-weight:600">Inicio</span>
+        </a>
+        <a href="#productos" onclick="closeMobileMenu()" style="display:flex;flex-direction:column;align-items:center;gap:3px;text-decoration:none;padding:4px 16px;border-radius:12px;transition:.2s" class="mob-nav-item">
+            <i class="fa-solid fa-shirt" style="font-size:18px;color:rgba(255,255,255,.5)"></i>
+            <span style="font-size:10px;color:rgba(255,255,255,.5);font-family:Inter,sans-serif;font-weight:600">Productos</span>
+        </a>
+        <button id="mob-cart-btn" onclick="document.getElementById('mob-cart-btn').dispatchEvent(new CustomEvent('open-cart',{bubbles:true}))" style="display:flex;flex-direction:column;align-items:center;gap:3px;background:none;border:none;cursor:pointer;padding:4px 16px;position:relative">
+            <div style="width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,#3B59FF,#7B2FBE);display:flex;align-items:center;justify-content:center;margin-top:-18px;box-shadow:0 4px 20px rgba(59,89,255,.5)">
+                <i class="fa-solid fa-bag-shopping" style="font-size:18px;color:white"></i>
+            </div>
+            <span id="mob-cart-count" style="display:none;position:absolute;top:-2px;right:8px;width:18px;height:18px;background:#ef4444;border-radius:50%;font-size:10px;font-weight:700;color:white;display:flex;align-items:center;justify-content:center">0</span>
+            <span style="font-size:10px;color:rgba(255,255,255,.5);font-family:Inter,sans-serif;font-weight:600">Carrito</span>
+        </button>
+        @if(auth()->check() && auth()->user()?->role !== 'admin')
+        <a href="/mi-cuenta" style="display:flex;flex-direction:column;align-items:center;gap:3px;text-decoration:none;padding:4px 16px;border-radius:12px;transition:.2s" class="mob-nav-item">
+            <i class="fa-solid fa-circle-user" style="font-size:18px;color:rgba(255,255,255,.5)"></i>
+            <span style="font-size:10px;color:rgba(255,255,255,.5);font-family:Inter,sans-serif;font-weight:600">Mi cuenta</span>
+        </a>
+        @else
+        <a href="/login" style="display:flex;flex-direction:column;align-items:center;gap:3px;text-decoration:none;padding:4px 16px;border-radius:12px;transition:.2s" class="mob-nav-item">
+            <i class="fa-solid fa-right-to-bracket" style="font-size:18px;color:rgba(255,255,255,.5)"></i>
+            <span style="font-size:10px;color:rgba(255,255,255,.5);font-family:Inter,sans-serif;font-weight:600">Ingresar</span>
+        </a>
+        @endif
+    </div>
+</nav>
+
+<style>
+@media (max-width: 768px) {
+    #mobile-nav { display:block !important; }
+    body { padding-bottom: 70px; }
+    .mob-nav-item:active { background:rgba(59,89,255,.2); }
+}
+</style>
+
+<script>
+function closeMobileMenu() {}
+// Sincronizar contador del carrito móvil
+setInterval(function() {
+    try {
+        var cart = JSON.parse(localStorage.getItem('fiftyone_cart') || '[]');
+        var count = cart.reduce(function(s,i){ return s + (i.qty||1); }, 0);
+        var el = document.getElementById('mob-cart-count');
+        if (el) { el.textContent = count; el.style.display = count > 0 ? 'flex' : 'none'; }
+    } catch(e) {}
+}, 500);
+// Conectar botón carrito móvil con React
+document.addEventListener('DOMContentLoaded', function() {
+    document.getElementById('mob-cart-btn')?.addEventListener('open-cart', function() {
+        // Simular clic en el botón de carrito del navbar
+        var cartBtns = document.querySelectorAll('button');
+        cartBtns.forEach(function(btn) {
+            if (btn.textContent.includes('Carrito')) btn.click();
+        });
+    });
+});
 </script>
 
 {{-- Botón flotante WhatsApp --}}
@@ -1434,7 +1568,7 @@ if ('serviceWorker' in navigator) {
 .wa-wrap:hover .wa-tooltip { opacity:1; transform:translateX(0); }
 </style>
 <div class="wa-wrap" style="position:fixed;bottom:28px;right:28px;z-index:9999;display:flex;align-items:center;gap:10px;flex-direction:row-reverse">
-    <a href="https://wa.me/573118422192?text=Hola%20FiftyOne%20%F0%9F%91%8D%20me%20interesa%20conocer%20m%C3%A1s%20sobre%20sus%20productos"
+    <a href="https://wa.me/573118422192?text=Hola%20FiftyOne%20%F0%9F%91%8B%0A%0AEstoy%20interesado%20en%20sus%20productos%20de%20ropa%20oversize.%0A%C2%BFPodr%C3%ADan%20brindarme%20informaci%C3%B3n%20sobre%20disponibilidad%2C%20tallas%20y%20tiempos%20de%20entrega%3F%0A%0AQuedo%20atento%2C%20gracias.%20%F0%9F%99%8F"
        target="_blank" rel="noopener"
        class="wa-btn"
        style="width:60px;height:60px;border-radius:50%;background:linear-gradient(135deg,#25D366,#128C7E);display:flex;align-items:center;justify-content:center;box-shadow:0 4px 20px rgba(37,211,102,.5);transition:transform .2s ease;text-decoration:none;flex-shrink:0">

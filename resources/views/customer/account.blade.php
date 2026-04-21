@@ -236,6 +236,12 @@
                         </span>
                         @endforeach
                     </div>
+                    @if($order->shipping_address)
+                    <div class="flex items-center gap-1.5 mt-2">
+                        <i class="fa-solid fa-location-dot text-indigo-400 text-xs"></i>
+                        <span class="text-xs text-gray-400">{{ $order->shipping_address }}{{ $order->city ? ', '.$order->city : '' }}</span>
+                    </div>
+                    @endif
                 </div>
                 <div class="text-right flex-shrink-0">
                     <p class="font-black text-lg" style="background:linear-gradient(90deg,#3B59FF,#7B2FBE);-webkit-background-clip:text;-webkit-text-fill-color:transparent">

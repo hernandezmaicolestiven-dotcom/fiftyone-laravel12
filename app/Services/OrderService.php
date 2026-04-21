@@ -61,13 +61,15 @@ class OrderService
 
             // Crear pedido (vincular al usuario si está autenticado)
             $order = Order::create([
-                'user_id'        => auth()->id(),
-                'customer_name'  => $data['customer_name'],
-                'customer_email' => $data['customer_email'] ?? null,
-                'customer_phone' => $data['customer_phone'] ?? null,
-                'notes'          => $data['notes'] ?? null,
-                'total'          => $total,
-                'status'         => 'pending',
+                'user_id'          => auth()->id(),
+                'customer_name'    => $data['customer_name'],
+                'customer_email'   => $data['customer_email'] ?? null,
+                'customer_phone'   => $data['customer_phone'] ?? null,
+                'shipping_address' => $data['shipping_address'] ?? null,
+                'city'             => $data['city'] ?? null,
+                'notes'            => $data['notes'] ?? null,
+                'total'            => $total,
+                'status'           => 'pending',
             ]);
 
             $order->items()->createMany($itemsData);

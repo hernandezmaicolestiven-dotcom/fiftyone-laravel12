@@ -5,6 +5,7 @@ use App\Http\Controllers\Admin\GeneratorController;
 use App\Http\Controllers\Admin\ReviewController as AdminReviewController;
 use App\Http\Controllers\WishlistController;
 use App\Http\Controllers\ReviewController;
+use App\Http\Controllers\Admin\AdminManagerController;
 use App\Http\Controllers\Admin\ColaboradorController;
 use App\Http\Controllers\Admin\AdminProductController;
 use App\Http\Controllers\Admin\AnalyticsController;
@@ -70,6 +71,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('products/export/csv', [AdminProductController::class, 'exportCsv'])->name('products.export.csv');
         Route::get('products/export/excel', [AdminProductController::class, 'exportExcel'])->name('products.export.excel');
         Route::post('products/import/csv', [AdminProductController::class, 'importCsv'])->name('products.import.csv');
+        Route::get('products/trashed', [AdminProductController::class, 'trashed'])->name('products.trashed');
+        Route::patch('products/{id}/restore', [AdminProductController::class, 'restore'])->name('products.restore');
+        Route::delete('products/{id}/force-delete', [AdminProductController::class, 'forceDelete'])->name('products.force-delete');
         Route::resource('products', AdminProductController::class);
         Route::resource('categories', CategoryController::class);
         Route::post('users/import/csv', [UserController::class, 'importCsv'])->name('users.import.csv');
@@ -113,10 +117,16 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('generators/invoice/{order}', [GeneratorController::class, 'invoice'])->name('generators.invoice');
         Route::get('generators/label/{order}', [GeneratorController::class, 'label'])->name('generators.label');
 
-        // Colaboradores — solo admin
+        // Colaboradores — solo admin y superadmin
         Route::get('colaboradores', [ColaboradorController::class, 'index'])->name('colaboradores.index');
         Route::post('colaboradores', [ColaboradorController::class, 'store'])->name('colaboradores.store');
         Route::delete('colaboradores/{user}', [ColaboradorController::class, 'destroy'])->name('colaboradores.destroy');
+
+        // Administradores — solo superadmin
+        Route::get('admins', [AdminManagerController::class, 'index'])->name('admins.index');
+        Route::post('admins', [AdminManagerController::class, 'store'])->name('admins.store');
+        Route::delete('admins/{user}', [AdminManagerController::class, 'destroy'])->name('admins.destroy');
+        Route::patch('admins/{user}/reset', [AdminManagerController::class, 'resetPassword'])->name('admins.reset');
 
         // Perfil
         Route::get('profile', [ProfileController::class, 'edit'])->name('profile');

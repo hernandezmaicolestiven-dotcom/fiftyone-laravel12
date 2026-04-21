@@ -67,6 +67,11 @@ class CustomerAuthController extends Controller
                 return redirect()->route('admin.dashboard');
             }
 
+            // Si viene del carrito → regresar al home con checkout abierto
+            if ($request->input('redirect') === 'checkout' || $request->query('redirect') === 'checkout') {
+                return redirect('/?checkout=1');
+            }
+
             return redirect()->route('customer.account');
         }
 

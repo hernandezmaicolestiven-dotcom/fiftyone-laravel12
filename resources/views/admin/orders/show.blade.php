@@ -78,6 +78,15 @@
                     <span class="text-gray-600">{{ $order->customer_phone }}</span>
                 </div>
                 @endif
+                @if($order->shipping_address)
+                <div class="flex items-start gap-3">
+                    <i class="fa-solid fa-location-dot text-indigo-400 mt-0.5 w-4"></i>
+                    <div>
+                        <span class="text-gray-800 font-semibold block">{{ $order->shipping_address }}</span>
+                        @if($order->city)<span class="text-gray-500 text-sm">{{ $order->city }}</span>@endif
+                    </div>
+                </div>
+                @endif
                 @if($order->notes)
                 <div class="flex items-start gap-3">
                     <i class="fa-solid fa-note-sticky text-gray-400 mt-0.5 w-4"></i>

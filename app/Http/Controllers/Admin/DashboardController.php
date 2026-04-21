@@ -26,6 +26,21 @@ class DashboardController extends Controller
             ];
         });
 
+        // Resumen del día — sin caché para que sea en tiempo real
+        $today = [
+            'orders'   => Order::whereDate('created_at', today())->count(),
+            'revenue'  => (float) Order::whereDate('created_at', today())->sum('total'),
+            'clients'  => User::where('role', 'customer')->whereDate('created_at', today())->count(),
+            'pending'  => Order::whereDate('created_at', today())->where('status', 'pending')->count(),
+        ];
+
+        // Comparar con ayer
+        $yesterday = [
+            'orders'  => Order::whereDate('created_at', today()->subDay())->count(),
+            'revenue' => (float) Order::whereDate('created_at', today()->subDay())->sum('total'),
+            'clients' => User::where('role', 'customer')->whereDate('created_at', today()->subDay())->count(),
+        ];
+
         $recentProducts  = Product::with('category')->latest()->take(5)->get();
         $topCategories   = Category::withCount('products')->orderByDesc('products_count')->take(5)->get();
         $lowStockProducts = Product::where('stock', '<', 5)->orderBy('stock')->take(4)->get();
@@ -44,7 +59,7 @@ class DashboardController extends Controller
         $chartRevenue= $months->map(fn($m) => (float) ($chartRaw[$m->year.'-'.$m->month]->rev ?? 0))->values();
 
         return view('admin.dashboard', compact(
-            'stats', 'recentProducts', 'chartLabels', 'chartData', 'chartRevenue',
+            'stats', 'today', 'yesterday', 'recentProducts', 'chartLabels', 'chartData', 'chartRevenue',
             'topCategories', 'lowStockProducts', 'recentOrders'
         ));
     }

@@ -222,9 +222,33 @@ class AdminProductController extends Controller
             Storage::disk('public')->delete($product->image);
         }
 
-        $product->delete();
+        $product->delete(); // Soft delete — no borra de la BD
 
         return redirect()->route('admin.products.index')
-            ->with('success', 'Producto eliminado correctamente.');
+            ->with('success', 'Producto eliminado. Puedes restaurarlo desde la papelera.');
+    }
+
+    public function trashed()
+    {
+        $products = Product::onlyTrashed()->latest()->paginate(10);
+        return view('admin.products.trashed', compact('products'));
+    }
+
+    public function restore($id)
+    {
+        Product::withTrashed()->findOrFail($id)->restore();
+        return redirect()->route('admin.products.trashed')
+            ->with('success', 'Producto restaurado correctamente.');
+    }
+
+    public function forceDelete($id)
+    {
+        $product = Product::withTrashed()->findOrFail($id);
+        if ($product->image) {
+            Storage::disk('public')->delete($product->image);
+        }
+        $product->forceDelete();
+        return redirect()->route('admin.products.trashed')
+            ->with('success', 'Producto eliminado permanentemente.');
     }
 }

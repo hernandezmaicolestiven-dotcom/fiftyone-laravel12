@@ -15,8 +15,8 @@ class AdminOnly
             return redirect()->route('admin.login');
         }
 
-        // Solo admin y colaborador pueden entrar al panel
-        if (! in_array(auth()->user()->role, ['admin', 'colaborador'])) {
+        // Solo admin, superadmin y colaborador pueden entrar al panel
+        if (! in_array(auth()->user()->role, ['admin', 'superadmin', 'colaborador'])) {
             return redirect('/mi-cuenta')->with('error', 'No tienes acceso al panel de administración.');
         }
 
