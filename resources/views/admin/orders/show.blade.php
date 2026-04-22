@@ -110,6 +110,12 @@
                         <option value="{{ $val }}" {{ $order->status === $val ? 'selected' : '' }}>{{ $label }}</option>
                     @endforeach
                 </select>
+                <div class="mb-3">
+                    <label class="block text-xs font-semibold text-gray-500 mb-1">Numero de guia (tracking)</label>
+                    <input type="text" name="tracking_number" value="{{ $order->tracking_number }}"
+                           placeholder="Ej: TCC-123456789"
+                           class="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300 bg-gray-50">
+                </div>
                 <button type="submit" class="w-full py-2 rounded-xl text-white text-sm font-semibold"
                         style="background: linear-gradient(90deg, #3B59FF, #7B2FBE)">
                     Guardar cambio

@@ -28,6 +28,14 @@ class OrderController extends Controller
         try {
             $order = $this->orderService->createOrder($data);
 
+            // Guardar dirección como predeterminada del usuario
+            if (auth()->check() && !empty($data['shipping_address'])) {
+                auth()->user()->update([
+                    'default_address' => $data['shipping_address'],
+                    'default_city'    => $data['city'] ?? null,
+                ]);
+            }
+
             return response()->json(['success' => true, 'order_id' => $order->id], 201);
         } catch (\Exception $e) {
             Log::error('Error al crear pedido', ['error' => $e->getMessage()]);

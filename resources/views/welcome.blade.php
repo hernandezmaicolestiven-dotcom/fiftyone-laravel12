@@ -4,7 +4,25 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>FiftyOne — Ropa Oversize</title>
+  <title>FiftyOne — Ropa Oversize Colombia | Streetwear Premium</title>
+  <meta name="description" content="FiftyOne es tu tienda de ropa oversize en Colombia. Hoodies, camisetas boxy, pantalones cargo y accesorios streetwear. Envíos a todo el país.">
+  <meta name="keywords" content="ropa oversize Colombia, hoodies oversize, camisetas boxy, streetwear Colombia, FiftyOne ropa, tienda oversize">
+  <meta name="author" content="FiftyOne">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="{{ config('app.url') }}">
+
+  {{-- Open Graph (para compartir en redes) --}}
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="FiftyOne — Ropa Oversize Colombia">
+  <meta property="og:description" content="Hoodies, camisetas boxy y streetwear premium. Envíos a todo Colombia.">
+  <meta property="og:url" content="{{ config('app.url') }}">
+  <meta property="og:site_name" content="FiftyOne">
+  <meta property="og:locale" content="es_CO">
+
+  {{-- Twitter Card --}}
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="FiftyOne — Ropa Oversize Colombia">
+  <meta name="twitter:description" content="Hoodies, camisetas boxy y streetwear premium. Envíos a todo Colombia.">
   <meta name="csrf-token" content="{{ csrf_token() }}">
   <meta name="theme-color" content="#3B59FF">
   <link rel="manifest" href="/manifest.json">
@@ -45,10 +63,17 @@
     .shimmer-line { background: linear-gradient(90deg,#f0f0f0 25%,#e0e0e0 50%,#f0f0f0 75%); background-size:200% 100%; animation: shimmer 1.5s infinite; border-radius:8px; }
   </style>
   <script>
-  window.__AUTH__ = {!! json_encode($authData) !!};
+  window.__AUTH__ = {!! json_encode([
+      'loggedIn' => $authData['loggedIn'],
+      'name'     => $authData['name'],
+      'id'       => $authData['id'] ?? null,
+      'email'    => $authData['loggedIn'] ? (auth()->user()?->email) : null,
+      'phone'    => $authData['loggedIn'] ? (auth()->user()?->phone) : null,
+      'address'  => $authData['loggedIn'] ? (auth()->user()?->default_address) : null,
+      'city'     => $authData['loggedIn'] ? (auth()->user()?->default_city) : null,
+  ]) !!};
   window.__WISHLIST__ = {!! json_encode($wishlistIds ?? []) !!};
-  window.__STATS__ = {!! json_encode(['customers' => \App\Models\User::where('role','customer')->count(), 'products' => \App\Models\Product::count(), 'orders' => \App\Models\Order::count()]) !!};
-  </script>
+  window.__STATS__ = {!! json_encode(['customers' => \App\Models\User::where('role','customer')->count(), 'products' => \App\Models\Product::count(), 'orders' => \App\Models\Order::count()]) !!};  </script>
 </head>
 <body class="bg-white text-gray-900 antialiased">
 <div id="root"></div>
@@ -232,7 +257,14 @@ function CartDrawer({ open, onClose, cart, onUpdateQty, onRemove, onClear, onChe
             </div>
 
             {/* Checkout btn */}
-            <button onClick={() => { if(!auth.loggedIn){ window.location.href='/login?redirect=checkout'; return; } onCheckout(); }}
+            <button onClick={() => {
+                if(!auth.loggedIn){
+                  sessionStorage.setItem('fiftyone_checkout_cart', localStorage.getItem('fiftyone_cart') || '[]');
+                  window.location.href='/login?redirect=checkout';
+                  return;
+                }
+                onCheckout();
+              }}
               className="w-full py-4 rounded-2xl text-white font-black text-sm flex items-center justify-center gap-2 transition-all hover:scale-[1.02] active:scale-[.98]"
               style={{background:'linear-gradient(90deg,#3B59FF,#7B2FBE)',boxShadow:'0 8px 30px rgba(59,89,255,.4)'}}>
               <i className="fa-solid fa-lock text-xs"></i>
@@ -264,6 +296,7 @@ const PAYMENT_METHODS = [
 
 // ── Checkout Modal — 3 pasos ────────────────────────────────────────────────
 function CheckoutModal({ cart, onClose, onSuccess }) {
+  const auth = window.__AUTH__ || {};
   const [step,      setStep]      = useState(1);
   const [name,      setName]      = useState('');
   const [email,     setEmail]     = useState('');
@@ -303,7 +336,11 @@ function CheckoutModal({ cart, onClose, onSuccess }) {
   };
 
   const goStep2 = () => {
-    if (!auth.loggedIn) { window.location.href = '/login'; return; }
+    if (!name && auth.name) setName(auth.name);
+    if (!email && auth.email) setEmail(auth.email);
+    if (!phone && auth.phone) setPhone(auth.phone);
+    if (!address && auth.address) setAddress(auth.address);
+    if (!city && auth.city) setCity(auth.city);
     setErr(''); setStep(2);
   };
   const goStep3 = () => {
@@ -316,6 +353,12 @@ function CheckoutModal({ cart, onClose, onSuccess }) {
   const submit = async () => {
     if (!payMethod) { setErr('Selecciona un método de pago'); return; }
     if (payMethod === 'tarjeta' && (!cardNum || !cardExp || !cardCvv || !cardName)) { setErr('Completa los datos de la tarjeta'); return; }
+    // Verificar sesión justo antes de enviar
+    if (!auth.loggedIn) {
+      sessionStorage.setItem('fiftyone_checkout_cart', localStorage.getItem('fiftyone_cart') || '[]');
+      window.location.href = '/login?redirect=checkout';
+      return;
+    }
     setErr(''); setLoading(true);
     try {
       const res = await fetch('/orders', {
@@ -1392,12 +1435,23 @@ function App() {
   React.useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     if (params.get('checkout') === '1') {
-      const cart = JSON.parse(localStorage.getItem('fiftyone_cart') || '[]');
-      if (cart.length > 0) {
-        setCheckout(true);
-        // Limpiar el parámetro de la URL sin recargar
-        window.history.replaceState({}, '', '/');
+      // Restaurar carrito guardado antes del login si existe
+      const savedCart = sessionStorage.getItem('fiftyone_checkout_cart');
+      if (savedCart) {
+        try {
+          const parsed = JSON.parse(savedCart);
+          if (parsed.length > 0) {
+            setCart(parsed);
+            localStorage.setItem('fiftyone_cart', savedCart);
+          }
+          sessionStorage.removeItem('fiftyone_checkout_cart');
+        } catch(e) {}
       }
+      // Abrir checkout después de un pequeño delay para que React monte el carrito
+      setTimeout(() => {
+        setCheckout(true);
+      }, 300);
+      window.history.replaceState({}, '', '/');
     }
   }, []);
 

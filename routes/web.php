@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\StoreSettingsController;
 use App\Http\Controllers\Admin\CouponController;
 use App\Http\Controllers\Admin\GeneratorController;
 use App\Http\Controllers\Admin\ReviewController as AdminReviewController;
@@ -75,10 +76,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::patch('products/{id}/restore', [AdminProductController::class, 'restore'])->name('products.restore');
         Route::delete('products/{id}/force-delete', [AdminProductController::class, 'forceDelete'])->name('products.force-delete');
         Route::resource('products', AdminProductController::class);
-        Route::resource('categories', CategoryController::class);
         Route::get('categories/trashed', [CategoryController::class, 'trashed'])->name('categories.trashed');
         Route::patch('categories/{id}/restore', [CategoryController::class, 'restore'])->name('categories.restore');
         Route::delete('categories/{id}/force-delete', [CategoryController::class, 'forceDelete'])->name('categories.force-delete');
+        Route::resource('categories', CategoryController::class);
         Route::post('users/import/csv', [UserController::class, 'importCsv'])->name('users.import.csv');
         Route::get('users/export/csv', [UserController::class, 'exportCsv'])->name('users.export.csv');
         Route::resource('users', UserController::class);
@@ -100,7 +101,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('messages', [MessageController::class, 'store'])->name('messages.store');
         Route::get('messages/poll', [MessageController::class, 'poll'])->name('messages.poll');
 
-        // Configuración
+        // Configuracion de la tienda
+        Route::get('store-settings', [StoreSettingsController::class, 'index'])->name('store-settings.index');
+        Route::put('store-settings', [StoreSettingsController::class, 'update'])->name('store-settings.update');
+
+        // Configuracion admin existente
         Route::get('settings', [SettingsController::class, 'index'])->name('settings');
         Route::put('settings/profile', [SettingsController::class, 'updateProfile'])->name('settings.profile');
         Route::put('settings/password', [SettingsController::class, 'updatePassword'])->name('settings.password');

@@ -5,6 +5,38 @@
 
 @section('content')
 
+{{-- Modal confirmacion elegante --}}
+<div x-data="{ open:false, form:null, msg:'' }" x-cloak
+     @confirm-delete.window="open=true; form=$event.detail.form; msg=$event.detail.msg">
+    <div x-show="open" class="fixed inset-0 z-50 flex items-center justify-center p-4"
+         style="background:rgba(0,0,0,.55);backdrop-filter:blur(6px)">
+        <div x-show="open" x-transition:enter="transition ease-out duration-200"
+             x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100"
+             class="bg-white rounded-3xl shadow-2xl p-8 max-w-sm w-full text-center">
+            <div class="w-16 h-16 rounded-2xl bg-red-50 flex items-center justify-center mx-auto mb-4">
+                <i class="fa-solid fa-trash-can text-red-500 text-2xl"></i>
+            </div>
+            <h3 class="text-lg font-black text-gray-900 mb-1">Mover a papelera</h3>
+            <p class="text-sm text-gray-500 mb-4" x-text="msg"></p>
+            <div class="flex items-center gap-2 bg-indigo-50 rounded-2xl px-4 py-2.5 mb-6 text-left">
+                <i class="fa-solid fa-rotate-left text-indigo-500 flex-shrink-0"></i>
+                <p class="text-xs text-indigo-700 font-medium">Puedes restaurarlo desde la papelera cuando quieras</p>
+            </div>
+            <div class="flex gap-3">
+                <button @click="open=false"
+                        class="flex-1 py-3 rounded-2xl border-2 border-gray-100 text-gray-600 text-sm font-bold hover:bg-gray-50 transition">
+                    Cancelar
+                </button>
+                <button @click="form.submit(); open=false"
+                        class="flex-1 py-3 rounded-2xl text-white text-sm font-bold transition hover:opacity-90"
+                        style="background:linear-gradient(90deg,#ef4444,#dc2626);box-shadow:0 4px 15px rgba(239,68,68,.3)">
+                    Mover a papelera
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 @if(session('success'))
 <div class="mb-5 bg-emerald-50 border border-emerald-200 text-emerald-700 px-4 py-3 rounded-xl text-sm flex items-center gap-2">
     <i class="fa-solid fa-circle-check"></i> {{ session('success') }}
@@ -252,10 +284,11 @@
                                class="inline-flex items-center gap-1 text-xs bg-amber-50 hover:bg-amber-100 text-amber-700 px-3 py-1.5 rounded-lg transition">
                                 <i class="fa-solid fa-pen-to-square"></i> Editar
                             </a>
-                            <form method="POST" action="{{ route('admin.products.destroy', $product) }}"
-                                  onsubmit="return confirm('¿Eliminar el producto «{{ addslashes($product->name) }}»? Esta acción no se puede deshacer.')">
+                            <form id="del-prod-{{ $product->id }}" method="POST"
+                                  action="{{ route('admin.products.destroy', $product) }}">
                                 @csrf @method('DELETE')
-                                <button type="submit"
+                                <button type="button"
+                                        @click="$dispatch('confirm-delete', { form: document.getElementById('del-prod-{{ $product->id }}'), msg: 'El producto {{ addslashes($product->name) }} se movera a la papelera.' })"
                                         class="inline-flex items-center gap-1 text-xs bg-red-50 hover:bg-red-100 text-red-700 px-3 py-1.5 rounded-lg transition">
                                     <i class="fa-solid fa-trash"></i> Eliminar
                                 </button>

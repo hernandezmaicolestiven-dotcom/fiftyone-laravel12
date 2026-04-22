@@ -24,6 +24,8 @@ class User extends Authenticatable
         'password',
         'role',
         'phone',
+        'default_address',
+        'default_city',
     ];
 
     /** Verifica si el usuario es administrador */

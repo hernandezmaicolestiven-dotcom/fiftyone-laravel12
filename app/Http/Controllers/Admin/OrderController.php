@@ -194,15 +194,22 @@ class OrderController extends Controller
 
     public function updateStatus(Request $request, Order $order)
     {
-        $request->validate(['status' => 'required|in:pending,confirmed,shipped,delivered,cancelled']);
+        $request->validate([
+            'status'          => 'required|in:pending,confirmed,shipped,delivered,cancelled',
+            'tracking_number' => 'nullable|string|max:100',
+        ]);
 
         try {
+            // Guardar número de guía si se proporcionó
+            if ($request->filled('tracking_number')) {
+                $order->update(['tracking_number' => $request->tracking_number]);
+            }
+
             $this->orderService->updateStatus($order, $request->status);
 
             return back()->with('success', 'Estado actualizado a "'.$order->fresh()->status_label.'".');
         } catch (\Exception $e) {
             Log::error('Error actualizando estado de pedido', ['order_id' => $order->id, 'error' => $e->getMessage()]);
-
             return back()->with('error', 'No se pudo actualizar el estado. Intenta de nuevo.');
         }
     }

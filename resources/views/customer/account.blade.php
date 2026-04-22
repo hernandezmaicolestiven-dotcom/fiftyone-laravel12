@@ -14,15 +14,18 @@
         .fade-up { animation: fadeUp .5s ease forwards; }
         /* Light mode */
         body.light { background:#f1f5f9; color:#1e293b; }
-        body.light .hero-bg { background: linear-gradient(135deg,#3B59FF 0%,#7B2FBE 100%); }
+        body.light .hero-bg { background: linear-gradient(135deg,#0d0d1a 0%,#0a0e2e 55%,#1a0a2e 100%) !important; }
         body.light .card-dark { background:rgba(0,0,0,.04) !important; border-color:rgba(0,0,0,.08) !important; }
-        body.light .text-white { color:#1e293b !important; }
-        body.light .text-gray-400 { color:#64748b !important; }
+        body.light .text-gray-400 { color:#94a3b8 !important; }
         body.light .text-gray-500 { color:#94a3b8 !important; }
-        body.light .text-gray-600 { color:#475569 !important; }
-        body.light .border-white\/10 { border-color:rgba(0,0,0,.08) !important; }
-        body.light .border-white\/5 { border-color:rgba(0,0,0,.05) !important; }
+        body.light .text-gray-600 { color:#64748b !important; }
+        body.light .border-white\/10 { border-color:rgba(255,255,255,.1) !important; }
+        body.light .border-white\/5 { border-color:rgba(255,255,255,.05) !important; }
         body.light .bg-gray-950 { background:#f1f5f9 !important; }
+        /* Nombre del usuario siempre visible */
+        nav .text-gray-400 { color:rgba(255,255,255,.7) !important; }
+        /* Nombre en el hero siempre blanco */
+        .hero-section h1 { color: white !important; -webkit-text-fill-color: white !important; }
     </style>
 </head>
 <body class="bg-gray-950 text-white min-h-screen">
@@ -66,7 +69,7 @@
     @endif
 
     {{-- Hero header --}}
-    <div class="relative rounded-3xl overflow-hidden p-8 mb-8 fade-up"
+    <div class="hero-section relative rounded-3xl overflow-hidden p-8 mb-8 fade-up"
          style="background:linear-gradient(135deg,#0d0d1a 0%,#0a0e2e 55%,#1a0a2e 100%)">
         <div class="absolute inset-0 opacity-20"
              style="background-image:radial-gradient(circle at 20% 50%,#3B59FF 0%,transparent 50%),radial-gradient(circle at 80% 20%,#7B2FBE 0%,transparent 50%)"></div>
@@ -77,7 +80,7 @@
             </div>
             <div>
                 <p class="text-gray-400 text-sm mb-1">Bienvenido de nuevo,</p>
-                <h1 class="text-2xl sm:text-3xl font-black text-white">{{ $user->name }} 👋</h1>
+                <h1 class="text-2xl sm:text-3xl font-black text-white" style="color:white!important;-webkit-text-fill-color:white!important">{{ $user->name }} 👋</h1>
                 <p class="text-gray-400 text-sm mt-1">
                     {{ $user->email }}
                     @if($user->phone) · {{ $user->phone }} @endif
@@ -236,6 +239,12 @@
                         </span>
                         @endforeach
                     </div>
+                    @if($order->tracking_number)
+                    <div class="flex items-center gap-2 mt-2 p-2 rounded-xl" style="background:rgba(59,89,255,.1)">
+                        <i class="fa-solid fa-truck text-indigo-400 text-xs"></i>
+                        <span class="text-xs text-indigo-300 font-semibold">Guia: {{ $order->tracking_number }}</span>
+                    </div>
+                    @endif
                     @if($order->shipping_address)
                     <div class="flex items-center gap-1.5 mt-2">
                         <i class="fa-solid fa-location-dot text-indigo-400 text-xs"></i>
