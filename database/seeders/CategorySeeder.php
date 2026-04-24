@@ -11,11 +11,10 @@ class CategorySeeder extends Seeder
     public function run(): void
     {
         $categories = [
-            ['name' => 'Ropa Deportiva', 'description' => 'Indumentaria para entrenar'],
-            ['name' => 'Calzado', 'description' => 'Zapatillas y calzado deportivo'],
-            ['name' => 'Accesorios', 'description' => 'Complementos para el deporte'],
-            ['name' => 'Suplementos', 'description' => 'Nutrición deportiva'],
-            ['name' => 'Equipamiento', 'description' => 'Equipos y máquinas de ejercicio'],
+            ['name' => 'Hoodies', 'description' => 'Hoodies oversize y sudaderas con capucha'],
+            ['name' => 'Camisetas', 'description' => 'Camisetas boxy y oversize'],
+            ['name' => 'Pantalones', 'description' => 'Pantalones cargo y joggers'],
+            ['name' => 'Chaquetas', 'description' => 'Chaquetas bomber, denim y puffer'],
         ];
 
         foreach ($categories as $cat) {

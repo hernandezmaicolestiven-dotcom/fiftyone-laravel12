@@ -1,0 +1,43 @@
+<svg width="120" height="120" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Fondo con gradiente azul a morado -->
+  <defs>
+    <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#3B59FF;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#7B2FBE;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="goldGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#FFD700;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#FFA500;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#FFD700;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Fondo redondeado -->
+  <rect width="120" height="120" rx="24" fill="url(#bgGradient)"/>
+  
+  <!-- Número 51 estilizado -->
+  <g transform="translate(20, 35)">
+    <!-- 5 -->
+    <path d="M 10 5 L 35 5 L 35 10 L 15 10 L 15 25 L 32 25 C 38 25 42 29 42 35 C 42 41 38 45 32 45 L 10 45 L 10 40 L 32 40 C 35 40 37 38 37 35 C 37 32 35 30 32 30 L 10 30 Z" 
+          fill="url(#goldGradient)" 
+          stroke="#8B4513" 
+          stroke-width="1.5"/>
+    
+    <!-- 1 -->
+    <path d="M 50 5 L 60 5 L 60 45 L 50 45 L 50 5 M 45 5 L 50 5 L 50 15 L 45 15 Z" 
+          fill="url(#goldGradient)" 
+          stroke="#8B4513" 
+          stroke-width="1.5"/>
+    
+    <!-- Línea diagonal -->
+    <line x1="5" y1="25" x2="70" y2="25" 
+          stroke="url(#goldGradient)" 
+          stroke-width="3" 
+          stroke-linecap="round"/>
+  </g>
+  
+  <!-- Detalle decorativo inferior -->
+  <g transform="translate(60, 95)">
+    <path d="M -5 0 L 0 -5 L 5 0 L 0 5 Z" fill="url(#goldGradient)" opacity="0.8"/>
+  </g>
+</svg>

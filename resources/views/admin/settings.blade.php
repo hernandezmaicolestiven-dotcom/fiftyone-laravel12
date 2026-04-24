@@ -18,15 +18,31 @@
     <div class="absolute bottom-8 right-24 w-3 h-3 rounded-full bg-blue-400 opacity-30"></div>
 
     <div class="relative z-10 flex items-center gap-6 h-full px-8">
-        {{-- Avatar grande --}}
-        <div class="relative flex-shrink-0">
-            <div class="w-20 h-20 rounded-2xl flex items-center justify-center text-3xl font-black text-white shadow-2xl"
-                 style="background: linear-gradient(135deg, #3B59FF, #7B2FBE)">
-                {{ strtoupper(substr($user->name, 0, 1)) }}
-            </div>
+        {{-- Avatar grande con opción de cambiar --}}
+        <div class="relative flex-shrink-0 group">
+            @if($user->avatar)
+                <img src="{{ Storage::url($user->avatar) }}" alt="{{ $user->name }}" 
+                     class="w-20 h-20 rounded-2xl object-cover shadow-2xl border-2 border-white/20">
+            @else
+                <div class="w-20 h-20 rounded-2xl flex items-center justify-center text-3xl font-black text-white shadow-2xl border-2 border-white/20"
+                     style="background: linear-gradient(135deg, #3B59FF, #7B2FBE)">
+                    {{ strtoupper(substr($user->name, 0, 1)) }}
+                </div>
+            @endif
             <div class="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-emerald-400 border-2 border-white flex items-center justify-center">
                 <i class="fa-solid fa-check text-white" style="font-size:8px"></i>
             </div>
+            {{-- Botón para cambiar foto --}}
+            <button onclick="document.getElementById('adminAvatarInput').click()" 
+                    class="absolute inset-0 bg-black/60 rounded-2xl flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
+                <i class="fa-solid fa-camera text-white text-xl"></i>
+            </button>
+            <form id="adminAvatarForm" method="POST" action="{{ route('admin.settings.profile') }}" enctype="multipart/form-data" class="hidden">
+                @csrf @method('PUT')
+                <input type="hidden" name="name" value="{{ $user->name }}">
+                <input type="hidden" name="email" value="{{ $user->email }}">
+                <input type="file" id="adminAvatarInput" name="avatar" accept="image/*" onchange="document.getElementById('adminAvatarForm').submit()">
+            </form>
         </div>
         <div>
             <div class="flex items-center gap-3 mb-1">

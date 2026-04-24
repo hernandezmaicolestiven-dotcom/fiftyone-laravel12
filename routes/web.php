@@ -146,6 +146,13 @@ Route::prefix('admin')->name('admin.')->group(function () {
 // Public order endpoint — requiere sesión de cliente
 Route::post('/orders', [PublicOrderController::class, 'store'])->name('orders.store')->middleware('auth');
 
+// Facturas (requiere auth)
+Route::middleware('auth')->group(function () {
+    Route::get('/factura/{order}', [\App\Http\Controllers\InvoiceController::class, 'show'])->name('invoice.show');
+    Route::get('/factura/{order}/descargar', [\App\Http\Controllers\InvoiceController::class, 'download'])->name('invoice.download');
+    Route::get('/api/factura/{order}', [\App\Http\Controllers\InvoiceController::class, 'getInvoiceData'])->name('invoice.data');
+});
+
 // Validar cupón (público)
 Route::get('/coupon/validate', function (\Illuminate\Http\Request $request) {
     $coupon = \App\Models\Coupon::where('code', strtoupper($request->code))->first();
@@ -180,8 +187,9 @@ Route::middleware('auth')->group(function () {
 });
 
 // Public catalog routes
-Route::get('/productos', [ProductController::class, 'index'])->name('catalogo.productos');
+// Public catalog routes
 Route::get('/catalogo', [ProductController::class, 'index'])->name('catalogo');
+Route::get('/productos', [ProductController::class, 'index'])->name('catalogo.productos');
 
 // Páginas estáticas
 Route::view('/sobre-nosotros', 'pages.sobre-nosotros')->name('sobre-nosotros');

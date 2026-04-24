@@ -179,10 +179,15 @@
         {{-- User footer --}}
         <div class="border-t border-white/10 px-4 py-4">
             <a href="{{ route('admin.settings') }}" class="flex items-center gap-3 rounded-lg p-1 hover:bg-white/5 transition">
-                <div class="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0 text-white"
-                     style="background: linear-gradient(135deg, #3B59FF, #7B2FBE)">
-                    {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
-                </div>
+                @if(auth()->user()->avatar)
+                    <img src="{{ Storage::url(auth()->user()->avatar) }}" alt="{{ auth()->user()->name }}" 
+                         class="w-8 h-8 rounded-full object-cover flex-shrink-0 border border-white/20">
+                @else
+                    <div class="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0 text-white border border-white/20"
+                         style="background: linear-gradient(135deg, #3B59FF, #7B2FBE)">
+                        {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
+                    </div>
+                @endif
                 <div x-show="sidebarOpen" class="overflow-hidden">
                     <p class="text-sm font-medium text-white truncate">{{ auth()->user()->name }}</p>
                     <p class="text-xs text-gray-400 truncate">{{ auth()->user()->email }}</p>

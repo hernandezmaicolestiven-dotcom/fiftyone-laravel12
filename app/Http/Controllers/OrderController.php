@@ -28,6 +28,10 @@ class OrderController extends Controller
         try {
             $order = $this->orderService->createOrder($data);
 
+            // Crear factura automáticamente
+            $invoiceService = app(\App\Services\InvoiceService::class);
+            $invoiceService->createInvoiceForOrder($order);
+
             // Guardar dirección como predeterminada del usuario
             if (auth()->check() && !empty($data['shipping_address'])) {
                 auth()->user()->update([

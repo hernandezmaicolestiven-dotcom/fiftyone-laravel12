@@ -15,13 +15,22 @@
         /* Light mode */
         body.light { background:#f1f5f9; color:#1e293b; }
         body.light .hero-bg { background: linear-gradient(135deg,#0d0d1a 0%,#0a0e2e 55%,#1a0a2e 100%) !important; }
-        body.light .card-dark { background:rgba(0,0,0,.04) !important; border-color:rgba(0,0,0,.08) !important; }
-        body.light .text-gray-400 { color:#94a3b8 !important; }
-        body.light .text-gray-500 { color:#94a3b8 !important; }
-        body.light .text-gray-600 { color:#64748b !important; }
-        body.light .border-white\/10 { border-color:rgba(255,255,255,.1) !important; }
-        body.light .border-white\/5 { border-color:rgba(255,255,255,.05) !important; }
-        body.light .bg-gray-950 { background:#f1f5f9 !important; }
+        body.light .card-dark { background:white !important; border-color:#e2e8f0 !important; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+        body.light .text-gray-400 { color:#64748b !important; }
+        body.light .text-gray-500 { color:#64748b !important; }
+        body.light .text-gray-600 { color:#475569 !important; }
+        body.light .border-white\/10 { border-color:#e2e8f0 !important; }
+        body.light .border-white\/5 { border-color:#f1f5f9 !important; }
+        body.light .bg-gray-950 { background:#f8fafc !important; }
+        body.light .bg-white\/5 { background:white !important; border-color:#e2e8f0 !important; }
+        body.light .bg-white\/3 { background:white !important; }
+        body.light .bg-white\/4 { background:white !important; }
+        body.light input, body.light textarea { color:#1e293b !important; }
+        body.light .text-white { color:#1e293b !important; }
+        /* Excepciones: mantener blanco en hero y navbar */
+        body.light nav .text-white { color:white !important; }
+        body.light .hero-section .text-white { color:white !important; }
+        body.light .hero-section h1 { color:white !important; -webkit-text-fill-color:white !important; }
         /* Nombre del usuario siempre visible */
         nav .text-gray-400 { color:rgba(255,255,255,.7) !important; }
         /* Nombre en el hero siempre blanco */
@@ -40,7 +49,19 @@
             <span class="text-white font-black text-xl">Fifty<span style="background:linear-gradient(90deg,#3B59FF,#7B2FBE);-webkit-background-clip:text;-webkit-text-fill-color:transparent">One</span></span>
         </a>
         <div class="flex items-center gap-4">
-            <span class="text-gray-400 text-sm hidden sm:block">{{ $user->name }}</span>
+            {{-- Avatar y nombre --}}
+            <div class="flex items-center gap-2">
+                @if($user->avatar)
+                    <img src="{{ Storage::url($user->avatar) }}" alt="{{ $user->name }}" 
+                         class="w-8 h-8 rounded-full object-cover border border-white/20">
+                @else
+                    <div class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold text-white border border-white/20"
+                         style="background:linear-gradient(135deg,#3B59FF,#7B2FBE)">
+                        {{ strtoupper(substr($user->name, 0, 1)) }}
+                    </div>
+                @endif
+                <span class="text-gray-400 text-sm hidden sm:block">{{ $user->name }}</span>
+            </div>
             {{-- Toggle tema --}}
             <button id="themeToggle" onclick="toggleTheme()"
                     class="w-12 h-6 rounded-full relative transition-all duration-300 flex-shrink-0"
@@ -74,13 +95,30 @@
         <div class="absolute inset-0 opacity-20"
              style="background-image:radial-gradient(circle at 20% 50%,#3B59FF 0%,transparent 50%),radial-gradient(circle at 80% 20%,#7B2FBE 0%,transparent 50%)"></div>
         <div class="relative flex items-center gap-5">
-            <div class="w-20 h-20 rounded-2xl flex items-center justify-center text-white text-3xl font-black flex-shrink-0 shadow-2xl"
-                 style="background:linear-gradient(135deg,#3B59FF,#7B2FBE)">
-                {{ strtoupper(substr($user->name, 0, 1)) }}
+            {{-- Avatar con opción de cambiar --}}
+            <div class="relative group">
+                @if($user->avatar)
+                    <img src="{{ Storage::url($user->avatar) }}" alt="{{ $user->name }}" 
+                         class="w-20 h-20 rounded-2xl object-cover shadow-2xl border-2 border-white/20">
+                @else
+                    <div class="w-20 h-20 rounded-2xl flex items-center justify-center text-white text-3xl font-black flex-shrink-0 shadow-2xl border-2 border-white/20"
+                         style="background:linear-gradient(135deg,#3B59FF,#7B2FBE)">
+                        {{ strtoupper(substr($user->name, 0, 1)) }}
+                    </div>
+                @endif
+                {{-- Botón para cambiar foto --}}
+                <button onclick="document.getElementById('avatarInput').click()" 
+                        class="absolute inset-0 bg-black/60 rounded-2xl flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
+                    <i class="fa-solid fa-camera text-white text-xl"></i>
+                </button>
+                <form id="avatarForm" method="POST" action="{{ route('customer.profile.update') }}" enctype="multipart/form-data" class="hidden">
+                    @csrf @method('PUT')
+                    <input type="file" id="avatarInput" name="avatar" accept="image/*" onchange="document.getElementById('avatarForm').submit()">
+                </form>
             </div>
             <div>
                 <p class="text-gray-400 text-sm mb-1">Bienvenido de nuevo,</p>
-                <h1 class="text-2xl sm:text-3xl font-black text-white" style="color:white!important;-webkit-text-fill-color:white!important">{{ $user->name }} 👋</h1>
+                <h1 class="text-2xl sm:text-3xl font-black text-white" style="color:white!important;-webkit-text-fill-color:white!important">{{ $user->name }}</h1>
                 <p class="text-gray-400 text-sm mt-1">
                     {{ $user->email }}
                     @if($user->phone) · {{ $user->phone }} @endif
@@ -256,15 +294,21 @@
                     <p class="font-black text-lg" style="background:linear-gradient(90deg,#3B59FF,#7B2FBE);-webkit-background-clip:text;-webkit-text-fill-color:transparent">
                         ${{ number_format($order->total, 0, ',', '.') }}
                     </p>
-                    @if($order->status === 'pending')
-                    <form method="POST" action="{{ route('customer.order.cancel', $order) }}"
-                          onsubmit="return confirm('¿Cancelar este pedido?')" class="mt-2">
-                        @csrf @method('PATCH')
-                        <button type="submit" class="text-xs text-red-400 hover:text-red-300 transition font-semibold">
-                            Cancelar pedido
-                        </button>
-                    </form>
-                    @endif
+                    <div class="mt-2 flex flex-col gap-1.5">
+                        <a href="{{ route('invoice.show', $order) }}" target="_blank" 
+                           class="text-xs text-blue-400 hover:text-blue-300 transition font-semibold inline-flex items-center justify-end gap-1">
+                            <i class="fa-solid fa-file-invoice text-xs"></i> Ver factura
+                        </a>
+                        @if($order->status === 'pending')
+                        <form method="POST" action="{{ route('customer.order.cancel', $order) }}"
+                              onsubmit="return confirm('¿Cancelar este pedido?')">
+                            @csrf @method('PATCH')
+                            <button type="submit" class="text-xs text-red-400 hover:text-red-300 transition font-semibold">
+                                Cancelar pedido
+                            </button>
+                        </form>
+                        @endif
+                    </div>
                 </div>
             </div>
 

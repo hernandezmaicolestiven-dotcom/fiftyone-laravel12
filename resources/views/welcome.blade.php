@@ -30,9 +30,9 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
-  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
-  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
-  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script crossorigin src="https://cdn.jsdelivr.net/npm/react@18.2.0/umd/react.production.min.js"></script>
+  <script crossorigin src="https://cdn.jsdelivr.net/npm/react-dom@18.2.0/umd/react-dom.production.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@babel/standalone@7.23.5/babel.min.js"></script>
   <style>
     html { scroll-behavior: smooth; }
     body { font-family: 'Inter', sans-serif; }
@@ -48,6 +48,7 @@
     @keyframes fadeIn  { from{opacity:0} to{opacity:1} }
     @keyframes fadeOut { from{opacity:1} to{opacity:0} }
     @keyframes slideUp { from{opacity:0;transform:translateY(28px) scale(.97)} to{opacity:1;transform:translateY(0) scale(1)} }
+    @keyframes slideIn { from{opacity:0;transform:translateX(100px)} to{opacity:1;transform:translateX(0)} }
     @keyframes bounceIn{ 0%{transform:scale(.5);opacity:0} 60%{transform:scale(1.1)} 80%{transform:scale(.95)} 100%{transform:scale(1);opacity:1} }
     @keyframes pulse   { 0%,100%{transform:scale(1)} 50%{transform:scale(1.08)} }
     @keyframes shimmer { 0%{background-position:-200% 0} 100%{background-position:200% 0} }
@@ -55,6 +56,7 @@
     .drawer-out { animation: slideOutRight .35s cubic-bezier(.4,0,.2,1) forwards; }
     .modal-enter{ animation: slideUp .3s cubic-bezier(.22,1,.36,1); }
     .bounce-in  { animation: bounceIn .5s cubic-bezier(.22,1,.36,1); }
+    .animate-slideIn { animation: slideIn .3s ease-out; }
     .qty-btn { width:32px;height:32px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-weight:700;cursor:pointer;transition:.2s;border:1.5px solid #e5e7eb;background:white; }
     .qty-btn:hover { border-color:#3B59FF;color:#3B59FF;background:#eef1ff; }
     .cart-item-row { transition: all .2s ease; }
@@ -87,8 +89,8 @@ $productosJS = $products->map(fn($p) => [
   'img'         => $p->image ? (str_starts_with($p->image,'http') ? $p->image : Storage::url($p->image)) : 'https://images.unsplash.com/photo-1556821840-3a63f15732ce?w=400&q=80',
   'rating'      => $p->reviews->count() ? round($p->reviews->avg('rating'),1) : 5,
   'reviews'     => $p->reviews->count(),
-  'sizes'       => $p->sizes ?? ['S','M','L','XL'],
-  'colors'      => $p->colors ?? [],
+  'sizes'       => is_array($p->sizes) ? $p->sizes : (is_string($p->sizes) ? json_decode($p->sizes, true) : ['S','M','L','XL']),
+  'colors'      => is_array($p->colors) ? $p->colors : (is_string($p->colors) ? json_decode($p->colors, true) : []),
   'stock'       => $p->stock,
   'category_id' => $p->category_id,
   'wishlisted'  => in_array($p->id, $wishlistIds ?? []),
@@ -209,10 +211,22 @@ function CartDrawer({ open, onClose, cart, onUpdateQty, onRemove, onClear, onChe
               {/* Image */}
               <div className="w-16 h-16 rounded-xl overflow-hidden flex-shrink-0 relative"
                 style={{background:'rgba(255,255,255,.08)'}}>
-                {item.img
-                  ? <img src={item.img} className="w-full h-full object-cover" alt={item.name} />
-                  : <div className="w-full h-full flex items-center justify-center"><i className="fa-solid fa-shirt text-white opacity-30 text-xl"></i></div>
-                }
+                {item.img ? (
+                  <img 
+                    src={item.img} 
+                    className="w-full h-full object-cover" 
+                    alt={item.name}
+                    onError={(e) => {
+                      console.error('Error loading image:', item.img, 'for product:', item.name);
+                      e.target.onerror = null;
+                      e.target.src = 'https://via.placeholder.com/150/3B59FF/FFFFFF?text=' + encodeURIComponent(item.name.substring(0,1));
+                    }}
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center">
+                    <i className="fa-solid fa-shirt text-white opacity-30 text-xl"></i>
+                  </div>
+                )}
               </div>
               {/* Info */}
               <div className="flex-1 min-w-0">
@@ -712,9 +726,7 @@ function Navbar({ cartCount, onCartOpen }) {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           <a href="/" className="flex items-center gap-2 flex-shrink-0">
-            <div className="w-8 h-8 bg-[#3B59FF] rounded-lg flex items-center justify-center">
-              <i className="fa-solid fa-shirt text-white text-sm"></i>
-            </div>
+            <img src="/logo-fiftyone.svg" alt="FiftyOne Logo" className="h-10 w-10" />
             <span className="text-white font-black text-xl">Fifty<span className="text-[#3B59FF]">One</span></span>
           </a>
           <div className="hidden md:flex items-center gap-7">
@@ -804,7 +816,7 @@ function Hero() {
           <div className="hidden lg:flex justify-center relative">
             <div className="relative w-[420px] h-[520px]">
               <div className="absolute inset-0 bg-gradient-to-br from-[#3B59FF]/20 to-[#1A237E]/20 rounded-3xl blur-2xl scale-110"></div>
-              <img src="https://images.unsplash.com/photo-1620799140408-edc6dcb6d633?w=600&q=80" alt="Buzo Oversize"
+              <img src="https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=600&q=80" alt="Buzo Oversize"
                 className="relative w-full h-full object-cover rounded-3xl shadow-2xl" />
               <div className="absolute -bottom-6 -left-8 bg-white rounded-2xl p-4 shadow-2xl flex items-center gap-3">
                 <div className="w-10 h-10 bg-[#3B59FF]/10 rounded-xl flex items-center justify-center">
@@ -903,7 +915,7 @@ function ProductCard({ product, onAdd, forceOpen, onForceOpenDone }) {
         <i className={`fa-heart text-sm ${wishlisted ? 'fa-solid text-white' : 'fa-regular text-gray-400'}`}></i>
       </button>
 
-      <div className="relative aspect-square overflow-hidden bg-gray-100 cursor-pointer" onClick={() => setDetail(true)}>
+      <div className="relative aspect-square overflow-hidden bg-gray-100">
         <img src={product.img} alt={product.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
         {product.badge && (
           <span className={`absolute top-3 left-3 text-xs font-bold px-2.5 py-1 rounded-full ${product.badge === 'Oferta' ? 'bg-red-500 text-white' : 'bg-[#3B59FF] text-white'}`}>
@@ -924,7 +936,7 @@ function ProductCard({ product, onAdd, forceOpen, onForceOpenDone }) {
 
       <div className="p-4 flex flex-col gap-2">
         <Stars count={product.rating} />
-        <h3 className="font-semibold text-black text-sm leading-tight cursor-pointer hover:text-[#3B59FF] transition-colors" onClick={() => setDetail(true)}>{product.name}</h3>
+        <h3 className="font-semibold text-black text-sm leading-tight">{product.name}</h3>
 
         {/* Tallas */}
         {product.sizes && product.sizes.length > 1 && (
@@ -1023,8 +1035,7 @@ function ProductCard({ product, onAdd, forceOpen, onForceOpenDone }) {
 
 // ── Products Section ───────────────────────────────────────────────────────
 function Products({ onAdd }) {
-  const [activeCategory, setActiveCategory] = React.useState('Todos');
-  const [openProductId, setOpenProductId]   = React.useState(null);
+  const [openProductId, setOpenProductId] = React.useState(null);
 
   // Polling liviano para detectar producto seleccionado desde el buscador
   React.useEffect(() => {
@@ -1036,12 +1047,9 @@ function Products({ onAdd }) {
     }, 100);
     return () => clearInterval(interval);
   }, []);
-  const allCats = ['Todos', 'Hoodies', 'Camisetas', 'Pantalones', 'Accesorios'];
-  // Mapeo de nombre de categoría a category_id real de la BD
-  const catMap = { 'Hoodies':1, 'Camisetas':2, 'Pantalones':3, 'Accesorios':4 };
-  const filtered = activeCategory === 'Todos'
-    ? dbProducts
-    : dbProducts.filter(p => p.category_id === catMap[activeCategory]);
+  
+  // Mostrar solo 8 productos destacados en el home
+  const featured = dbProducts.slice(0, 8);
 
   return (
     <section id="productos" className="py-20 bg-white">
@@ -1050,27 +1058,16 @@ function Products({ onAdd }) {
           <div>
             <span className="text-[#3B59FF] text-sm font-semibold uppercase tracking-widest">Productos</span>
             <h2 className="text-4xl font-black text-black mt-2">Prendas destacadas</h2>
+            <p className="text-gray-600 mt-2">Descubre nuestra selección especial</p>
           </div>
-          <a href="/productos" className="inline-flex items-center gap-2 text-sm font-semibold text-gray-600 hover:text-[#3B59FF] transition-colors">
-            Ver todos <i className="fa-solid fa-arrow-right text-xs"></i>
+          <a href="/catalogo" className="inline-flex items-center gap-2 text-sm font-semibold text-white px-6 py-3 rounded-xl transition-all hover:scale-105"
+             style={{background:'linear-gradient(90deg,#3B59FF,#7B2FBE)'}}>
+            Ver todo el catálogo <i className="fa-solid fa-arrow-right text-xs"></i>
           </a>
         </div>
-        {/* Filtros por categoría */}
-        <div className="flex flex-wrap gap-2 mb-8">
-          {allCats.map(cat => (
-            <button key={cat} onClick={() => setActiveCategory(cat)}
-                    className="px-4 py-2 rounded-full text-sm font-semibold transition-all"
-                    style={{
-                      background: activeCategory===cat ? 'linear-gradient(90deg,#3B59FF,#7B2FBE)' : 'transparent',
-                      color: activeCategory===cat ? 'white' : '#6b7280',
-                      border: activeCategory===cat ? 'none' : '1.5px solid #e5e7eb',
-                    }}>
-              {cat}
-            </button>
-          ))}
-        </div>
-        <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-5">
-          {filtered.map(p => <ProductCard key={p.id} product={p} onAdd={onAdd}
+        
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-5">
+          {featured.map(p => <ProductCard key={p.id} product={p} onAdd={onAdd}
             forceOpen={openProductId === p.id}
             onForceOpenDone={() => setOpenProductId(null)} />)}
         </div>
@@ -1228,9 +1225,7 @@ function Footer() {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-10 mb-12">
           <div className="col-span-2 md:col-span-1">
             <div className="flex items-center gap-2 mb-4">
-              <div className="w-8 h-8 bg-[#3B59FF] rounded-lg flex items-center justify-center">
-                <i className="fa-solid fa-shirt text-white text-sm"></i>
-              </div>
+              <img src="/logo-fiftyone.svg" alt="FiftyOne Logo" className="h-10 w-10" />
               <span className="text-white font-black text-xl">Fifty<span className="text-[#3B59FF]">One</span></span>
             </div>
             <p className="text-sm leading-relaxed mb-5 text-gray-400">Tu tienda de ropa oversize. Estilo streetwear, telas premium y envíos a todo el país.</p>
@@ -1250,7 +1245,6 @@ function Footer() {
             { title:'Soporte', links:[
               {l:'Contacto',     h:'/contacto'},
               {l:'Envíos',       h:'/envios'},
-              {l:'Devoluciones', h:'/devoluciones'},
               {l:'FAQ',          h:'/faq'},
             ]},
           ].map(col => (
@@ -1424,12 +1418,44 @@ function LooksDelMes({ onAdd }) {
   );
 }
 
+// ── Toast Notification ─────────────────────────────────────────────────────
+function Toast({ message, show, onClose }) {
+  React.useEffect(() => {
+    if (show) {
+      const timer = setTimeout(onClose, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [show, onClose]);
+
+  if (!show) return null;
+
+  return (
+    <div className="fixed top-20 right-4 z-[9999] animate-slideIn"
+         style={{animation: 'slideIn 0.3s ease-out'}}>
+      <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl p-4 flex items-center gap-3 border border-gray-200 dark:border-gray-700 min-w-[300px] max-w-md">
+        <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
+             style={{background:'linear-gradient(135deg,#3B59FF,#7B2FBE)'}}>
+          <i className="fa-solid fa-check text-white text-lg"></i>
+        </div>
+        <div className="flex-1">
+          <p className="font-bold text-gray-900 dark:text-white text-sm">¡Agregado al carrito!</p>
+          <p className="text-xs text-gray-600 dark:text-gray-400 mt-0.5">{message}</p>
+        </div>
+        <button onClick={onClose} className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition">
+          <i className="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+    </div>
+  );
+}
+
 // ── App ────────────────────────────────────────────────────────────────────
 function App() {
   const [cart, setCart]           = useState(() => JSON.parse(localStorage.getItem('fiftyone_cart') || '[]'));
   const [drawerOpen, setDrawer]   = useState(false);
   const [showCheckout, setCheckout] = useState(false);
   const [successId, setSuccessId] = useState(null);
+  const [toast, setToast] = useState({ show: false, message: '' });
 
   // Abrir checkout automáticamente si viene de login con ?checkout=1
   React.useEffect(() => {
@@ -1462,13 +1488,33 @@ function App() {
   const totalItems = cart.reduce((s,i) => s + i.qty, 0);
 
   const addToCart = (product) => {
+    console.log('Adding to cart:', product); // Debug log
     setCart(prev => {
       const existing = prev.find(i => i.id === product.id);
       if (existing) return prev.map(i => i.id === product.id ? {...i, qty: i.qty + 1} : i);
-      return [...prev, { id: product.id, name: product.name, price: product.price, img: product.img, qty: 1 }];
+      const newItem = { id: product.id, name: product.name, price: product.price, img: product.img, qty: 1 };
+      console.log('New cart item:', newItem); // Debug log
+      return [...prev, newItem];
     });
+    setToast({ show: true, message: product.name });
     setDrawer(true);
   };
+
+  // Control WhatsApp button visibility based on cart drawer state
+  useEffect(() => {
+    const waBtn = document.getElementById('wa-float-btn');
+    if (waBtn) {
+      if (drawerOpen) {
+        waBtn.style.opacity = '0';
+        waBtn.style.transform = 'translateX(120px)';
+        waBtn.style.pointerEvents = 'none';
+      } else {
+        waBtn.style.opacity = '1';
+        waBtn.style.transform = 'translateX(0)';
+        waBtn.style.pointerEvents = 'auto';
+      }
+    }
+  }, [drawerOpen]);
 
   const updateQty = (id, delta) => setCart(prev => prev.map(i => i.id === id ? {...i, qty: i.qty + delta} : i).filter(i => i.qty > 0));
   const removeItem = (id) => setCart(prev => prev.filter(i => i.id !== id));
@@ -1478,6 +1524,7 @@ function App() {
 
   return (
     <>
+      <Toast message={toast.message} show={toast.show} onClose={() => setToast({ show: false, message: '' })} />
       <TopBanner />
       <Navbar cartCount={totalItems} onCartOpen={() => setDrawer(true)} />
       <Hero />
@@ -1621,8 +1668,8 @@ document.addEventListener('DOMContentLoaded', function() {
 .wa-tooltip { opacity:0; transform:translateX(10px); transition:all .25s ease; pointer-events:none; }
 .wa-wrap:hover .wa-tooltip { opacity:1; transform:translateX(0); }
 </style>
-<div class="wa-wrap" style="position:fixed;bottom:28px;right:28px;z-index:9999;display:flex;align-items:center;gap:10px;flex-direction:row-reverse">
-    <a href="https://wa.me/573118422192?text=Hola%20FiftyOne%20%F0%9F%91%8B%0A%0AEstoy%20interesado%20en%20sus%20productos%20de%20ropa%20oversize.%0A%C2%BFPodr%C3%ADan%20brindarme%20informaci%C3%B3n%20sobre%20disponibilidad%2C%20tallas%20y%20tiempos%20de%20entrega%3F%0A%0AQuedo%20atento%2C%20gracias.%20%F0%9F%99%8F"
+<div id="wa-float-btn" class="wa-wrap" style="position:fixed;bottom:28px;right:28px;z-index:9999;display:flex;align-items:center;gap:10px;flex-direction:row-reverse;opacity:1;transform:translateX(0);transition:all 0.4s cubic-bezier(0.22,1,0.36,1)">
+    <a href="https://wa.me/573118422192?text=Buen%20d%C3%ADa%2C%20equipo%20FiftyOne.%0A%0AMe%20gustar%C3%ADa%20recibir%20informaci%C3%B3n%20detallada%20sobre%3A%0A%0A%E2%80%A2%20Disponibilidad%20de%20productos%0A%E2%80%A2%20Gu%C3%ADa%20de%20tallas%0A%E2%80%A2%20Tiempos%20de%20entrega%0A%E2%80%A2%20M%C3%A9todos%20de%20pago%0A%0AAgradezco%20su%20atenci%C3%B3n%20y%20pronta%20respuesta.%0A%0ASaludos%20cordiales."
        target="_blank" rel="noopener"
        class="wa-btn"
        style="width:60px;height:60px;border-radius:50%;background:linear-gradient(135deg,#25D366,#128C7E);display:flex;align-items:center;justify-content:center;box-shadow:0 4px 20px rgba(37,211,102,.5);transition:transform .2s ease;text-decoration:none;flex-shrink:0">

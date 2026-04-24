@@ -10,7 +10,7 @@
      style="background: linear-gradient(135deg, #0d0d1a 0%, #0a0e2e 55%, #1a0a2e 100%)">
     <div>
         <p class="text-gray-400 text-sm mb-1">Bienvenido de nuevo,</p>
-        <h2 class="text-2xl font-bold text-white">{{ auth()->user()->name }} 👋</h2>
+        <h2 class="text-2xl font-bold text-white">{{ auth()->user()->name }}</h2>
         <p class="text-gray-400 text-sm mt-1">{{ now()->isoFormat('dddd, D [de] MMMM [de] YYYY') }}</p>
     </div>
     <div class="flex gap-3">
