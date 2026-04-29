@@ -12,11 +12,14 @@ class InvoiceService
      */
     public function createInvoiceForOrder(Order $order): Invoice
     {
+        // Cargar items con productos
+        $order->load('items.product');
+        
         // Preparar items del pedido
         $items = $order->items->map(function ($item) {
             return [
-                'name' => $item->product->name,
-                'size' => $item->size,
+                'name' => $item->product->name ?? 'Producto',
+                'size' => $item->size ?? '-',
                 'color' => $item->color ?? null,
                 'price' => $item->price,
                 'quantity' => $item->quantity,
@@ -52,6 +55,11 @@ class InvoiceService
      */
     public function getOrCreateInvoice(Order $order): Invoice
     {
+        // Cargar items con productos si no están cargados
+        if (!$order->relationLoaded('items')) {
+            $order->load('items.product');
+        }
+        
         $invoice = Invoice::where('order_id', $order->id)->first();
 
         if (!$invoice) {

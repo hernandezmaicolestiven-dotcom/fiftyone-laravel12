@@ -23,6 +23,8 @@ class OrderController extends Controller
             'items.*.product_id' => 'required|exists:products,id',
             'items.*.quantity'   => 'required|integer|min:1',
             'coupon_code'        => 'nullable|string|max:20',
+            'payment_method'     => 'required|string|in:nequi,daviplata,pse,bancolombia,efecty,tarjeta',
+            'payment_details'    => 'nullable|array',
         ]);
 
         try {

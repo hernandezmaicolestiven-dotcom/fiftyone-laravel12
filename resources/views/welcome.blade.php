@@ -366,6 +366,7 @@ function CheckoutModal({ cart, onClose, onSuccess }) {
 
   const submit = async () => {
     if (!payMethod) { setErr('Selecciona un método de pago'); return; }
+    if (payMethod === 'pse' && !pseBank) { setErr('Selecciona tu banco para PSE'); return; }
     if (payMethod === 'tarjeta' && (!cardNum || !cardExp || !cardCvv || !cardName)) { setErr('Completa los datos de la tarjeta'); return; }
     // Verificar sesión justo antes de enviar
     if (!auth.loggedIn) {
@@ -375,20 +376,34 @@ function CheckoutModal({ cart, onClose, onSuccess }) {
     }
     setErr(''); setLoading(true);
     try {
+      // Preparar detalles del pago según el método
+      const paymentDetails = {};
+      if (payMethod === 'pse') {
+        paymentDetails.bank = pseBank;
+      } else if (payMethod === 'tarjeta') {
+        paymentDetails.card_last4 = cardNum.replace(/\s/g,'').slice(-4);
+        paymentDetails.card_holder = cardName;
+      }
+
       const res = await fetch('/orders', {
         method:'POST',
         headers:{'Content-Type':'application/json','X-CSRF-TOKEN':document.querySelector('meta[name="csrf-token"]').content},
         body: JSON.stringify({
-          customer_name: name.trim(), customer_email: email||null, customer_phone: phone||null,
-          shipping_address: address.trim()||null, city: city.trim()||null,
-          notes: (notes ? notes+' | ' : '')+'Pago: '+payMethod+(coupon?' | Cupón: '+coupon:''),
+          customer_name: name.trim(), 
+          customer_email: email||null, 
+          customer_phone: phone||null,
+          shipping_address: address.trim()||null, 
+          city: city.trim()||null,
+          notes: notes||null,
           items: cart.map(i => ({product_id:i.id, quantity:i.qty})),
           coupon_code: coupon || null,
+          payment_method: payMethod,
+          payment_details: paymentDetails,
         }),
       });
       const data = await res.json();
       if (res.ok && data.success) onSuccess(data.order_id);
-      else setErr('Error al procesar el pedido.');
+      else setErr(data.message || 'Error al procesar el pedido.');
     } catch { setErr('Error de conexión.'); }
     finally { setLoading(false); }
   };
@@ -915,8 +930,8 @@ function ProductCard({ product, onAdd, forceOpen, onForceOpenDone }) {
         <i className={`fa-heart text-sm ${wishlisted ? 'fa-solid text-white' : 'fa-regular text-gray-400'}`}></i>
       </button>
 
-      <div className="relative aspect-square overflow-hidden bg-gray-100">
-        <img src={product.img} alt={product.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+      <div className="relative aspect-square overflow-hidden bg-gradient-to-br from-gray-50 to-gray-100">
+        <img src={product.img} alt={product.name} className="w-full h-full object-contain p-4 group-hover:scale-105 transition-transform duration-500" loading="lazy" />
         {product.badge && (
           <span className={`absolute top-3 left-3 text-xs font-bold px-2.5 py-1 rounded-full ${product.badge === 'Oferta' ? 'bg-red-500 text-white' : 'bg-[#3B59FF] text-white'}`}>
             {product.badge}
@@ -973,8 +988,8 @@ function ProductCard({ product, onAdd, forceOpen, onForceOpenDone }) {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onClick={() => setDetail(false)}
              style={{background:'rgba(0,0,0,.7)',backdropFilter:'blur(8px)'}}>
           <div className="bg-white rounded-3xl overflow-hidden max-w-lg w-full shadow-2xl" onClick={e => e.stopPropagation()}>
-            <div className="relative aspect-video overflow-hidden bg-gray-100">
-              <img src={product.img} alt={product.name} className="w-full h-full object-cover" />
+            <div className="relative aspect-video overflow-hidden bg-gradient-to-br from-gray-50 to-gray-100">
+              <img src={product.img} alt={product.name} className="w-full h-full object-contain p-6" loading="lazy" />
               <button onClick={() => setDetail(false)} className="absolute top-3 right-3 w-9 h-9 rounded-full bg-white/90 flex items-center justify-center shadow">
                 <i className="fa-solid fa-xmark text-gray-700"></i>
               </button>

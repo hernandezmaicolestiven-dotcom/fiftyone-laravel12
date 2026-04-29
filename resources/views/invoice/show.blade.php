@@ -19,7 +19,7 @@
     <div class="max-w-4xl mx-auto px-4">
         <!-- Botones de acción -->
         <div class="no-print mb-6 flex gap-3 justify-end">
-            <a href="{{ route('customer.orders') }}" class="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded-lg text-gray-700 font-medium transition">
+            <a href="{{ route('customer.account') }}" class="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded-lg text-gray-700 font-medium transition">
                 <i class="fa-solid fa-arrow-left mr-2"></i>Volver a pedidos
             </a>
             <button onclick="window.print()" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition">

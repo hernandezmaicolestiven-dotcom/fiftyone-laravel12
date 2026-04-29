@@ -1,0 +1,35 @@
+╔════════════════════════════════════════════════════════════╗
+║              CREDENCIALES FIFTYONE - ACCESO RÁPIDO         ║
+╚════════════════════════════════════════════════════════════╝
+
+┌────────────────────────────────────────────────────────────┐
+│ 👨‍💼 ADMINISTRADOR                                          │
+├────────────────────────────────────────────────────────────┤
+│ URL:  http://localhost:8000/admin/login                   │
+│ User: admin@fiftyone.com                                   │
+│ Pass: Admin123!                                            │
+└────────────────────────────────────────────────────────────┘
+
+┌────────────────────────────────────────────────────────────┐
+│ 👤 CLIENTE                                                 │
+├────────────────────────────────────────────────────────────┤
+│ URL:  http://localhost:8000/login                         │
+│ User: cliente@test.com                                     │
+│ Pass: Cliente123!                                          │
+└────────────────────────────────────────────────────────────┘
+
+┌────────────────────────────────────────────────────────────┐
+│ 🤝 COLABORADOR                                             │
+├────────────────────────────────────────────────────────────┤
+│ URL:  http://localhost:8000/admin/login                   │
+│ User: colaborador@fiftyone.com                            │
+│ Pass: Colab123!                                            │
+└────────────────────────────────────────────────────────────┘
+
+⚠️  IMPORTANTE:
+    - Las contraseñas incluyen el signo ! al final
+    - Son CASE SENSITIVE (mayúsculas importan)
+    - Copia y pega para evitar errores
+
+🔄 RESETEAR: php artisan db:seed --class=ResetCredentialsSeeder
+📖 MÁS INFO: Ver archivo CREDENCIALES.md
