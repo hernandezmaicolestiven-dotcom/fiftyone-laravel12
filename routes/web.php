@@ -37,6 +37,14 @@ Route::get('/', function () {
             ->get();
     });
     
+    // Cachear productos por 5 minutos para mejorar rendimiento
+    $products = cache()->remember('home_products', 300, function () {
+        return Product::with(['category', 'reviews'])
+            ->latest()
+            ->take(50) // Limitar a 50 productos más recientes
+            ->get();
+    });
+    
     $authUser = auth()->user();
     $authData = [
         'loggedIn' => $authUser && $authUser->role !== 'admin',
@@ -45,12 +53,33 @@ Route::get('/', function () {
     ];
     
     // Wishlist del usuario (solo si está autenticado)
+    
+    // Wishlist del usuario (solo si está autenticado)
     $wishlistIds = [];
     if ($authUser && $authUser->role !== 'admin') {
         $wishlistIds = \App\Models\Wishlist::where('user_id', $authUser->id)
             ->pluck('product_id')
             ->toArray();
+        $wishlistIds = \App\Models\Wishlist::where('user_id', $authUser->id)
+            ->pluck('product_id')
+            ->toArray();
     }
+    
+    // Reseñas para mostrar en home (últimas 6, cacheadas)
+    $reviews = cache()->remember('home_reviews', 300, function () {
+        return \App\Models\Review::with(['user:id,name', 'product:id,name'])
+            ->latest()
+            ->take(6)
+            ->get()
+            ->map(fn($r) => [
+                'name'    => $r->user->name,
+                'product' => $r->product->name ?? '',
+                'rating'  => $r->rating,
+                'comment' => $r->comment,
+                'date'    => $r->created_at->format('d/m/Y'),
+            ]);
+    });
+    
     
     // Reseñas para mostrar en home (últimas 6, cacheadas)
     $reviews = cache()->remember('home_reviews', 300, function () {
@@ -101,9 +130,15 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('users/trashed', [UserController::class, 'trashed'])->name('users.trashed');
         Route::patch('users/{id}/restore', [UserController::class, 'restore'])->name('users.restore');
         Route::delete('users/{id}/force-delete', [UserController::class, 'forceDelete'])->name('users.force-delete');
+        Route::get('users/trashed', [UserController::class, 'trashed'])->name('users.trashed');
+        Route::patch('users/{id}/restore', [UserController::class, 'restore'])->name('users.restore');
+        Route::delete('users/{id}/force-delete', [UserController::class, 'forceDelete'])->name('users.force-delete');
         Route::resource('users', UserController::class);
         Route::get('orders/export/csv', [OrderController::class, 'exportCsv'])->name('orders.export.csv');
         Route::get('orders/export/pdf', [OrderController::class, 'exportPdf'])->name('orders.export.pdf');
+        Route::get('orders/trashed', [OrderController::class, 'trashed'])->name('orders.trashed');
+        Route::patch('orders/{id}/restore', [OrderController::class, 'restore'])->name('orders.restore');
+        Route::delete('orders/{id}/force-delete', [OrderController::class, 'forceDelete'])->name('orders.force-delete');
         Route::get('orders/trashed', [OrderController::class, 'trashed'])->name('orders.trashed');
         Route::patch('orders/{id}/restore', [OrderController::class, 'restore'])->name('orders.restore');
         Route::delete('orders/{id}/force-delete', [OrderController::class, 'forceDelete'])->name('orders.force-delete');
@@ -139,12 +174,18 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('reviews/trashed', [AdminReviewController::class, 'trashed'])->name('reviews.trashed');
         Route::patch('reviews/{id}/restore', [AdminReviewController::class, 'restore'])->name('reviews.restore');
         Route::delete('reviews/{id}/force-delete', [AdminReviewController::class, 'forceDelete'])->name('reviews.force-delete');
+        Route::get('reviews/trashed', [AdminReviewController::class, 'trashed'])->name('reviews.trashed');
+        Route::patch('reviews/{id}/restore', [AdminReviewController::class, 'restore'])->name('reviews.restore');
+        Route::delete('reviews/{id}/force-delete', [AdminReviewController::class, 'forceDelete'])->name('reviews.force-delete');
 
         // Cupones
         Route::get('coupons', [CouponController::class, 'index'])->name('coupons.index');
         Route::post('coupons', [CouponController::class, 'store'])->name('coupons.store');
         Route::patch('coupons/{coupon}/toggle', [CouponController::class, 'toggle'])->name('coupons.toggle');
         Route::delete('coupons/{coupon}', [CouponController::class, 'destroy'])->name('coupons.destroy');
+        Route::get('coupons/trashed', [CouponController::class, 'trashed'])->name('coupons.trashed');
+        Route::patch('coupons/{id}/restore', [CouponController::class, 'restore'])->name('coupons.restore');
+        Route::delete('coupons/{id}/force-delete', [CouponController::class, 'forceDelete'])->name('coupons.force-delete');
         Route::get('coupons/trashed', [CouponController::class, 'trashed'])->name('coupons.trashed');
         Route::patch('coupons/{id}/restore', [CouponController::class, 'restore'])->name('coupons.restore');
         Route::delete('coupons/{id}/force-delete', [CouponController::class, 'forceDelete'])->name('coupons.force-delete');
