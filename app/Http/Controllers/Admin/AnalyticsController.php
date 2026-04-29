@@ -24,13 +24,35 @@ class AnalyticsController extends Controller
 
         // ── Datos históricos mensuales del año seleccionado ──────────────────
         $months = collect(range(1, 12))->map(function ($m) use ($year) {
-            $orders = Order::whereYear('created_at', $year)->whereMonth('created_at', $m)->get();
-
+            // Usar una sola query agrupada en lugar de 12 queries
             return [
-                'month' => Carbon::create($year, $m)->translatedFormat('M'),
-                'orders' => $orders->count(),
-                'revenue' => (float) $orders->sum('total'),
-                'avg' => $orders->count() ? round($orders->sum('total') / $orders->count(), 0) : 0,
+                'month' => $m,
+                'orders' => 0,
+                'revenue' => 0,
+                'customers' => 0,
+            ];
+        });
+        
+        // Query optimizada: una sola consulta para todo el año
+        $yearData = Order::selectRaw('
+                MONTH(created_at) as month,
+                COUNT(*) as orders,
+                SUM(total) as revenue,
+                COUNT(DISTINCT user_id) as customers
+            ')
+            ->whereYear('created_at', $year)
+            ->groupBy('month')
+            ->get()
+            ->keyBy('month');
+        
+        // Combinar datos
+        $months = $months->map(function ($m) use ($yearData, $year) {
+            $data = $yearData->get($m['month']);
+            return [
+                'month' => Carbon::create($year, $m['month'])->translatedFormat('M'),
+                'orders' => $data->orders ?? 0,
+                'revenue' => (float) ($data->revenue ?? 0),
+                'avg' => ($data->orders ?? 0) > 0 ? round(($data->revenue ?? 0) / $data->orders, 0) : 0,
             ];
         });
 
@@ -44,26 +66,42 @@ class AnalyticsController extends Controller
             $availableYears = [now()->year];
         }
 
-        // ── Top productos del año ─────────────────────────────────────────────
-        $topProducts = OrderItem::with('product')
+        // ── Top productos del año (optimizado) ────────────────────────────────
+        $topProducts = OrderItem::selectRaw('
+                product_name,
+                SUM(quantity) as qty,
+                SUM(subtotal) as revenue
+            ')
             ->whereHas('order', fn ($q) => $q->whereYear('created_at', $year))
-            ->get()
             ->groupBy('product_name')
-            ->map(fn ($g) => ['name' => $g->first()->product_name, 'qty' => $g->sum('quantity'), 'revenue' => $g->sum('subtotal')])
-            ->sortByDesc('revenue')
+            ->orderByDesc('revenue')
             ->take(5)
-            ->values();
+            ->get()
+            ->map(fn ($item) => [
+                'name' => $item->product_name,
+                'qty' => $item->qty,
+                'revenue' => $item->revenue
+            ]);
 
-        // ── KPIs del año ─────────────────────────────────────────────────────
-        $yearOrders = Order::whereYear('created_at', $year)->get();
+        // ── KPIs del año (optimizado con una sola query) ──────────────────────
+        $yearStats = Order::selectRaw('
+                COUNT(*) as total_orders,
+                SUM(total) as total_revenue,
+                AVG(total) as avg_order,
+                SUM(CASE WHEN status = "delivered" THEN 1 ELSE 0 END) as delivered,
+                SUM(CASE WHEN status = "cancelled" THEN 1 ELSE 0 END) as cancelled
+            ')
+            ->whereYear('created_at', $year)
+            ->first();
+        
         $kpis = [
-            'total_orders' => $yearOrders->count(),
-            'total_revenue' => $yearOrders->sum('total'),
-            'avg_order' => $yearOrders->count() ? round($yearOrders->sum('total') / $yearOrders->count(), 0) : 0,
-            'delivered' => $yearOrders->where('status', 'delivered')->count(),
-            'cancelled' => $yearOrders->where('status', 'cancelled')->count(),
-            'conversion' => $yearOrders->count()
-                ? round($yearOrders->where('status', 'delivered')->count() / $yearOrders->count() * 100, 1)
+            'total_orders' => $yearStats->total_orders ?? 0,
+            'total_revenue' => $yearStats->total_revenue ?? 0,
+            'avg_order' => round($yearStats->avg_order ?? 0, 0),
+            'delivered' => $yearStats->delivered ?? 0,
+            'cancelled' => $yearStats->cancelled ?? 0,
+            'conversion' => ($yearStats->total_orders ?? 0) > 0
+                ? round(($yearStats->delivered / $yearStats->total_orders) * 100, 1)
                 : 0,
         ];
 

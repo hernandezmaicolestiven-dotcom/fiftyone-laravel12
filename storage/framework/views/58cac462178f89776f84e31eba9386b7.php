@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="<?php echo e(csrf_token()); ?>">
     <title>Mi cuenta — FiftyOne</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -72,7 +73,7 @@
                     <i id="themeIcon" class="fa-solid fa-moon text-indigo-600 text-xs"></i>
                 </span>
             </button>
-            <form method="POST" action="<?php echo e(route('customer.logout')); ?>">
+            <form method="POST" action="<?php echo e(route('customer.logout')); ?>" id="logoutForm">
                 <?php echo csrf_field(); ?>
                 <button type="submit" class="flex items-center gap-1.5 text-sm text-gray-400 hover:text-red-400 transition px-3 py-1.5 rounded-xl hover:bg-white/5">
                     <i class="fa-solid fa-right-from-bracket text-xs"></i> Salir
@@ -401,6 +402,35 @@ function toggleTheme() {
         if (icon)  icon.className = 'fa-solid fa-sun text-amber-500 text-xs';
     }
 })();
+
+// Manejar logout con mejor gestión de errores
+document.getElementById('logoutForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    // Obtener el token CSRF fresco
+    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || 
+                      document.querySelector('input[name="_token"]')?.value;
+    
+    // Hacer la petición con fetch para mejor control
+    fetch('<?php echo e(route("customer.logout")); ?>', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': csrfToken,
+            'Accept': 'application/json'
+        },
+        credentials: 'same-origin'
+    })
+    .then(response => {
+        // Redirigir al home sin importar la respuesta
+        window.location.href = '/';
+    })
+    .catch(error => {
+        // Si hay error, igual redirigir al home
+        console.log('Logout error, redirecting anyway');
+        window.location.href = '/';
+    });
+});
 </script>
 </body>
 </html>

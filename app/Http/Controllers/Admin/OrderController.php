@@ -218,6 +218,39 @@ class OrderController extends Controller
     {
         $order->delete();
 
-        return redirect()->route('admin.orders.index')->with('success', 'Pedido eliminado.');
+        return redirect()->route('admin.orders.index')->with('success', 'Pedido movido a la papelera.');
+    }
+
+    /**
+     * Mostrar pedidos en papelera
+     */
+    public function trashed()
+    {
+        $orders = Order::onlyTrashed()->with('items')->latest('deleted_at')->paginate(15);
+        return view('admin.orders.trashed', compact('orders'));
+    }
+
+    /**
+     * Restaurar pedido de la papelera
+     */
+    public function restore($id)
+    {
+        $order = Order::onlyTrashed()->findOrFail($id);
+        $order->restore();
+
+        return redirect()->route('admin.orders.trashed')
+            ->with('success', 'Pedido restaurado correctamente.');
+    }
+
+    /**
+     * Eliminar permanentemente
+     */
+    public function forceDelete($id)
+    {
+        $order = Order::onlyTrashed()->findOrFail($id);
+        $order->forceDelete();
+
+        return redirect()->route('admin.orders.trashed')
+            ->with('success', 'Pedido eliminado permanentemente.');
     }
 }

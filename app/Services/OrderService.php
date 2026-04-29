@@ -70,6 +70,9 @@ class OrderService
                 'notes'            => $data['notes'] ?? null,
                 'total'            => $total,
                 'status'           => 'pending',
+                'payment_method'   => $data['payment_method'] ?? null,
+                'payment_status'   => 'pending',
+                'payment_details'  => isset($data['payment_details']) ? json_encode($data['payment_details']) : null,
             ]);
 
             $order->items()->createMany($itemsData);

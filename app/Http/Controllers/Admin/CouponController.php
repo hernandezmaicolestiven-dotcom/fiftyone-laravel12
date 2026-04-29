@@ -45,6 +45,39 @@ class CouponController extends Controller
     public function destroy(Coupon $coupon)
     {
         $coupon->delete();
-        return back()->with('success', 'Cupón eliminado.');
+        return back()->with('success', 'Cupón movido a la papelera.');
+    }
+
+    /**
+     * Mostrar cupones en papelera
+     */
+    public function trashed()
+    {
+        $coupons = Coupon::onlyTrashed()->latest('deleted_at')->get();
+        return view('admin.coupons.trashed', compact('coupons'));
+    }
+
+    /**
+     * Restaurar cupón de la papelera
+     */
+    public function restore($id)
+    {
+        $coupon = Coupon::onlyTrashed()->findOrFail($id);
+        $coupon->restore();
+
+        return redirect()->route('admin.coupons.trashed')
+            ->with('success', 'Cupón restaurado correctamente.');
+    }
+
+    /**
+     * Eliminar permanentemente
+     */
+    public function forceDelete($id)
+    {
+        $coupon = Coupon::onlyTrashed()->findOrFail($id);
+        $coupon->forceDelete();
+
+        return redirect()->route('admin.coupons.trashed')
+            ->with('success', 'Cupón eliminado permanentemente.');
     }
 }

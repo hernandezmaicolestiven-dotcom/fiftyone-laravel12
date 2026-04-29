@@ -6,6 +6,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Password as PasswordFacade;
 use Illuminate\Validation\Rules\Password;
 
 /**
@@ -36,10 +37,9 @@ class CustomerAuthController extends Controller
             'role' => 'customer',
         ]);
 
-        Auth::login($user);
-
-        return redirect()->route('customer.account')
-            ->with('success', '¡Bienvenido, '.$user->name.'!');
+        // NO hacer login automático, redirigir al login con mensaje de éxito
+        return redirect()->route('customer.login')
+            ->with('success', '¡Cuenta creada exitosamente! Ahora puedes iniciar sesión con tus credenciales.');
     }
 
     public function showLogin()
@@ -81,10 +81,11 @@ class CustomerAuthController extends Controller
     public function logout(Request $request)
     {
         Auth::logout();
+        
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        return redirect('/');
+        return redirect('/')->with('success', 'Sesión cerrada correctamente.');
     }
 
     /** Área de cuenta del cliente — historial de pedidos */
@@ -146,5 +147,54 @@ class CustomerAuthController extends Controller
         }
         auth()->user()->update(['password' => \Hash::make($request->password)]);
         return back()->with('success', 'Contraseña actualizada.');
+    }
+
+    /** Mostrar formulario de recuperación de contraseña */
+    public function showForgotPassword()
+    {
+        return view('customer.auth.forgot-password');
+    }
+
+    /** Enviar enlace de recuperación */
+    public function sendResetLink(Request $request)
+    {
+        $request->validate(['email' => 'required|email']);
+
+        $status = PasswordFacade::sendResetLink(
+            $request->only('email')
+        );
+
+        return $status === PasswordFacade::RESET_LINK_SENT
+            ? back()->with('status', 'Te hemos enviado un enlace de recuperación a tu correo.')
+            : back()->withErrors(['email' => 'No encontramos una cuenta con ese correo.']);
+    }
+
+    /** Mostrar formulario de restablecimiento */
+    public function showResetPassword($token)
+    {
+        return view('customer.auth.reset-password', ['token' => $token]);
+    }
+
+    /** Restablecer contraseña */
+    public function resetPassword(Request $request)
+    {
+        $request->validate([
+            'token' => 'required',
+            'email' => 'required|email',
+            'password' => 'required|confirmed|min:8',
+        ]);
+
+        $status = PasswordFacade::reset(
+            $request->only('email', 'password', 'password_confirmation', 'token'),
+            function ($user, $password) {
+                $user->forceFill([
+                    'password' => Hash::make($password)
+                ])->save();
+            }
+        );
+
+        return $status === PasswordFacade::PASSWORD_RESET
+            ? redirect()->route('customer.login')->with('success', 'Tu contraseña ha sido restablecida. Ya puedes iniciar sesión.')
+            : back()->withErrors(['email' => 'El enlace de recuperación es inválido o ha expirado.']);
     }
 }

@@ -1,0 +1,99 @@
+╔════════════════════════════════════════════════════════════╗
+║              CAMBIO REALIZADO - FLUJO DE REGISTRO          ║
+╚════════════════════════════════════════════════════════════╝
+
+┌────────────────────────────────────────────────────────────┐
+│ ❌ ANTES (Login Automático)                                │
+├────────────────────────────────────────────────────────────┤
+│                                                            │
+│  1. Usuario llena formulario de registro                  │
+│  2. Click en "Crear cuenta"                               │
+│  3. ⚡ Login automático                                    │
+│  4. Redirigido a /mi-cuenta                               │
+│                                                            │
+│  ❌ Usuario NO ve confirmación                            │
+│  ❌ Usuario NO prueba sus credenciales                    │
+└────────────────────────────────────────────────────────────┘
+
+┌────────────────────────────────────────────────────────────┐
+│ ✅ AHORA (Login Manual - Paso por Paso)                   │
+├────────────────────────────────────────────────────────────┤
+│                                                            │
+│  1. Usuario llena formulario de registro                  │
+│  2. Click en "Crear cuenta"                               │
+│  3. ✅ Mensaje: "¡Cuenta creada exitosamente!"            │
+│  4. Redirigido a /login                                   │
+│  5. Usuario ingresa email y contraseña                    │
+│  6. Click en "Iniciar sesión"                             │
+│  7. Redirigido a /mi-cuenta                               │
+│                                                            │
+│  ✅ Usuario ve confirmación clara                         │
+│  ✅ Usuario prueba que sus credenciales funcionan         │
+│  ✅ Flujo más estándar y esperado                         │
+└────────────────────────────────────────────────────────────┘
+
+╔════════════════════════════════════════════════════════════╗
+║                    CÓDIGO MODIFICADO                       ║
+╚════════════════════════════════════════════════════════════╝
+
+Archivo: app/Http/Controllers/CustomerAuthController.php
+Método: register()
+
+ANTES:
+------
+Auth::login($user);  // ❌ Login automático
+return redirect()->route('customer.account');
+
+AHORA:
+------
+// ✅ NO hacer login automático
+return redirect()->route('customer.login')
+    ->with('success', '¡Cuenta creada exitosamente! ...');
+
+╔════════════════════════════════════════════════════════════╗
+║                    LO QUE PASA AHORA                       ║
+╚════════════════════════════════════════════════════════════╝
+
+1. Usuario se registra en /registro
+   ↓
+2. Sistema crea cuenta en base de datos
+   ↓
+3. Sistema muestra mensaje verde:
+   "✅ ¡Cuenta creada exitosamente!"
+   ↓
+4. Usuario es redirigido a /login
+   ↓
+5. Usuario ve el formulario de login
+   ↓
+6. Usuario ingresa sus credenciales manualmente
+   ↓
+7. Sistema verifica credenciales
+   ↓
+8. Login exitoso → /mi-cuenta
+
+╔════════════════════════════════════════════════════════════╗
+║                    PARA PROBAR                             ║
+╚════════════════════════════════════════════════════════════╝
+
+1. Abre navegador en modo incógnito
+2. Ve a: http://localhost:8000/registro
+3. Llena el formulario
+4. Click en "Crear cuenta"
+5. Verás mensaje de éxito
+6. Estarás en /login
+7. Inicia sesión manualmente
+8. ✅ Acceso a tu cuenta
+
+╔════════════════════════════════════════════════════════════╗
+║                    ESTADO                                  ║
+╚════════════════════════════════════════════════════════════╝
+
+✅ Cambio implementado
+✅ Código sin errores
+✅ Flujo paso por paso
+✅ Mensaje de éxito visible
+✅ Login manual requerido
+✅ Credenciales guardadas en DB
+
+Fecha: 28 de Abril, 2026
+Estado: 🟢 FUNCIONANDO

@@ -71,10 +71,52 @@ php artisan serve
 
 Abre [http://localhost:8000](http://localhost:8000)
 
-**Credenciales de acceso al panel:**
-- URL: `/admin/login`
-- Email: `admin@fiftyone.com`
-- Contraseña: `admin123`
+**Credenciales de acceso:**
+
+Ver documentación completa en [`docs/credenciales/CREDENCIALES_RAPIDO.txt`](docs/credenciales/CREDENCIALES_RAPIDO.txt)
+
+- **Admin**: http://localhost:8000/admin/login
+  - Email: `admin@fiftyone.com`
+  - Password: `Admin123!`
+
+- **Cliente**: http://localhost:8000/login
+  - Email: `cliente@test.com`
+  - Password: `Cliente123!`
+
+---
+
+## 📚 Documentación
+
+Toda la documentación está organizada en la carpeta [`docs/`](docs/):
+
+- **[Guías de uso](docs/guias/)** - Tutoriales y configuración
+- **[Credenciales](docs/credenciales/)** - Información de acceso
+- **[Scripts](scripts/)** - Utilidades y pruebas
+- **[API](docs/api.md)** - Documentación de endpoints
+
+### Guías Principales
+
+- [Sistema de Pagos](docs/guias/SISTEMA_PAGOS_COMPLETO.md) - 6 métodos de pago implementados
+- [Sistema de Registro y Login](docs/guias/SISTEMA_REGISTRO_LOGIN.md)
+- [Recuperación de Contraseña](docs/guias/RECUPERACION_CONTRASENA.md)
+- [Sistema de Facturación](docs/guias/SISTEMA_FACTURACION.md)
+- [Configurar Correo Real](docs/guias/CONFIGURAR_CORREO_REAL.md)
+
+### Scripts Útiles
+
+```bash
+# Iniciar worker de colas (necesario para correos)
+scripts/start-queue-worker.bat
+
+# Verificar que todo funcione
+scripts/tests/verificar-sistema.bat
+
+# Abrir login de admin
+scripts/abrir-login-admin.bat
+
+# Obtener enlace de recuperación de contraseña
+scripts/get-reset-link.bat
+```
 
 ---
 

@@ -147,6 +147,44 @@ class UserController extends Controller
         $user->delete();
 
         return redirect()->route('admin.users.index')
-            ->with('success', 'Usuario eliminado correctamente.');
+            ->with('success', 'Usuario movido a la papelera.');
+    }
+
+    /**
+     * Mostrar usuarios en papelera
+     */
+    public function trashed()
+    {
+        $users = User::onlyTrashed()->latest('deleted_at')->paginate(10);
+        return view('admin.users.trashed', compact('users'));
+    }
+
+    /**
+     * Restaurar usuario de la papelera
+     */
+    public function restore($id)
+    {
+        $user = User::onlyTrashed()->findOrFail($id);
+        $user->restore();
+
+        return redirect()->route('admin.users.trashed')
+            ->with('success', 'Usuario restaurado correctamente.');
+    }
+
+    /**
+     * Eliminar permanentemente
+     */
+    public function forceDelete($id)
+    {
+        $user = User::onlyTrashed()->findOrFail($id);
+        
+        if ($user->id === auth()->id()) {
+            return back()->with('error', 'No puedes eliminar tu propio usuario.');
+        }
+
+        $user->forceDelete();
+
+        return redirect()->route('admin.users.trashed')
+            ->with('success', 'Usuario eliminado permanentemente.');
     }
 }
