@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
-@php use Illuminate\Support\Facades\Storage; @endphp
+<?php use Illuminate\Support\Facades\Storage; ?>
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -9,21 +9,21 @@
   <meta name="keywords" content="ropa oversize Colombia, hoodies oversize, camisetas boxy, streetwear Colombia, FiftyOne ropa, tienda oversize">
   <meta name="author" content="FiftyOne">
   <meta name="robots" content="index, follow">
-  <link rel="canonical" href="{{ config('app.url') }}">
+  <link rel="canonical" href="<?php echo e(config('app.url')); ?>">
 
-  {{-- Open Graph (para compartir en redes) --}}
+  
   <meta property="og:type" content="website">
   <meta property="og:title" content="FiftyOne — Ropa Oversize Colombia">
   <meta property="og:description" content="Hoodies, camisetas boxy y streetwear premium. Envíos a todo Colombia.">
-  <meta property="og:url" content="{{ config('app.url') }}">
+  <meta property="og:url" content="<?php echo e(config('app.url')); ?>">
   <meta property="og:site_name" content="FiftyOne">
   <meta property="og:locale" content="es_CO">
 
-  {{-- Twitter Card --}}
+  
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="FiftyOne — Ropa Oversize Colombia">
   <meta name="twitter:description" content="Hoodies, camisetas boxy y streetwear premium. Envíos a todo Colombia.">
-  <meta name="csrf-token" content="{{ csrf_token() }}">
+  <meta name="csrf-token" content="<?php echo e(csrf_token()); ?>">
   <meta name="theme-color" content="#3B59FF">
   <link rel="manifest" href="/manifest.json">
   <script src="https://cdn.tailwindcss.com"></script>
@@ -65,7 +65,7 @@
     .shimmer-line { background: linear-gradient(90deg,#f0f0f0 25%,#e0e0e0 50%,#f0f0f0 75%); background-size:200% 100%; animation: shimmer 1.5s infinite; border-radius:8px; }
   </style>
   <script>
-  window.__AUTH__ = {!! json_encode([
+  window.__AUTH__ = <?php echo json_encode([
       'loggedIn' => $authData['loggedIn'],
       'name'     => $authData['name'],
       'id'       => $authData['id'] ?? null,
@@ -73,14 +73,14 @@
       'phone'    => $authData['loggedIn'] ? (auth()->user()?->phone) : null,
       'address'  => $authData['loggedIn'] ? (auth()->user()?->default_address) : null,
       'city'     => $authData['loggedIn'] ? (auth()->user()?->default_city) : null,
-  ]) !!};
-  window.__WISHLIST__ = {!! json_encode($wishlistIds ?? []) !!};
-  window.__STATS__ = {!! json_encode(['customers' => \App\Models\User::where('role','customer')->count(), 'products' => \App\Models\Product::count(), 'orders' => \App\Models\Order::count()]) !!};  </script>
+  ]); ?>;
+  window.__WISHLIST__ = <?php echo json_encode($wishlistIds ?? []); ?>;
+  window.__STATS__ = <?php echo json_encode(['customers' => \App\Models\User::where('role','customer')->count(), 'products' => \App\Models\Product::count(), 'orders' => \App\Models\Order::count()]); ?>;  </script>
 </head>
 <body class="bg-white text-gray-900 antialiased">
 <div id="root"></div>
 
-@php
+<?php
 $productosJS = $products->map(fn($p) => [
   'id'          => $p->id,
   'name'        => $p->name,
@@ -104,11 +104,11 @@ $paginationData = [
   'from' => $products->firstItem(),
   'to' => $products->lastItem(),
 ];
-@endphp
-<script type="text/plain" id="products-data">{!! json_encode($productosJS) !!}</script>
-<script type="text/plain" id="pagination-data">{!! json_encode($paginationData) !!}</script>
-<script type="text/plain" id="reviews-data">{!! json_encode($reviews) !!}</script>
-@verbatim
+?>
+<script type="text/plain" id="products-data"><?php echo json_encode($productosJS); ?></script>
+<script type="text/plain" id="pagination-data"><?php echo json_encode($paginationData); ?></script>
+<script type="text/plain" id="reviews-data"><?php echo json_encode($reviews); ?></script>
+
 <script type="text/babel">
 const { useState, useEffect } = React;
 
@@ -1724,16 +1724,16 @@ function MobileNav({ cartCount, onCartOpen }) {
 
 ReactDOM.createRoot(document.getElementById('root')).render(<App />);
 </script>
-@endverbatim
 
-{{-- PWA Service Worker --}}
+
+
 <script>
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('/sw.js').catch(() => {});
 }
 </script>
 
-{{-- Barra navegación móvil --}}
+
 <nav id="mobile-nav" style="display:none;position:fixed;bottom:0;left:0;right:0;z-index:9998;background:linear-gradient(135deg,#0d0d1a,#0a0e2e);border-top:1px solid rgba(255,255,255,.1);padding:8px 0 env(safe-area-inset-bottom,8px)">
     <div style="display:flex;justify-content:space-around;align-items:center">
         <a href="#inicio" onclick="closeMobileMenu()" style="display:flex;flex-direction:column;align-items:center;gap:3px;text-decoration:none;padding:4px 16px;border-radius:12px;transition:.2s" class="mob-nav-item">
@@ -1751,17 +1751,17 @@ if ('serviceWorker' in navigator) {
             <span id="mob-cart-count" style="display:none;position:absolute;top:-2px;right:8px;width:18px;height:18px;background:#ef4444;border-radius:50%;font-size:10px;font-weight:700;color:white;display:flex;align-items:center;justify-content:center">0</span>
             <span style="font-size:10px;color:rgba(255,255,255,.5);font-family:Inter,sans-serif;font-weight:600">Carrito</span>
         </button>
-        @if(auth()->check() && auth()->user()?->role !== 'admin')
+        <?php if(auth()->check() && auth()->user()?->role !== 'admin'): ?>
         <a href="/mi-cuenta" style="display:flex;flex-direction:column;align-items:center;gap:3px;text-decoration:none;padding:4px 16px;border-radius:12px;transition:.2s" class="mob-nav-item">
             <i class="fa-solid fa-circle-user" style="font-size:18px;color:rgba(255,255,255,.5)"></i>
             <span style="font-size:10px;color:rgba(255,255,255,.5);font-family:Inter,sans-serif;font-weight:600">Mi cuenta</span>
         </a>
-        @else
+        <?php else: ?>
         <a href="/login" style="display:flex;flex-direction:column;align-items:center;gap:3px;text-decoration:none;padding:4px 16px;border-radius:12px;transition:.2s" class="mob-nav-item">
             <i class="fa-solid fa-right-to-bracket" style="font-size:18px;color:rgba(255,255,255,.5)"></i>
             <span style="font-size:10px;color:rgba(255,255,255,.5);font-family:Inter,sans-serif;font-weight:600">Ingresar</span>
         </a>
-        @endif
+        <?php endif; ?>
     </div>
 </nav>
 
@@ -1796,7 +1796,7 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 
-{{-- Botón flotante WhatsApp --}}
+
 <style>
 @keyframes waPulse {
     0%   { box-shadow: 0 0 0 0 rgba(37,211,102,.6); }
@@ -1824,10 +1824,10 @@ document.addEventListener('DOMContentLoaded', function() {
     </div>
 </div>
 
-{{-- Looks del Día / Inspiración --}}
-@include('partials.looks-inspiracion')
 
-{{-- Script para scroll automático al inicio --}}
+<?php echo $__env->make('partials.looks-inspiracion', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
+
+
 <script>
 window.addEventListener('load', function() {
     // Scroll al inicio de la página cuando carga
@@ -1839,3 +1839,4 @@ window.addEventListener('load', function() {
 
 </body>
 </html>
+<?php /**PATH /var/www/html/resources/views/welcome.blade.php ENDPATH**/ ?>

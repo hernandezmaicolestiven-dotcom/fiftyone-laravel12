@@ -43,14 +43,6 @@ Route::get('/', function () {
             ->paginate($perPage);
     });
     
-    // Cachear productos por 5 minutos para mejorar rendimiento
-    $products = cache()->remember('home_products', 300, function () {
-        return Product::with(['category', 'reviews'])
-            ->latest()
-            ->take(50) // Limitar a 50 productos más recientes
-            ->get();
-    });
-    
     $authUser = auth()->user();
     $authData = [
         'loggedIn' => $authUser && $authUser->role !== 'admin',

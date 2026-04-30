@@ -1,0 +1,82 @@
+═══════════════════════════════════════════════════════════
+    CREDENCIALES DE ACCESO - FIFTYONE
+═══════════════════════════════════════════════════════════
+
+📱 URLS PARA EL INSTRUCTOR (probar en orden):
+   1. http://10.6.64.193:8000
+   2. http://192.168.137.1:8000
+   3. http://172.30.144.1:8000
+
+───────────────────────────────────────────────────────────
+
+👨‍💼 PANEL DE ADMINISTRACIÓN
+───────────────────────────────────────────────────────────
+URL:      http://localhost:8000/admin/login
+Email:    admin@fiftyone.com
+Password: Admin123!
+
+⚠️ IMPORTANTE: 
+   - La "A" de Admin es MAYÚSCULA
+   - Incluye el signo de exclamación (!) al final
+   - No hay espacios
+
+───────────────────────────────────────────────────────────
+
+👤 CUENTA DE CLIENTE (Tienda)
+───────────────────────────────────────────────────────────
+URL:      http://localhost:8000/login
+Email:    cliente@test.com
+Password: Cliente123!
+
+⚠️ IMPORTANTE:
+   - La "C" de Cliente es MAYÚSCULA
+   - Incluye el signo de exclamación (!) al final
+
+───────────────────────────────────────────────────────────
+
+🤝 CUENTA DE COLABORADOR (Acceso limitado)
+───────────────────────────────────────────────────────────
+URL:      http://localhost:8000/admin/login
+Email:    colaborador@fiftyone.com
+Password: Colab123!
+
+───────────────────────────────────────────────────────────
+
+✅ VERIFICACIÓN RÁPIDA:
+───────────────────────────────────────────────────────────
+1. Abre el navegador
+2. Ve a: http://localhost:8000/admin/login
+3. Copia y pega exactamente:
+   
+   Email:    admin@fiftyone.com
+   Password: Admin123!
+
+4. Presiona "Iniciar Sesión"
+
+───────────────────────────────────────────────────────────
+
+🔧 SI NO FUNCIONA:
+───────────────────────────────────────────────────────────
+1. Verifica que copiaste TODO (incluyendo el !)
+2. Verifica que la "A" de Admin sea MAYÚSCULA
+3. No debe haber espacios antes o después
+4. Intenta escribirlo manualmente en lugar de copiar
+
+───────────────────────────────────────────────────────────
+
+📞 PARA LA DEMOSTRACIÓN:
+───────────────────────────────────────────────────────────
+El instructor debe:
+1. Conectarse al mismo Wi-Fi que tú
+2. Usar una de las IPs de arriba
+3. Usar las credenciales de Admin
+
+Ejemplo completo:
+http://10.6.64.193:8000/admin/login
+admin@fiftyone.com
+Admin123!
+
+═══════════════════════════════════════════════════════════
+Fecha: 30 de Abril de 2026
+Proyecto: FiftyOne - E-commerce
+═══════════════════════════════════════════════════════════

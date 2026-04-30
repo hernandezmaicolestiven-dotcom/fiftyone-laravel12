@@ -1,0 +1,80 @@
+version: '3.8'
+
+services:
+  # Contenedor de la aplicación Laravel (Producción)
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: fiftyone_app_prod
+    restart: always
+    working_dir: /var/www/html
+    volumes:
+      # Bind mount del proyecto completo
+      - ./:/var/www/html
+      # Volumen para vendor (mejor rendimiento)
+      - vendor:/var/www/html/vendor
+      # Volumen para node_modules (mejor rendimiento)
+      - node_modules:/var/www/html/node_modules
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      - DB_HOST=db
+      - DB_PORT=3306
+      - DB_DATABASE=fiftyone
+      - DB_USERNAME=laravel
+      - DB_PASSWORD=${DB_PASSWORD:-secret}
+      - APP_ENV=production
+      - APP_DEBUG=false
+    depends_on:
+      - db
+    networks:
+      - fiftyone_network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Contenedor de MySQL (Producción)
+  db:
+    image: mysql:8.0
+    container_name: fiftyone_db_prod
+    restart: always
+    environment:
+      MYSQL_DATABASE: fiftyone
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root}
+      MYSQL_USER: laravel
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-secret}
+    ports:
+      - "3307:3306"
+    volumes:
+      # Named volume para persistir datos
+      - mysql_data:/var/lib/mysql
+      # Configuración personalizada de MySQL
+      - ./docker/mysql/my.cnf:/etc/mysql/conf.d/my.cnf:ro
+    networks:
+      - fiftyone_network
+    command: --default-authentication-plugin=mysql_native_password
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_ROOT_PASSWORD:-root}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+# Volúmenes nombrados
+volumes:
+  mysql_data:
+    driver: local
+  vendor:
+    driver: local
+  node_modules:
+    driver: local
+
+# Red personalizada
+networks:
+  fiftyone_network:
+    driver: bridge
+

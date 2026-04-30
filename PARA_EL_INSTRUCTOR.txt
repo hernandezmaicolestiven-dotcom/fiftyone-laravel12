@@ -1,0 +1,134 @@
+═══════════════════════════════════════════════════════════════════
+    🎓 GUÍA RÁPIDA PARA EL INSTRUCTOR - FIFTYONE E-COMMERCE
+═══════════════════════════════════════════════════════════════════
+
+📱 PASO 1: CONECTARSE AL MISMO WI-FI
+───────────────────────────────────────────────────────────────────
+Asegúrate de estar en la misma red Wi-Fi que el estudiante.
+
+
+🌐 PASO 2: ABRIR EL NAVEGADOR Y PROBAR ESTAS URLs (EN ORDEN)
+───────────────────────────────────────────────────────────────────
+
+Opción 1 (Principal):
+http://10.6.64.193:8000
+
+Opción 2 (Alternativa):
+http://192.168.137.1:8000
+
+Opción 3 (Alternativa):
+http://172.30.144.1:8000
+
+
+🏠 PASO 3: VER LA PÁGINA PRINCIPAL (TIENDA)
+───────────────────────────────────────────────────────────────────
+Deberías ver:
+✅ Sección "Looks del Día" con imágenes
+✅ Catálogo de 25 productos
+✅ Carrito de compras funcional
+✅ Búsqueda y filtros
+
+
+👨‍💼 PASO 4: ACCEDER AL PANEL DE ADMINISTRACIÓN
+───────────────────────────────────────────────────────────────────
+
+URL:
+http://10.6.64.193:8000/admin/login
+
+Credenciales:
+Email:    admin@fiftyone.com
+Password: Admin123!
+
+⚠️ IMPORTANTE:
+   - La "A" de Admin es MAYÚSCULA
+   - Incluye el signo de exclamación (!) al final
+   - Copia y pega exactamente como está
+
+
+✨ PASO 5: EXPLORAR EL PANEL ADMIN
+───────────────────────────────────────────────────────────────────
+Una vez dentro, puedes ver:
+
+✅ Dashboard con estadísticas y gráficas
+✅ Productos (25 productos de prueba)
+✅ Pedidos (203 pedidos de prueba)
+✅ Usuarios (100 usuarios)
+✅ Reportes y analíticas
+✅ Sistema de facturación (generar PDF)
+✅ Cupones de descuento
+✅ Categorías
+✅ Mensajes de contacto
+✅ Reseñas de productos (34 reseñas)
+
+
+👤 PASO 6: PROBAR COMO CLIENTE (OPCIONAL)
+───────────────────────────────────────────────────────────────────
+
+URL:
+http://10.6.64.193:8000/login
+
+Credenciales:
+Email:    cliente@test.com
+Password: Cliente123!
+
+Puedes ver:
+✅ Perfil de usuario
+✅ Historial de pedidos
+✅ Lista de deseos
+✅ Hacer compras
+
+
+🎯 FUNCIONALIDADES DESTACADAS PARA PROBAR
+───────────────────────────────────────────────────────────────────
+
+1. En el Panel Admin:
+   - Crear un nuevo producto
+   - Ver detalles de un pedido
+   - Generar una factura en PDF
+   - Ver reportes de ventas
+   - Cambiar estado de un pedido
+
+2. En la Tienda:
+   - Agregar productos al carrito
+   - Buscar productos
+   - Filtrar por categoría
+   - Ver "Looks del Día"
+
+
+🔧 SI ALGO NO FUNCIONA
+───────────────────────────────────────────────────────────────────
+
+1. Verifica que estés en el mismo Wi-Fi
+2. Prueba las 3 URLs en orden
+3. Asegúrate de copiar las credenciales exactamente
+4. Avisa al estudiante si hay problemas
+
+
+📊 DATOS DEL SISTEMA
+───────────────────────────────────────────────────────────────────
+✅ 25 productos en catálogo
+✅ 100 usuarios registrados
+✅ 203 pedidos de prueba
+✅ 34 reseñas de productos
+✅ 4 categorías de productos
+✅ 6 métodos de pago implementados
+
+
+💡 PUNTOS FUERTES DEL PROYECTO
+───────────────────────────────────────────────────────────────────
+✅ Dockerización completa (fácil de desplegar)
+✅ Arquitectura limpia y organizada
+✅ Sistema completo de e-commerce
+✅ Panel de administración profesional
+✅ Seguridad implementada (autenticación, validación)
+✅ Documentación completa
+
+
+═══════════════════════════════════════════════════════════════════
+    ¡LISTO PARA PROBAR! 🚀
+═══════════════════════════════════════════════════════════════════
+
+Proyecto: FiftyOne E-commerce
+Tecnologías: Laravel 12, PHP 8.2, MySQL 8.0, Docker
+Fecha: 30 de Abril de 2026
+

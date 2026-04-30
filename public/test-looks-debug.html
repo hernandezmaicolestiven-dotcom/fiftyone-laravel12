@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test Looks del Día - Debug</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <script crossorigin src="https://cdn.jsdelivr.net/npm/react@18.2.0/umd/react.production.min.js"></script>
+  <script crossorigin src="https://cdn.jsdelivr.net/npm/react-dom@18.2.0/umd/react-dom.production.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@babel/standalone@7.23.5/babel.min.js"></script>
+</head>
+<body class="bg-gray-900">
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState } = React;
+
+    // Datos de prueba
+    const dbProducts = [
+      { id: 241, name: 'Hoodie Oversize Negro Básico', price: 120000, img: 'https://images.unsplash.com/photo-1556821840-3a63f15732ce?auto=format&fit=crop&w=800&q=80' },
+      { id: 242, name: 'Hoodie Gris Melange Premium', price: 125000, img: 'https://images.unsplash.com/photo-1620799140408-edc6dcb6d633?auto=format&fit=crop&w=800&q=80' },
+      { id: 243, name: 'Hoodie Beige Aesthetic', price: 130000, img: 'https://images.unsplash.com/photo-1509631179647-0177331693ae?auto=format&fit=crop&w=800&q=80' },
+      { id: 244, name: 'Hoodie Negro con Logo Bordado', price: 145000, img: 'https://images.unsplash.com/photo-1618354691373-d851c5c3a990?auto=format&fit=crop&w=800&q=80' },
+      { id: 245, name: 'Hoodie Azul Marino Clásico', price: 118000, img: 'https://images.unsplash.com/photo-1578587018452-892bacefd3f2?auto=format&fit=crop&w=800&q=80' },
+      { id: 246, name: 'Hoodie Crema Vintage Wash', price: 135000, img: 'https://images.unsplash.com/photo-1614252369475-531eba835eb1?auto=format&fit=crop&w=800&q=80' },
+      { id: 247, name: 'Camiseta Boxy Negra Básica', price: 65000, img: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&w=800&q=80' },
+      { id: 248, name: 'Camiseta Oversize Blanca', price: 60000, img: 'https://images.unsplash.com/photo-156215787-818bc0726f68?auto=format&fit=crop&w=800&q=80' },
+      { id: 249, name: 'Camiseta Gris con Estampado', price: 70000, img: 'https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?auto=format&fit=crop&w=800&q=80' }
+    ];
+
+    const fmt = n => '$ ' + Math.round(parseFloat(n)).toLocaleString('es-CO');
+
+    function LooksDelDia({ onAdd }) {
+      const allProducts = dbProducts || [];
+      
+      console.log('🔍 Debug - Total productos:', allProducts.length);
+      console.log('🔍 Debug - Productos:', allProducts);
+      
+      if (allProducts.length === 0) {
+        return <div className="text-white text-center p-20">No hay productos disponible

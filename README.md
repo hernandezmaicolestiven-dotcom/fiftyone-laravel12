@@ -19,7 +19,33 @@ Sistema de gestión para tienda de ropa oversize. Incluye panel admin completo, 
 
 ---
 
-## Instalación local
+## 🐳 Instalación con Docker (Recomendado)
+
+La forma más rápida de ejecutar el proyecto. No necesitas instalar PHP, MySQL, ni Node.js.
+
+### Requisitos
+- Docker Desktop ([Descargar](https://www.docker.com/products/docker-desktop))
+
+### Inicio Rápido
+
+**Windows:**
+```bash
+scripts/docker/docker-start.bat
+```
+
+**Linux/Mac:**
+```bash
+chmod +x scripts/docker/docker-start.sh
+./scripts/docker/docker-start.sh
+```
+
+Accede a: http://localhost:8000
+
+📚 **Documentación completa:** [docs/docker/DOCKER.md](docs/docker/DOCKER.md) | [Guía rápida](docs/docker/DOCKER-QUICKSTART.md) | [Resumen](docs/docker/DOCKER-SUMMARY.md)
+
+---
+
+## 💻 Instalación local (Sin Docker)
 
 ### 1. Clonar el repositorio
 
@@ -96,6 +122,7 @@ Toda la documentación está organizada en la carpeta [`docs/`](docs/):
 
 ### Guías Principales
 
+- [🐳 Docker](docs/docker/DOCKER.md) - Ejecutar el proyecto en Docker
 - [Sistema de Pagos](docs/guias/SISTEMA_PAGOS_COMPLETO.md) - 6 métodos de pago implementados
 - [Sistema de Registro y Login](docs/guias/SISTEMA_REGISTRO_LOGIN.md)
 - [Recuperación de Contraseña](docs/guias/RECUPERACION_CONTRASENA.md)

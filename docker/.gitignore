@@ -1,0 +1,8 @@
+# Ignorar logs de MySQL
+mysql/*.log
+
+# Ignorar archivos temporales
+*.tmp
+*.bak
+*.swp
+

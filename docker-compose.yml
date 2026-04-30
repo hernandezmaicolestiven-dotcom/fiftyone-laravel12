@@ -1,0 +1,63 @@
+version: '3.8'
+
+services:
+  # Contenedor de la aplicación Laravel
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: fiftyone_app
+    restart: unless-stopped
+    working_dir: /var/www/html
+    volumes:
+      # Bind mount del proyecto completo
+      - ./:/var/www/html
+      # Volumen para vendor (mejor rendimiento)
+      - vendor:/var/www/html/vendor
+      # Volumen para node_modules (mejor rendimiento)
+      - node_modules:/var/www/html/node_modules
+    ports:
+      - "8000:80"
+    environment:
+      - DB_HOST=db
+      - DB_PORT=3306
+      - DB_DATABASE=fiftyone
+      - DB_USERNAME=laravel
+      - DB_PASSWORD=secret
+    depends_on:
+      - db
+    networks:
+      - fiftyone_network
+
+  # Contenedor de MySQL
+  db:
+    image: mysql:8.0
+    container_name: fiftyone_db
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: fiftyone
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_USER: laravel
+      MYSQL_PASSWORD: secret
+    ports:
+      # Puerto 3307 en el host para evitar conflictos
+      - "3307:3306"
+    volumes:
+      # Named volume para persistir datos
+      - mysql_data:/var/lib/mysql
+    networks:
+      - fiftyone_network
+
+# Volúmenes nombrados
+volumes:
+  mysql_data:
+    driver: local
+  vendor:
+    driver: local
+  node_modules:
+    driver: local
+
+# Red personalizada
+networks:
+  fiftyone_network:
+    driver: bridge
