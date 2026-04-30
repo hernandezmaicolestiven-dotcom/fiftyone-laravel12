@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Test Simple - Looks</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <script crossorigin src="https://cdn.jsdelivr.net/npm/react@18.2.0/umd/react.production.min.js"></script>
+  <script crossorigin src="https://cdn.jsdelivr.net/npm/react-dom@18.2.0/umd/react-dom.production.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@babel/standalone@7.23.5/babel.min.js"></script>
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+  </style>
+</head>
+<body class="bg-gray-100">
+  <div id="root"></div>
+
+  <script type="text/babel">
+    // Datos de prueba simples
+    const testProducts = [
+      { id: 1, name: 'Producto 1', price: 100000, img: 'https://images.unsplash.com/photo-1556821840-3a63f15732ce?w=400&q=80' },
+      { id: 2, name: 'Producto 2', price: 200000, img: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400&q=80' },
+      { id: 3, name: 'Producto 3', price: 300000, img: 'https://images.unsplash.com/photo-1542272604-787c3835535d?w=400&q=80' },
+      { id: 4, name: 'Producto 4', price: 400000, img: 'https://images.unsplash.com/photo-1620799140408-edc6dcb6d633?w=400&q=80' },
+      { id: 5, name: 'Producto 5', price: 500000, img: 'https://images.unsplash.com/photo-1542272604-787c3835535d?w=400&q=80' },
+      { id: 6, name: 'Producto 6', price: 600000, img: 'https://images.unsplash.com/photo-1588850561407-ed78c282e89b?w=400&q=80' },
+      { id: 7, name: 'Producto 7', price: 700000, img: 'https://images.unsplash.com/photo-1556821840-3a63f15732ce?w=400&q=80' },
+      { id: 8, name: 'Producto 8', price: 800000, img: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400&q=80' },
+      { id: 9, name: 'Producto 9', price: 900000, img: 'https://images.unsplash.com/photo-1542272604-787c3835535d?w=400&q=80' },
+    ];
+
+    const fmt = n => '$ ' + Math.round(parseFloat(n)).toLocaleString('es-CO');
+
+    function TestLooks() {
+      console.log('TestLooks renderizando...');
+      console.log('testProducts:', testProducts);
+
+      const looks = [
+        {
+          title: 'Look 1',
+          products: [testProducts[0], testProducts[1], testProducts[2]],
+          bg: 'from-[#0d0d1a] to-[#1a0a2e]',
+        },
+        {
+          title: 'Look 2',
+          products: [testProducts[3], testProducts[4], testProducts[5]],
+          bg: 'from-[#0a0e2e] to-[#0d0d1a]',
+        },
+        {
+          title: 'Look 3',
+          products: [testProducts[6], testProducts[7], testProducts[8]],
+          bg: 'from-[#1a0a2e] to-[#0a0e2e]',
+        },
+      ];
+
+      console.log('looks:', looks);
+
+      return (
+        <div className="py-20 bg-gray-50">
+          <div className="max-w-7xl mx-auto px-4">
+            <h1 className="text-4xl font-black text-center mb-12">Test - Looks del Día</h1>
+            <div className="grid md:grid-cols-3 gap-6">
+              {looks.map((look, i) => {
+                console.log(`Renderizando look ${i}:`, look);
+                return (
+                  <div key={i} className={`rounded-3xl bg-gradient-to-br ${look.bg} p-6 text-white`}>
+                    <h3 className="font-black text-xl mb-4">{look.title}</h3>
+                    <div className="space-y-3">
+                      {look.products.map(p => {
+                        console.log(`Renderizando producto:`, p);
+                        return (
+                          <div key={p.id} className="flex items-center gap-3 rounded-2xl p-3"
+                               style={{background:'rgba(255,255,255,.07)',border:'1px solid rgba(255,255,255,.1)'}}>
+                            <div className="w-12 h-12 rounded-xl overflow-hidden flex-shrink-0 bg-gray-700">
+                              <img src={p.img} className="w-full h-full object-cover" alt={p.name}
+                                   onError={(e) => { console.error('Error cargando imagen:', p.img); e.target.style.display='none'; }}
+                                   onLoad={() => console.log('Imagen cargada:', p.img)} />
+                            </div>
+                            <div className="flex-1">
+                              <p className="text-sm font-semibold">{p.name}</p>
+                              <p className="text-xs opacity-60">{fmt(p.price)}</p>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                    <div className="mt-4 pt-4 border-t border-white/10 flex justify-between">
+                      <span className="text-xs opacity-60">Total</span>
+                      <span className="font-black">{fmt(look.products.reduce((s,p) => s + p.price, 0))}</span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    console.log('Iniciando render...');
+    ReactDOM.render(<TestLooks />, document.getElementById('root'));
+    console.log('Render completado');
+  </script>
+</body>
+</html>

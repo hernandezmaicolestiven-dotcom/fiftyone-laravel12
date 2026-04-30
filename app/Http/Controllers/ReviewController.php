@@ -27,6 +27,7 @@ class ReviewController extends Controller
     {
         $reviews = Review::with('user')
             ->where('product_id', $request->product_id)
+            ->approved() // Solo reseñas aprobadas
             ->latest()
             ->get()
             ->map(fn($r) => [

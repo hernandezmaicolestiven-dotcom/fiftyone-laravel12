@@ -11,12 +11,49 @@ class ReviewController extends Controller
     {
         $products = \App\Models\Product::orderBy('name')->get();
         $productId = request('product_id');
-        $query = Review::with(['product', 'user'])->latest();
+        $status = request('status'); // pending, approved, rejected
+        
+        $query = Review::with(['product', 'user', 'approver'])->latest();
+        
         if ($productId) {
             $query->where('product_id', $productId);
         }
-        $reviews = $query->paginate(20);
-        return view('admin.reviews.index', compact('reviews', 'products', 'productId'));
+        
+        if ($status) {
+            $query->where('status', $status);
+        }
+        
+        $reviews = $query->paginate(20)->withQueryString();
+        
+        // Estadísticas
+        $stats = [
+            'pending' => Review::where('status', 'pending')->count(),
+            'approved' => Review::where('status', 'approved')->count(),
+            'rejected' => Review::where('status', 'rejected')->count(),
+            'total' => Review::count(),
+        ];
+        
+        return view('admin.reviews.index', compact('reviews', 'products', 'productId', 'status', 'stats'));
+    }
+
+    /**
+     * Aprobar reseña
+     */
+    public function approve(Review $review)
+    {
+        $review->approve(auth()->id());
+        
+        return back()->with('success', 'Reseña aprobada correctamente.');
+    }
+
+    /**
+     * Rechazar reseña
+     */
+    public function reject(Review $review)
+    {
+        $review->reject();
+        
+        return back()->with('success', 'Reseña rechazada.');
     }
 
     public function destroy(Review $review)

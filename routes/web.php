@@ -29,12 +29,18 @@ use Illuminate\Support\Facades\Route;
 
 // Public
 Route::get('/', function () {
-    // Cachear productos por 5 minutos para mejorar rendimiento
-    $products = cache()->remember('home_products', 300, function () {
-        return Product::with(['category', 'reviews'])
+    // Obtener página actual
+    $page = request()->get('page', 1);
+    $perPage = 8; // Solo 8 productos en home
+    
+    // Cachear productos paginados por 10 minutos
+    $cacheKey = "home_products_page_{$page}";
+    $products = cache()->remember($cacheKey, 600, function () use ($perPage) {
+        return Product::with(['category:id,name'])
+            ->withCount('reviews')
+            ->select('id', 'name', 'price', 'stock', 'image', 'category_id', 'sizes', 'colors', 'created_at')
             ->latest()
-            ->take(50) // Limitar a 50 productos más recientes
-            ->get();
+            ->paginate($perPage);
     });
     
     $authUser = auth()->user();
@@ -52,9 +58,10 @@ Route::get('/', function () {
             ->toArray();
     }
     
-    // Reseñas para mostrar en home (últimas 6, cacheadas)
-    $reviews = cache()->remember('home_reviews', 300, function () {
+    // Reseñas para mostrar en home (últimas 6, cacheadas por 10 minutos)
+    $reviews = cache()->remember('home_reviews', 600, function () {
         return \App\Models\Review::with(['user:id,name', 'product:id,name'])
+            ->approved() // Solo reseñas aprobadas
             ->latest()
             ->take(6)
             ->get()
@@ -135,6 +142,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         // Reseñas
         Route::get('reviews', [AdminReviewController::class, 'index'])->name('reviews.index');
+        Route::post('reviews/{review}/approve', [AdminReviewController::class, 'approve'])->name('reviews.approve');
+        Route::post('reviews/{review}/reject', [AdminReviewController::class, 'reject'])->name('reviews.reject');
         Route::delete('reviews/{review}', [AdminReviewController::class, 'destroy'])->name('reviews.destroy');
         Route::get('reviews/trashed', [AdminReviewController::class, 'trashed'])->name('reviews.trashed');
         Route::patch('reviews/{id}/restore', [AdminReviewController::class, 'restore'])->name('reviews.restore');
@@ -168,6 +177,16 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('profile', [ProfileController::class, 'edit'])->name('profile');
         Route::put('profile', [ProfileController::class, 'update'])->name('profile.update');
         Route::put('profile/password', [ProfileController::class, 'updatePassword'])->name('profile.password');
+
+        // Facturas
+        Route::get('invoices', [\App\Http\Controllers\Admin\InvoiceController::class, 'index'])->name('invoices.index');
+        Route::get('invoices/settings', [\App\Http\Controllers\Admin\InvoiceController::class, 'settings'])->name('invoices.settings');
+        Route::put('invoices/settings', [\App\Http\Controllers\Admin\InvoiceController::class, 'updateSettings'])->name('invoices.update-settings');
+        Route::get('invoices/export-csv', [\App\Http\Controllers\Admin\InvoiceController::class, 'exportCsv'])->name('invoices.export-csv');
+        Route::get('invoices/{invoice}', [\App\Http\Controllers\Admin\InvoiceController::class, 'show'])->name('invoices.show');
+        Route::post('invoices/{invoice}/cancel', [\App\Http\Controllers\Admin\InvoiceController::class, 'cancel'])->name('invoices.cancel');
+        Route::post('invoices/{invoice}/resend', [\App\Http\Controllers\Admin\InvoiceController::class, 'resend'])->name('invoices.resend');
+        Route::get('invoices/{invoice}/download-pdf', [\App\Http\Controllers\Admin\InvoiceController::class, 'downloadPdf'])->name('invoices.download-pdf');
     });
 });
 
