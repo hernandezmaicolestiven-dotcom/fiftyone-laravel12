@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Wompi Checkout</title>
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 600px;
+            width: 100%;
+            padding: 40px;
+        }
+        h1 {
+            color: #1e293b;
+            font-size: 28px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .info {
+            background: #f0f9ff;
+            border-left: 4px solid #0ea5e9;
+            padding: 16px;
+            margin-bottom: 24px;
+            border-radius: 8px;
+        }
+        .info h3 {
+            color: #0369a1;
+            font-size: 16px;
+            margin-bottom: 8px;
+        }
+        .info p {
+            color: #0c4a6e;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+        .btn {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, #00D4A1 0%, #00B88D 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 12px rgba(0,212,161,0.3);
+            margin-bottom: 12px;
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,212,161,0.4);
+        }
+        .btn:active {
+            transform: translateY(0);
+        }
+        .log {
+            background: #1e293b;
+            color: #10b981;
+            padding: 16px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            max-height: 300px;
+            overflow-y: auto;
+            margin-top: 20px;
+            display: none;
+        }
+        .log.show {
+            display: block;
+        }
+        .log-line {
+            margin-bottom: 4px;
+        }
+        .error {
+            color: #ef4444;
+        }
+        .success {
+            color: #10b981;
+        }
+        .warning {
+            color: #f59e0b;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 Test Wompi Checkout</h1>
+
+        <div class="info">
+            <h3>📋 Instrucciones</h3>
+            <p>Este es un test directo del flujo de pago con Wompi. Presiona el botón para simular una compra y ver si el checkout funciona correctamente.</p>
+        </div>
+
+        <button class="btn" onclick="testWompi()">🚀 Probar Wompi</button>
+        <button class="btn" onclick="clearCache()" style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);">🗑️ Limpiar Caché</button>
+
+        <div class="log" id="log"></div>
+    </div>
+
+    <script>
+        const log = document.getElementById('log');
+
+        function addLog(message, type = 'info') {
+            log.classList.add('show');
+            const line = document.createElement('div');
+            line.className = 'log-line ' + type;
+            line.textContent = new Date().toLocaleTimeString() + ' - ' + message;
+            log.appendChild(line);
+            log.scrollTop = log.scrollHeight;
+        }
+
+        function clearCache() {
+            addLog('🗑️ Limpiando caché...', 'warning');
+            localStorage.clear();
+            sessionStorage.clear();
+            addLog('✅ Caché limpiado', 'success');
+            setTimeout(() => {
+                addLog('🔄 Recargando página...', 'info');
+                location.reload(true);
+            }, 1000);
+        }
+
+        async function testWompi() {
+            log.innerHTML = '';
+            log.classList.add('show');
+            
+            addLog('🚀 Iniciando test de Wompi...', 'info');
+            
+            try {
+                // Paso 1: Crear orden
+                addLog('📦 Paso 1: Creando orden de prueba...', 'info');
+                
+                const orderRes = await fetch('/orders', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '',
+                    },
+                    body: JSON.stringify({
+                        customer_name: 'Test Usuario',
+                        customer_email: 'test@example.com',
+                        customer_phone: '3001234567',
+                        shipping_address: 'Calle 123 #45-67',
+                        city: 'Bogotá',
+                        notes: 'Test de Wompi',
+                        items: [{ product_id: 1, quantity: 1 }],
+                        payment_method: 'wompi',
+                    }),
+                });
+
+                if (!orderRes.ok) {
+                    const errorText = await orderRes.text();
+                    addLog('❌ Error al crear orden: ' + orderRes.status + ' ' + orderRes.statusText, 'error');
+                    addLog('Respuesta: ' + errorText.substring(0, 200), 'error');
+                    return;
+                }
+
+                const orderData = await orderRes.json();
+                addLog('✅ Orden creada: ID ' + orderData.order_id, 'success');
+
+                // Paso 2: Crear transacción Wompi
+                addLog('💳 Paso 2: Creando transacción Wompi...', 'info');
+                
+                const wompiRes = await fetch('/api/wompi/create-transaction', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '',
+                    },
+                    body: JSON.stringify({ order_id: orderData.order_id }),
+                });
+
+                addLog('📡 Respuesta: ' + wompiRes.status + ' ' + wompiRes.statusText, 'info');
+
+                const contentType = wompiRes.headers.get('content-type');
+                if (!contentType || !contentType.includes('application/json')) {
+                    const text = await wompiRes.text();
+                    addLog('❌ La respuesta no es JSON: ' + contentType, 'error');
+                    addLog('Contenido: ' + text.substring(0, 200), 'error');
+                    return;
+                }
+
+                const wompiData = await wompiRes.json();
+                addLog('✅ Transacción creada', 'success');
+                addLog('📋 Datos: ' + JSON.stringify(wompiData, null, 2), 'info');
+
+                if (wompiData.success && wompiData.checkout_data) {
+                    // Construir URL del checkout
+                    const checkoutUrl = '/wompi-demo.html?' + new URLSearchParams({
+                        'amount-in-cents': wompiData.checkout_data.amount_in_cents,
+                        'reference': wompiData.checkout_data.reference,
+                        'redirect-url': wompiData.checkout_data.redirect_url,
+                    }).toString();
+
+                    addLog('🌐 URL del checkout: ' + checkoutUrl, 'success');
+                    addLog('🎉 ¡TODO FUNCIONA! Redirigiendo en 3 segundos...', 'success');
+
+                    setTimeout(() => {
+                        window.location.href = checkoutUrl;
+                    }, 3000);
+                } else {
+                    addLog('❌ Error en respuesta de Wompi: ' + (wompiData.message || 'Desconocido'), 'error');
+                }
+
+            } catch (error) {
+                addLog('❌ Error: ' + error.message, 'error');
+                addLog('Stack: ' + error.stack, 'error');
+            }
+        }
+
+        // Auto-test al cargar (opcional)
+        // testWompi();
+    </script>
+</body>
+</html>

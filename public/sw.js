@@ -1,5 +1,5 @@
 // FiftyOne Service Worker — PWA offline support
-const CACHE_NAME = 'fiftyone-v1';
+const CACHE_NAME = 'fiftyone-v2'; // Cambiado para forzar actualización
 const STATIC_ASSETS = ['/', '/catalogo'];
 
 // Instalar: cachear assets estáticos
@@ -24,6 +24,9 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
   if (event.request.url.includes('/admin')) return; // No cachear el panel admin
+  if (event.request.url.includes('/api/')) return; // NO CACHEAR API
+  if (event.request.url.includes('/orders')) return; // NO CACHEAR ÓRDENES
+  if (event.request.url.includes('/wompi')) return; // NO CACHEAR WOMPI
 
   event.respondWith(
     fetch(event.request)

@@ -92,7 +92,10 @@ start-queue-worker.bat
 
 ### 💳 Sistema de Pagos
 - [Sistema de Pagos Completo](guias/SISTEMA_PAGOS_COMPLETO.md) - **IMPORTANTE**
-- Métodos disponibles: Nequi, Daviplata, PSE, Bancolombia, Efecty, Tarjeta
+- **[Integración Wompi](INTEGRACION_WOMPI.md)** - **NUEVO** - Pasarela de pagos profesional
+- **[Quick Start Wompi](WOMPI_QUICK_START.md)** - Setup en 5 minutos
+- **[Mejoras Futuras Wompi](WOMPI_MEJORAS_FUTURAS.md)** - Roadmap
+- Métodos disponibles: Wompi, Nequi, Daviplata, PSE, Bancolombia, Efecty, Tarjeta
 
 ### 📧 Correos y Notificaciones
 - [Configurar Correo Real](guias/CONFIGURAR_CORREO_REAL.md)
@@ -136,7 +139,8 @@ Ver carpeta [`../scripts/tests/`](../scripts/tests/)
 ## 📊 Estado del Sistema
 
 ✅ **Sistema de Autenticación** - 100% Funcional
-✅ **Sistema de Pagos** - 100% Funcional (6 métodos)
+✅ **Sistema de Pagos** - 100% Funcional (7 métodos)
+✅ **Integración Wompi** - 100% Funcional (NUEVO)
 ✅ **Sistema de Facturación** - 100% Funcional
 ✅ **Sistema de Avatares** - 100% Funcional
 ✅ **Recuperación de Contraseña** - 100% Funcional
@@ -165,6 +169,6 @@ Si tienes problemas:
 
 ---
 
-**Última actualización:** 30 de Abril, 2026
-**Versión:** 1.0
+**Última actualización:** 11 de Mayo, 2026
+**Versión:** 1.1.0 (Wompi integrado)
 **Estado:** 🟢 Producción Ready

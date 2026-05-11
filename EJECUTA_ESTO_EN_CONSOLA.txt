@@ -1,0 +1,68 @@
+╔══════════════════════════════════════════════════════════════════╗
+║                                                                  ║
+║              📋 COPIA Y PEGA ESTO EN LA CONSOLA 📋               ║
+║                                                                  ║
+╚══════════════════════════════════════════════════════════════════╝
+
+
+1️⃣ Abre la consola del navegador:
+
+   Presiona: F12
+   
+   Luego haz clic en la pestaña "Console"
+
+
+2️⃣ Copia y pega este código:
+
+┌──────────────────────────────────────────────────────────────────┐
+│                                                                  │
+│  if('serviceWorker' in navigator){                               │
+│    navigator.serviceWorker.getRegistrations().then(r=>          │
+│      r.forEach(x=>x.unregister())                                │
+│    );                                                            │
+│  }                                                               │
+│  caches.keys().then(k=>k.forEach(x=>caches.delete(x)));         │
+│  localStorage.clear();                                           │
+│  sessionStorage.clear();                                         │
+│  setTimeout(()=>location.reload(true),1000);                     │
+│                                                                  │
+└──────────────────────────────────────────────────────────────────┘
+
+
+3️⃣ Presiona Enter
+
+   La página se recargará automáticamente en 1 segundo.
+
+
+4️⃣ Prueba de nuevo:
+
+   - Selecciona Wompi
+   - Haz clic en "Pagar"
+   - Deberías ver en la consola:
+     🚀 Iniciando pago con Wompi...
+     📡 Respuesta de Wompi: 200 OK
+     ✅ Datos de Wompi: {...}
+
+
+═══════════════════════════════════════════════════════════════════
+
+✅ ESTO LIMPIARÁ:
+
+- Service Workers
+- Cache Storage
+- LocalStorage
+- SessionStorage
+- Y recargará la página sin caché
+
+
+═══════════════════════════════════════════════════════════════════
+
+📞 DESPUÉS DE EJECUTAR:
+
+Avísame si:
+- ✅ Ves los logs nuevos en la consola
+- ✅ Te redirige a Wompi
+- ❌ Sigue el error
+
+
+═══════════════════════════════════════════════════════════════════

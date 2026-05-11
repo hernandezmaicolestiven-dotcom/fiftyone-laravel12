@@ -25,6 +25,10 @@
   <meta name="twitter:description" content="Hoodies, camisetas boxy y streetwear premium. Envíos a todo Colombia.">
   <meta name="csrf-token" content="{{ csrf_token() }}">
   <meta name="theme-color" content="#3B59FF">
+  {{-- Forzar recarga sin caché --}}
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
   <link rel="manifest" href="/manifest.json">
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -75,9 +79,26 @@
       'city'     => $authData['loggedIn'] ? (auth()->user()?->default_city) : null,
   ]) !!};
   window.__WISHLIST__ = {!! json_encode($wishlistIds ?? []) !!};
-  window.__STATS__ = {!! json_encode(['customers' => \App\Models\User::where('role','customer')->count(), 'products' => \App\Models\Product::count(), 'orders' => \App\Models\Order::count()]) !!};  </script>
+  window.__STATS__ = {!! json_encode(['customers' => \App\Models\User::where('role','customer')->count(), 'products' => \App\Models\Product::count(), 'orders' => \App\Models\Order::count()]) !!};
+  
+  // FORZAR RECARGA COMPLETA - Versión 2.7.0 (Modo Demo Restaurado)
+  const CURRENT_VERSION = '2.7.0';
+  const stored = localStorage.getItem('app_version');
+  if (stored !== CURRENT_VERSION) {
+    console.log('🔄 Actualizando a versión ' + CURRENT_VERSION);
+    localStorage.clear();
+    sessionStorage.clear();
+    localStorage.setItem('app_version', CURRENT_VERSION);
+    if (stored) {
+      window.location.reload(true);
+    }
+  }
+  </script>
 </head>
 <body class="bg-white text-gray-900 antialiased">
+
+
+
 <div id="root"></div>
 
 @php
@@ -312,12 +333,68 @@ function CartDrawer({ open, onClose, cart, onUpdateQty, onRemove, onClear, onChe
 
 // ── Payment methods config ──────────────────────────────────────────────────
 const PAYMENT_METHODS = [
-  { id:'nequi',       label:'Nequi',       sub:'Instantáneo',    icon:'fa-mobile-screen-button',  color:'#7B2FBE', bg:'rgba(123,47,190,.15)', border:'rgba(123,47,190,.4)'  },
-  { id:'daviplata',   label:'Daviplata',   sub:'Billetera',      icon:'fa-wallet',                color:'#E8001C', bg:'rgba(232,0,28,.12)',   border:'rgba(232,0,28,.35)'   },
-  { id:'pse',         label:'PSE',         sub:'Débito banco',   icon:'fa-building-columns',      color:'#00A859', bg:'rgba(0,168,89,.12)',   border:'rgba(0,168,89,.35)'   },
-  { id:'bancolombia', label:'Bancolombia', sub:'Transferencia',  icon:'fa-arrow-right-arrow-left', color:'#FDDA24', bg:'rgba(253,218,36,.12)', border:'rgba(253,218,36,.35)' },
-  { id:'efecty',      label:'Efecty',      sub:'Efectivo',       icon:'fa-money-bill-wave',       color:'#FFB800', bg:'rgba(255,184,0,.12)',  border:'rgba(255,184,0,.35)'  },
-  { id:'tarjeta',     label:'Tarjeta',     sub:'Créd / Déb',     icon:'fa-credit-card',           color:'#3B59FF', bg:'rgba(59,89,255,.15)', border:'rgba(59,89,255,.4)'   },
+  { 
+    id:'wompi', 
+    label:'Wompi', 
+    sub:'Tarjeta de crédito/débito',
+    desc:'Pago seguro con tarjeta',
+    icon:'fa-credit-card',
+    color:'#00D4A1', 
+    bg:'linear-gradient(135deg, rgba(0,212,161,.15), rgba(0,212,161,.25))', 
+    border:'rgba(0,212,161,.5)', 
+    featured: true,
+    badge: 'Recomendado'
+  },
+  { 
+    id:'nequi', 
+    label:'Nequi', 
+    sub:'Pago instantáneo',
+    desc:'Desde tu app Nequi',
+    icon:'fa-mobile-screen-button',
+    color:'#7B2FBE', 
+    bg:'linear-gradient(135deg, rgba(123,47,190,.15), rgba(123,47,190,.25))', 
+    border:'rgba(123,47,190,.5)'
+  },
+  { 
+    id:'daviplata', 
+    label:'Daviplata', 
+    sub:'Billetera digital',
+    desc:'Pago desde Daviplata',
+    icon:'fa-wallet',
+    color:'#E8001C', 
+    bg:'linear-gradient(135deg, rgba(232,0,28,.12), rgba(232,0,28,.22))', 
+    border:'rgba(232,0,28,.45)'
+  },
+  { 
+    id:'pse', 
+    label:'PSE', 
+    sub:'Débito bancario',
+    desc:'Pago desde tu banco',
+    icon:'fa-building-columns',
+    color:'#00A859', 
+    bg:'linear-gradient(135deg, rgba(0,168,89,.12), rgba(0,168,89,.22))', 
+    border:'rgba(0,168,89,.45)'
+  },
+  { 
+    id:'bancolombia', 
+    label:'Bancolombia', 
+    sub:'Transferencia',
+    desc:'Transferencia bancaria',
+    icon:'fa-arrow-right-arrow-left',
+    color:'#FDDA24', 
+    bg:'linear-gradient(135deg, rgba(253,218,36,.12), rgba(253,218,36,.22))', 
+    border:'rgba(253,218,36,.45)'
+  },
+  { 
+    id:'efecty', 
+    label:'Efecty', 
+    sub:'Pago en efectivo',
+    desc:'En puntos Efecty',
+    icon:'fa-money-bill-wave',
+    color:'#FFB800', 
+    bg:'linear-gradient(135deg, rgba(255,184,0,.12), rgba(255,184,0,.22))', 
+    border:'rgba(255,184,0,.45)'
+  },
 ];
 
 // ── Checkout Modal — 3 pasos ────────────────────────────────────────────────
@@ -380,13 +457,17 @@ function CheckoutModal({ cart, onClose, onSuccess }) {
     if (!payMethod) { setErr('Selecciona un método de pago'); return; }
     if (payMethod === 'pse' && !pseBank) { setErr('Selecciona tu banco para PSE'); return; }
     if (payMethod === 'tarjeta' && (!cardNum || !cardExp || !cardCvv || !cardName)) { setErr('Completa los datos de la tarjeta'); return; }
+    
     // Verificar sesión justo antes de enviar
     if (!auth.loggedIn) {
       sessionStorage.setItem('fiftyone_checkout_cart', localStorage.getItem('fiftyone_cart') || '[]');
       window.location.href = '/login?redirect=checkout';
       return;
     }
-    setErr(''); setLoading(true);
+    
+    setErr(''); 
+    setLoading(true);
+    
     try {
       // Preparar detalles del pago según el método
       const paymentDetails = {};
@@ -397,6 +478,7 @@ function CheckoutModal({ cart, onClose, onSuccess }) {
         paymentDetails.card_holder = cardName;
       }
 
+      // Crear la orden primero
       const res = await fetch('/orders', {
         method:'POST',
         headers:{'Content-Type':'application/json','X-CSRF-TOKEN':document.querySelector('meta[name="csrf-token"]').content},
@@ -413,11 +495,79 @@ function CheckoutModal({ cart, onClose, onSuccess }) {
           payment_details: paymentDetails,
         }),
       });
+      
       const data = await res.json();
-      if (res.ok && data.success) onSuccess(data.order_id);
-      else setErr(data.message || 'Error al procesar el pedido.');
-    } catch { setErr('Error de conexión.'); }
-    finally { setLoading(false); }
+      
+      if (!res.ok || !data.success) {
+        setErr(data.message || 'Error al procesar el pedido.');
+        setLoading(false);
+        return;
+      }
+
+      // Si el método de pago es Wompi, redirigir al checkout de Wompi
+      if (payMethod === 'wompi') {
+        try {
+          console.log('🚀 Iniciando pago con Wompi para orden:', data.order_id);
+          
+          const wompiRes = await fetch('/api/wompi/create-transaction', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Accept': 'application/json',
+              'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+            },
+            body: JSON.stringify({ order_id: data.order_id }),
+          });
+
+          console.log('📡 Respuesta de Wompi:', wompiRes.status, wompiRes.statusText);
+
+          // Verificar si la respuesta es JSON
+          const contentType = wompiRes.headers.get('content-type');
+          if (!contentType || !contentType.includes('application/json')) {
+            console.error('❌ La respuesta no es JSON:', contentType);
+            const text = await wompiRes.text();
+            console.error('Contenido:', text.substring(0, 200));
+            setErr('Error: El servidor no respondió correctamente. Por favor recarga la página (Ctrl+Shift+R)');
+            setLoading(false);
+            return;
+          }
+
+          const wompiData = await wompiRes.json();
+          console.log('✅ Datos de Wompi:', wompiData);
+
+          if (wompiData.success) {
+            // MODO DEMO: Redirigir a página demo local
+            console.log('🌐 Redirigiendo a demo de Wompi...');
+            
+            // Guardar datos en sessionStorage para la página demo
+            sessionStorage.setItem('wompi_payment_data', JSON.stringify({
+              order_id: data.order_id,
+              amount: wompiData.checkout_data?.amount_in_cents || 0,
+              reference: wompiData.checkout_data?.reference || '',
+              customer_email: wompiData.checkout_data?.customer_email || ''
+            }));
+            
+            // Redirigir a la página demo
+            window.location.href = '/wompi-demo.html';
+          } else {
+            console.error('❌ Error en respuesta de Wompi:', wompiData);
+            setErr(wompiData.message || 'Error al iniciar el pago con Wompi');
+            setLoading(false);
+          }
+        } catch (wompiError) {
+          console.error('❌ Error Wompi:', wompiError);
+          setErr('Error al conectar con Wompi. Por favor recarga la página (Ctrl+Shift+R)');
+          setLoading(false);
+        }
+      } else {
+        // Para otros métodos de pago, mostrar éxito inmediatamente
+        onSuccess(data.order_id);
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      setErr('Error de conexión.');
+      setLoading(false);
+    }
   };
 
   const iCls = "w-full rounded-xl px-4 py-3 text-sm text-white font-medium focus:outline-none transition-all";
@@ -568,45 +718,63 @@ function CheckoutModal({ cart, onClose, onSuccess }) {
                 style={{background:'rgba(239,68,68,.1)',border:'1px solid rgba(239,68,68,.25)',color:'#fca5a5'}}>
                 <i className="fa-solid fa-circle-exclamation"></i> {err}</div>}
 
-              <p className="text-xs font-bold uppercase tracking-widest" style={{color:'rgba(255,255,255,.35)'}}>Elige cómo pagar</p>
+              <p className="text-xs font-bold uppercase tracking-widest mb-1" style={{color:'rgba(255,255,255,.35)'}}>Elige cómo pagar</p>
 
-              {/* Payment grid */}
-              <div className="grid grid-cols-3 gap-2">
+              {/* Payment grid - MEJORADO */}
+              <div className="grid grid-cols-2 gap-3">
                 {PAYMENT_METHODS.map(m => (
                   <button key={m.id} onClick={()=>setPayMethod(m.id)}
-                    className="flex flex-col items-center gap-2 rounded-2xl p-3 transition-all hover:scale-[1.04] active:scale-[.97]"
+                    className="relative flex flex-col items-start gap-2.5 rounded-2xl p-4 transition-all duration-300 hover:scale-[1.02] active:scale-[.98] group"
                     style={{
                       background: payMethod===m.id ? m.bg : 'rgba(255,255,255,.04)',
-                      border: payMethod===m.id ? `1.5px solid ${m.border}` : '1.5px solid rgba(255,255,255,.07)',
-                      boxShadow: payMethod===m.id ? `0 4px 20px ${m.bg}` : 'none',
+                      border: payMethod===m.id ? `2px solid ${m.border}` : '2px solid rgba(255,255,255,.07)',
+                      boxShadow: payMethod===m.id ? `0 8px 30px ${m.bg.replace('linear-gradient(135deg,', '').split(',')[0]}` : 'none',
                     }}>
-                    <div className="w-9 h-9 rounded-xl flex items-center justify-center"
-                      style={{background: payMethod===m.id ? m.bg : 'rgba(255,255,255,.08)'}}>
-                      <i className={`fa-solid ${m.icon} text-base`} style={{color: m.color}}></i>
-                    </div>
-                    <span className="text-xs font-bold text-white leading-tight text-center">{m.label}</span>
-                    <span className="text-[10px] leading-tight text-center" style={{color:'rgba(255,255,255,.35)'}}>{m.sub}</span>
-                    {payMethod===m.id&&(
-                      <div className="w-4 h-4 rounded-full flex items-center justify-center" style={{background:'linear-gradient(135deg,#3B59FF,#7B2FBE)'}}>
-                        <i className="fa-solid fa-check text-white" style={{fontSize:'8px'}}></i>
+                    {/* Badge recomendado */}
+                    {m.badge && (
+                      <div className="absolute -top-2 -right-2 px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider"
+                        style={{background:'linear-gradient(90deg,#3B59FF,#7B2FBE)',color:'white',boxShadow:'0 4px 12px rgba(59,89,255,.4)'}}>
+                        {m.badge}
                       </div>
                     )}
+                    
+                    <div className="flex items-center gap-3 w-full">
+                      {/* Icon */}
+                      <div className="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0 transition-all duration-300"
+                        style={{
+                          background: payMethod===m.id ? m.bg : 'rgba(255,255,255,.08)',
+                          transform: payMethod===m.id ? 'scale(1.1)' : 'scale(1)'
+                        }}>
+                        <i className={`fa-solid ${m.icon} text-lg transition-all duration-300`} 
+                          style={{
+                            color: m.color,
+                            transform: payMethod===m.id ? 'scale(1.1)' : 'scale(1)'
+                          }}></i>
+                      </div>
+                      
+                      {/* Text */}
+                      <div className="flex-1 text-left">
+                        <p className="text-sm font-black text-white leading-tight">{m.label}</p>
+                        <p className="text-[11px] leading-tight mt-0.5" style={{color:'rgba(255,255,255,.45)'}}>{m.sub}</p>
+                      </div>
+                      
+                      {/* Check */}
+                      {payMethod===m.id&&(
+                        <div className="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 animate-slideIn"
+                          style={{background:'linear-gradient(135deg,#3B59FF,#7B2FBE)',boxShadow:'0 4px 12px rgba(59,89,255,.5)'}}>
+                          <i className="fa-solid fa-check text-white" style={{fontSize:'10px'}}></i>
+                        </div>
+                      )}
+                    </div>
+                    
+                    {/* Description */}
+                    <p className="text-[10px] leading-relaxed w-full" 
+                      style={{color: payMethod===m.id ? 'rgba(255,255,255,.6)' : 'rgba(255,255,255,.3)'}}>
+                      {m.desc}
+                    </p>
                   </button>
                 ))}
               </div>
-
-              {/* Tarjeta fields */}
-              {payMethod==='tarjeta'&&(
-                <div className="space-y-3 rounded-2xl p-4" style={{background:'rgba(59,89,255,.08)',border:'1px solid rgba(59,89,255,.2)'}}>
-                  <p className="text-xs font-bold uppercase tracking-widest" style={{color:'rgba(255,255,255,.4)'}}>Datos de la tarjeta</p>
-                  <input value={cardNum} onChange={e=>setCardNum(fmtCard(e.target.value))} placeholder="0000 0000 0000 0000" maxLength={19} className={iCls} style={iSty}/>
-                  <input value={cardName} onChange={e=>setCardName(e.target.value)} placeholder="Nombre en la tarjeta" className={iCls} style={iSty}/>
-                  <div className="grid grid-cols-2 gap-3">
-                    <input value={cardExp} onChange={e=>setCardExp(fmtExp(e.target.value))} placeholder="MM/AA" maxLength={5} className={iCls} style={iSty}/>
-                    <input value={cardCvv} onChange={e=>setCardCvv(e.target.value.replace(/\D/g,'').slice(0,4))} placeholder="CVV" maxLength={4} className={iCls} style={iSty}/>
-                  </div>
-                </div>
-              )}
 
               {/* PSE */}
               {payMethod==='pse'&&(
@@ -1726,11 +1894,31 @@ ReactDOM.createRoot(document.getElementById('root')).render(<App />);
 </script>
 @endverbatim
 
-{{-- PWA Service Worker --}}
+{{-- PWA Service Worker - DESACTIVADO PARA EVITAR PROBLEMAS DE CACHÉ --}}
 <script>
+// Desregistrar TODOS los Service Workers
 if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('/sw.js').catch(() => {});
+  navigator.serviceWorker.getRegistrations().then(function(registrations) {
+    for(let registration of registrations) {
+      registration.unregister().then(function() {
+        console.log('✅ Service Worker desregistrado');
+      });
+    }
+  });
 }
+
+// Limpiar TODOS los caches
+if ('caches' in window) {
+  caches.keys().then(function(names) {
+    for (let name of names) {
+      caches.delete(name).then(function() {
+        console.log('✅ Cache eliminado:', name);
+      });
+    }
+  });
+}
+
+console.log('✅ Service Workers desactivados - Sin caché');
 </script>
 
 {{-- Barra navegación móvil --}}
@@ -1824,9 +2012,6 @@ document.addEventListener('DOMContentLoaded', function() {
     </div>
 </div>
 
-{{-- Looks del Día / Inspiración --}}
-@include('partials.looks-inspiracion')
-
 {{-- Script para scroll automático al inicio --}}
 <script>
 window.addEventListener('load', function() {
@@ -1838,4 +2023,5 @@ window.addEventListener('load', function() {
 </script>
 
 </body>
+<!-- Updated: 2026-05-11 - VERSION 2.4.0 - Widget Wompi Oficial -->
 </html>

@@ -2,6 +2,19 @@
     🎓 GUÍA RÁPIDA PARA EL INSTRUCTOR - FIFTYONE E-COMMERCE
 ═══════════════════════════════════════════════════════════════════
 
+⚠️  IMPORTANTE: WOMPI EN MODO DEMOSTRACIÓN
+───────────────────────────────────────────────────────────────────
+Este proyecto usa WOMPI en MODO DEMO porque es un proyecto académico.
+No es posible obtener llaves reales de Wompi sin una empresa registrada.
+
+✅ El checkout DEMO simula completamente el flujo de pago
+✅ El backend está 100% funcional y listo para producción
+✅ La arquitectura es idéntica a una integración real
+
+📄 Ver: WOMPI_MODO_DEMO.md para detalles técnicos completos
+
+═══════════════════════════════════════════════════════════════════
+
 📱 PASO 1: CONECTARSE AL MISMO WI-FI
 ───────────────────────────────────────────────────────────────────
 Asegúrate de estar en la misma red Wi-Fi que el estudiante.
@@ -27,6 +40,7 @@ Deberías ver:
 ✅ Catálogo de 25 productos
 ✅ Carrito de compras funcional
 ✅ Búsqueda y filtros
+✅ Sistema de pagos Wompi (MODO DEMO)
 
 
 👨‍💼 PASO 4: ACCEDER AL PANEL DE ADMINISTRACIÓN
@@ -93,6 +107,7 @@ Puedes ver:
    - Buscar productos
    - Filtrar por categoría
    - Ver "Looks del Día"
+   - Probar checkout con Wompi (DEMO)
 
 
 🔧 SI ALGO NO FUNCIONA
@@ -111,7 +126,7 @@ Puedes ver:
 ✅ 203 pedidos de prueba
 ✅ 34 reseñas de productos
 ✅ 4 categorías de productos
-✅ 6 métodos de pago implementados
+✅ Sistema de pagos Wompi (MODO DEMO - ver WOMPI_MODO_DEMO.md)
 
 
 💡 PUNTOS FUERTES DEL PROYECTO
@@ -122,6 +137,8 @@ Puedes ver:
 ✅ Panel de administración profesional
 ✅ Seguridad implementada (autenticación, validación)
 ✅ Documentación completa
+✅ Integración de pasarela de pagos (Wompi en modo DEMO)
+✅ Sistema de facturación con PDF
 
 
 ═══════════════════════════════════════════════════════════════════

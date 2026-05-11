@@ -26,6 +26,16 @@ class Order extends Model
         return $this->hasMany(OrderItem::class);
     }
 
+    public function wompiPayments()
+    {
+        return $this->hasMany(\App\Models\WompiPayment::class);
+    }
+
+    public function latestWompiPayment()
+    {
+        return $this->hasOne(\App\Models\WompiPayment::class)->latestOfMany();
+    }
+
     public function getStatusLabelAttribute(): string
     {
         return $this->getStatusLabel($this->status);
@@ -58,6 +68,7 @@ class Order extends Model
     public function getPaymentMethodLabelAttribute(): string
     {
         return match ($this->payment_method) {
+            'wompi' => 'Wompi',
             'nequi' => 'Nequi',
             'daviplata' => 'Daviplata',
             'pse' => 'PSE',

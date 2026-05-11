@@ -1,0 +1,82 @@
+╔══════════════════════════════════════════════════════════════════╗
+║                                                                  ║
+║              🔥 PROBLEMA: CACHÉ DEL NAVEGADOR 🔥                 ║
+║                                                                  ║
+╚══════════════════════════════════════════════════════════════════╝
+
+✅ EL SERVIDOR FUNCIONA PERFECTAMENTE
+
+Acabo de probar el endpoint y devuelve JSON correctamente.
+El problema es que tu navegador tiene JavaScript viejo en caché.
+
+
+═══════════════════════════════════════════════════════════════════
+
+🚀 SOLUCIÓN RÁPIDA (ELIGE UNA):
+
+┌─────────────────────────────────────────────────────────────────┐
+│ OPCIÓN 1: MODO INCÓGNITO (MÁS RÁPIDO)                          │
+└─────────────────────────────────────────────────────────────────┘
+
+1. Presiona: Ctrl + Shift + N (Chrome) o Ctrl + Shift + P (Firefox)
+2. Ve a: http://localhost:8000
+3. Prueba el pago con Wompi
+
+✅ En modo incógnito NO hay caché
+
+
+┌─────────────────────────────────────────────────────────────────┐
+│ OPCIÓN 2: LIMPIA LA CACHÉ                                       │
+└─────────────────────────────────────────────────────────────────┘
+
+1. Presiona: Ctrl + Shift + R (recarga forzada)
+2. O presiona: Ctrl + Shift + Delete (borrar caché)
+3. Cierra TODAS las pestañas de localhost:8000
+4. Abre una nueva pestaña
+5. Ve a: http://localhost:8000
+
+
+┌─────────────────────────────────────────────────────────────────┐
+│ OPCIÓN 3: USA EL SCRIPT                                         │
+└─────────────────────────────────────────────────────────────────┘
+
+1. Ejecuta: limpiar-todo.bat
+2. Reinicia el servidor: php artisan serve
+3. Abre modo incógnito
+4. Prueba
+
+
+═══════════════════════════════════════════════════════════════════
+
+🔍 CÓMO SABER SI FUNCIONA:
+
+Abre la consola del navegador (F12) y busca:
+
+  🚀 Iniciando pago con Wompi para orden: X
+  📡 Respuesta de Wompi: 200 OK
+  ✅ Datos de Wompi: {...}
+  🌐 Redirigiendo a Wompi: https://checkout.wompi.co/p/...
+
+Si ves estos mensajes = FUNCIONA ✅
+
+
+═══════════════════════════════════════════════════════════════════
+
+❓ ¿POR QUÉ PASA ESTO?
+
+El navegador guarda el JavaScript en caché para cargar más rápido.
+Cuando actualizo el código, el navegador sigue usando la versión vieja.
+
+SOLUCIÓN: Modo incógnito o Ctrl + Shift + R
+
+
+═══════════════════════════════════════════════════════════════════
+
+📞 PRUEBA AHORA:
+
+1. Abre MODO INCÓGNITO
+2. Ve a localhost:8000
+3. Intenta pagar con Wompi
+4. Avísame si funciona
+
+═══════════════════════════════════════════════════════════════════

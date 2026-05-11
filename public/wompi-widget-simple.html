@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Widget Wompi - Prueba Simple</title>
+    <script src="https://checkout.wompi.co/widget.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .card {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 500px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 18px 40px;
+            font-size: 18px;
+            font-weight: 600;
+            border-radius: 12px;
+            cursor: pointer;
+            width: 100%;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+        }
+        .btn:active {
+            transform: translateY(0);
+        }
+        .info-box {
+            background: #f8f9fa;
+            border-left: 4px solid #667eea;
+            padding: 20px;
+            margin: 30px 0;
+            border-radius: 8px;
+        }
+        .info-box h3 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 16px;
+        }
+        .info-box p {
+            color: #666;
+            margin: 8px 0;
+            font-size: 14px;
+        }
+        .info-box strong {
+            color: #333;
+        }
+        .status {
+            text-align: center;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            font-size: 14px;
+        }
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .status.info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        .emoji {
+            font-size: 48px;
+            margin-bottom: 20px;
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <span class="emoji">💳</span>
+        <h1>Widget de Wompi</h1>
+        <p class="subtitle">Prueba del sistema de pagos</p>
+
+        <button class="btn" onclick="abrirWompi()">
+            🚀 Abrir Widget de Pago
+        </button>
+
+        <div class="info-box">
+            <h3>💳 Tarjeta de Prueba (APROBADA)</h3>
+            <p><strong>Número:</strong> 4242 4242 4242 4242</p>
+            <p><strong>CVV:</strong> 123</p>
+            <p><strong>Fecha:</strong> 12/25 (o cualquier fecha futura)</p>
+        </div>
+
+        <div id="status"></div>
+    </div>
+
+    <script>
+        const publicKey = 'pub_test_VHRuIqigjYHQESsMAmEujUJ9RIeQaW66';
+        
+        function mostrarEstado(mensaje, tipo) {
+            const statusDiv = document.getElementById('status');
+            statusDiv.className = 'status ' + tipo;
+            statusDiv.textContent = mensaje;
+            statusDiv.style.display = 'block';
+        }
+
+        function abrirWompi() {
+            console.log('🚀 Iniciando widget de Wompi...');
+            mostrarEstado('⏳ Abriendo widget...', 'info');
+
+            // Verificar que el widget esté cargado
+            if (typeof WidgetCheckout === 'undefined') {
+                console.error('❌ WidgetCheckout no está definido');
+                mostrarEstado('❌ Error: El widget de Wompi no se cargó correctamente', 'error');
+                return;
+            }
+
+            // Datos de prueba
+            const reference = 'TEST-' + Date.now();
+            const amountInCents = 5000000; // $50,000 COP
+
+            try {
+                const checkout = new WidgetCheckout({
+                    currency: 'COP',
+                    amountInCents: amountInCents,
+                    reference: reference,
+                    publicKey: publicKey,
+                    redirectUrl: window.location.href
+                });
+
+                console.log('✅ Widget creado correctamente');
+                console.log('📋 Referencia:', reference);
+                console.log('💰 Monto:', amountInCents / 100, 'COP');
+                
+                checkout.open((result) => {
+                    console.log('✅ Resultado del pago:', result);
+                    const transaction = result.transaction;
+                    
+                    if (transaction.status === 'APPROVED') {
+                        mostrarEstado('✅ ¡Pago aprobado! ID: ' + transaction.id, 'success');
+                    } else {
+                        mostrarEstado('⚠️ Pago ' + transaction.status + ' - ID: ' + transaction.id, 'info');
+                    }
+                });
+
+                mostrarEstado('✅ Widget abierto correctamente', 'success');
+                console.log('🎉 Widget abierto');
+
+            } catch (error) {
+                console.error('❌ Error al abrir widget:', error);
+                mostrarEstado('❌ Error: ' + error.message, 'error');
+            }
+        }
+
+        // Verificar que el script se haya cargado
+        window.addEventListener('load', function() {
+            if (typeof WidgetCheckout !== 'undefined') {
+                console.log('✅ Widget de Wompi cargado correctamente');
+                mostrarEstado('✅ Widget de Wompi listo para usar', 'success');
+            } else {
+                console.error('❌ Widget de Wompi NO se cargó');
+                mostrarEstado('❌ Error: El widget de Wompi no se cargó. Verifica tu conexión.', 'error');
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,73 @@
+═══════════════════════════════════════════════════════════
+  ⚠️ INSTRUCCIONES URGENTES - WOMPI
+═══════════════════════════════════════════════════════════
+
+🔴 EL ERROR 403 QUE VES ES PORQUE ESTÁS USANDO UNA URL VIEJA
+
+El navegador guardó en caché la versión anterior que intentaba
+redirigir a Wompi con parámetros (eso ya no funciona así).
+
+═══════════════════════════════════════════════════════════
+  ✅ SOLUCIÓN EN 3 PASOS:
+═══════════════════════════════════════════════════════════
+
+1️⃣ CIERRA COMPLETAMENTE EL NAVEGADOR
+   - No solo la pestaña, cierra TODO el navegador
+   - Espera 5 segundos
+
+2️⃣ ABRE EL NAVEGADOR DE NUEVO
+   - Ve a tu tienda
+   - Presiona Ctrl+Shift+R (recarga forzada)
+
+3️⃣ PRUEBA EL WIDGET
+   - Agrega un producto al carrito
+   - Haz clic en "Pagar con Wompi"
+   - Ahora se abrirá un MODAL (ventana emergente)
+   - NO te redirigirá a otra página
+
+═══════════════════════════════════════════════════════════
+  🧪 PRUEBA RÁPIDA DEL WIDGET
+═══════════════════════════════════════════════════════════
+
+Si quieres ver cómo funciona el widget sin hacer todo el proceso
+de compra, abre esta URL en tu navegador:
+
+   http://localhost/test-wompi-widget.html
+
+O si usas otro puerto:
+
+   http://localhost:8000/test-wompi-widget.html
+
+Haz clic en el botón y verás el widget de Wompi abrirse.
+
+═══════════════════════════════════════════════════════════
+  📋 DIFERENCIAS IMPORTANTES:
+═══════════════════════════════════════════════════════════
+
+❌ ANTES (no funciona):
+   - Redirigía a checkout.wompi.co con parámetros en la URL
+   - Daba error 403 de CloudFront
+
+✅ AHORA (funciona):
+   - Abre un modal (ventana emergente) en tu misma página
+   - El widget oficial de Wompi maneja todo
+   - No hay redirección, no hay error 403
+
+═══════════════════════════════════════════════════════════
+  💳 TARJETA DE PRUEBA:
+═══════════════════════════════════════════════════════════
+
+Número: 4242 4242 4242 4242
+CVV: 123
+Fecha: Cualquier fecha futura (ej: 12/25)
+
+═══════════════════════════════════════════════════════════
+  🆘 SI AÚN NO FUNCIONA:
+═══════════════════════════════════════════════════════════
+
+1. Abre la consola del navegador (F12)
+2. Ve a la pestaña "Console"
+3. Busca mensajes que digan "Widget de Wompi"
+4. Copia y pega lo que veas ahí
+
+═══════════════════════════════════════════════════════════

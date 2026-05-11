@@ -1,0 +1,77 @@
+╔══════════════════════════════════════════════════════════════════╗
+║                                                                  ║
+║              ✅ SERVICE WORKER DESACTIVADO                       ║
+║                                                                  ║
+╚══════════════════════════════════════════════════════════════════╝
+
+El Service Worker causaba problemas de caché.
+Lo he DESACTIVADO completamente.
+
+
+═══════════════════════════════════════════════════════════════════
+
+🚀 HAZ ESTO AHORA (3 PASOS):
+
+1️⃣ Cierra TODAS las pestañas de localhost:8000
+
+2️⃣ Abre una nueva pestaña y ve a:
+   http://localhost:8000
+
+3️⃣ Recarga la página:
+   Ctrl + Shift + R
+
+
+═══════════════════════════════════════════════════════════════════
+
+✅ QUÉ VERÁS EN LA CONSOLA (F12):
+
+✅ Service Worker desregistrado
+✅ Cache eliminado: fiftyone-v1
+✅ Cache eliminado: fiftyone-v2
+✅ Service Workers desactivados - Sin caché
+🔄 Nueva versión detectada (v2.2.0)
+
+
+═══════════════════════════════════════════════════════════════════
+
+🎯 LUEGO PRUEBA EL PAGO:
+
+1. Agrega productos al carrito
+2. Ve al checkout
+3. Selecciona "Wompi"
+4. Haz clic en "Pagar"
+
+Deberías ver:
+🚀 Iniciando pago con Wompi para orden: X
+📡 Respuesta de Wompi: 200 OK
+✅ Datos de Wompi: {...}
+🌐 Redirigiendo a Wompi: https://checkout.wompi.co/p/...
+
+
+═══════════════════════════════════════════════════════════════════
+
+✅ CAMBIOS APLICADOS:
+
+- Service Worker DESACTIVADO (no más caché)
+- Versión actualizada a 2.2.0
+- Limpieza automática de caches
+- OrderController acepta 'wompi'
+- Modelo Order con label para Wompi
+
+
+═══════════════════════════════════════════════════════════════════
+
+📞 SI SIGUE EL ERROR:
+
+Ejecuta esto en la consola (F12):
+
+localStorage.clear();
+sessionStorage.clear();
+location.reload(true);
+
+
+═══════════════════════════════════════════════════════════════════
+
+Cierra todas las pestañas, abre una nueva y recarga con Ctrl+Shift+R
+
+═══════════════════════════════════════════════════════════════════

@@ -33,9 +33,9 @@ Route::get('/', function () {
     $page = request()->get('page', 1);
     $perPage = 8; // Solo 8 productos en home
     
-    // Cachear productos paginados por 10 minutos
+    // Cachear productos paginados por 15 minutos
     $cacheKey = "home_products_page_{$page}";
-    $products = cache()->remember($cacheKey, 600, function () use ($perPage) {
+    $products = cache()->remember($cacheKey, 900, function () use ($perPage) {
         return Product::with(['category:id,name'])
             ->withCount('reviews')
             ->select('id', 'name', 'price', 'stock', 'image', 'category_id', 'sizes', 'colors', 'created_at')
@@ -51,38 +51,17 @@ Route::get('/', function () {
     ];
     
     // Wishlist del usuario (solo si está autenticado)
-    
-    // Wishlist del usuario (solo si está autenticado)
     $wishlistIds = [];
     if ($authUser && $authUser->role !== 'admin') {
         $wishlistIds = \App\Models\Wishlist::where('user_id', $authUser->id)
             ->pluck('product_id')
             ->toArray();
-        $wishlistIds = \App\Models\Wishlist::where('user_id', $authUser->id)
-            ->pluck('product_id')
-            ->toArray();
     }
     
-    // Reseñas para mostrar en home (últimas 6, cacheadas por 10 minutos)
-    $reviews = cache()->remember('home_reviews', 600, function () {
+    // Reseñas para mostrar en home (últimas 6, cacheadas por 15 minutos)
+    $reviews = cache()->remember('home_reviews', 900, function () {
         return \App\Models\Review::with(['user:id,name', 'product:id,name'])
-            ->approved() // Solo reseñas aprobadas
-            ->latest()
-            ->take(6)
-            ->get()
-            ->map(fn($r) => [
-                'name'    => $r->user->name,
-                'product' => $r->product->name ?? '',
-                'rating'  => $r->rating,
-                'comment' => $r->comment,
-                'date'    => $r->created_at->format('d/m/Y'),
-            ]);
-    });
-    
-    
-    // Reseñas para mostrar en home (últimas 6, cacheadas)
-    $reviews = cache()->remember('home_reviews', 300, function () {
-        return \App\Models\Review::with(['user:id,name', 'product:id,name'])
+            ->where('status', 'approved') // Solo reseñas aprobadas
             ->latest()
             ->take(6)
             ->get()
@@ -287,3 +266,7 @@ Route::view('/devoluciones', 'pages.devoluciones')->name('devoluciones');
 Route::view('/faq', 'pages.faq')->name('faq');
 Route::view('/privacidad', 'pages.privacidad')->name('privacidad');
 Route::view('/terminos', 'pages.terminos')->name('terminos');
+
+// ── Wompi Callback ──────────────────────────────────────────────────────────
+Route::get('/wompi/callback', [\App\Http\Controllers\WompiController::class, 'callback'])->name('wompi.callback');
+
