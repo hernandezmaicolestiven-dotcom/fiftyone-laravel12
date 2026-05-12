@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Procesando Pago - Wompi</title>
+    <script src="https://checkout.wompi.co/widget.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 500px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            text-align: center;
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 24px;
+        }
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .message {
+            color: #666;
+            margin-top: 20px;
+            font-size: 14px;
+        }
+        .error {
+            background: #fee;
+            border: 1px solid #fcc;
+            color: #c33;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔐 Procesando Pago Seguro</h1>
+        <div class="spinner"></div>
+        <p class="message">Abriendo pasarela de pago de Wompi...</p>
+        <div id="error" class="error" style="display: none;"></div>
+    </div>
+
+    <script>
+        // Obtener datos del pago
+        const checkoutData = JSON.parse(sessionStorage.getItem('wompi_checkout') || '{}');
+        
+        if (!checkoutData.reference) {
+            document.getElementById('error').textContent = 'Error: No se encontraron datos del pago. Por favor intenta de nuevo.';
+            document.getElementById('error').style.display = 'block';
+            document.querySelector('.spinner').style.display = 'none';
+            setTimeout(() => window.location.href = '/', 3000);
+        } else {
+            // Verificar que el widget esté cargado
+            if (typeof WidgetCheckout === 'undefined') {
+                document.getElementById('error').textContent = 'Error: El widget de Wompi no se cargó. Verifica tu conexión a internet.';
+                document.getElementById('error').style.display = 'block';
+                document.querySelector('.spinner').style.display = 'none';
+            } else {
+                try {
+                    // Crear el widget
+                    const checkout = new WidgetCheckout({
+                        currency: checkoutData.currency,
+                        amountInCents: checkoutData.amount,
+                        reference: checkoutData.reference,
+                        publicKey: checkoutData.public_key,
+                        redirectUrl: checkoutData.redirect_url || window.location.origin + '/wompi/callback',
+                        customerData: {
+                            email: checkoutData.customer_email,
+                            fullName: checkoutData.customer_name,
+                            phoneNumber: checkoutData.customer_phone
+                        }
+                    });
+
+                    console.log('✅ Widget de Wompi creado');
+                    
+                    // Abrir el widget
+                    checkout.open((result) => {
+                        console.log('✅ Pago completado:', result);
+                        const transaction = result.transaction;
+                        
+                        // Limpiar sessionStorage
+                        sessionStorage.removeItem('wompi_checkout');
+                        
+                        // Redirigir al callback
+                        window.location.href = checkoutData.redirect_url + 
+                            '?id=' + transaction.id + 
+                            '&reference=' + checkoutData.reference;
+                    });
+
+                    console.log('🎉 Widget abierto');
+                    
+                } catch (error) {
+                    console.error('❌ Error:', error);
+                    document.getElementById('error').textContent = 'Error al abrir el widget de Wompi: ' + (error.message || 'Error desconocido');
+                    document.getElementById('error').style.display = 'block';
+                    document.querySelector('.spinner').style.display = 'none';
+                }
+            }
+        }
+    </script>
+</body>
+</html>

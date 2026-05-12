@@ -20,9 +20,15 @@
     <div class="relative z-10 flex items-center gap-6 h-full px-8">
         {{-- Avatar grande con opción de cambiar --}}
         <div class="relative flex-shrink-0 group">
-            @if($user->avatar)
-                <img src="{{ Storage::url($user->avatar) }}" alt="{{ $user->name }}" 
+            @if($user->avatar && file_exists(storage_path('app/public/' . $user->avatar)))
+                <img src="{{ asset('storage/' . $user->avatar) }}?v={{ $user->updated_at->timestamp }}" 
+                     alt="{{ $user->name }}" 
+                     onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"
                      class="w-20 h-20 rounded-2xl object-cover shadow-2xl border-2 border-white/20">
+                <div class="w-20 h-20 rounded-2xl flex items-center justify-center text-3xl font-black text-white shadow-2xl border-2 border-white/20"
+                     style="background: linear-gradient(135deg, #3B59FF, #7B2FBE); display: none;">
+                    {{ strtoupper(substr($user->name, 0, 1)) }}
+                </div>
             @else
                 <div class="w-20 h-20 rounded-2xl flex items-center justify-center text-3xl font-black text-white shadow-2xl border-2 border-white/20"
                      style="background: linear-gradient(135deg, #3B59FF, #7B2FBE)">

@@ -20,9 +20,9 @@ class ResetCredentialsSeeder extends Seeder
         $admin = User::updateOrCreate(
             ['email' => 'admin@fiftyone.com'],
             [
-                'name' => 'Administrador Principal',
+                'name' => 'Administrador FiftyOne',
                 'email' => 'admin@fiftyone.com',
-                'password' => Hash::make('Admin123!'),
+                'password' => Hash::make('admin2026'),
                 'role' => 'admin',
                 'phone' => '3001234567',
             ]
@@ -34,7 +34,7 @@ class ResetCredentialsSeeder extends Seeder
             [
                 'name' => 'Cliente de Prueba',
                 'email' => 'cliente@test.com',
-                'password' => Hash::make('Cliente123!'),
+                'password' => Hash::make('cliente2026'),
                 'role' => 'customer',
                 'phone' => '3009876543',
             ]
@@ -46,7 +46,7 @@ class ResetCredentialsSeeder extends Seeder
             [
                 'name' => 'Colaborador FiftyOne',
                 'email' => 'colaborador@fiftyone.com',
-                'password' => Hash::make('Colab123!'),
+                'password' => Hash::make('colab2026'),
                 'role' => 'colaborador',
                 'phone' => '3005555555',
             ]
@@ -59,7 +59,7 @@ class ResetCredentialsSeeder extends Seeder
         echo "├────────────────────────────────────────────────────────────┤\n";
         echo "│ URL:      http://localhost:8000/admin/login               │\n";
         echo "│ Email:    admin@fiftyone.com                              │\n";
-        echo "│ Password: Admin123!                                       │\n";
+        echo "│ Password: admin2026                                       │\n";
         echo "└────────────────────────────────────────────────────────────┘\n";
         echo "\n";
         echo "┌────────────────────────────────────────────────────────────┐\n";
@@ -67,7 +67,7 @@ class ResetCredentialsSeeder extends Seeder
         echo "├────────────────────────────────────────────────────────────┤\n";
         echo "│ URL:      http://localhost:8000/login                     │\n";
         echo "│ Email:    cliente@test.com                                │\n";
-        echo "│ Password: Cliente123!                                     │\n";
+        echo "│ Password: cliente2026                                     │\n";
         echo "└────────────────────────────────────────────────────────────┘\n";
         echo "\n";
         echo "┌────────────────────────────────────────────────────────────┐\n";
@@ -75,18 +75,18 @@ class ResetCredentialsSeeder extends Seeder
         echo "├────────────────────────────────────────────────────────────┤\n";
         echo "│ URL:      http://localhost:8000/admin/login               │\n";
         echo "│ Email:    colaborador@fiftyone.com                        │\n";
-        echo "│ Password: Colab123!                                       │\n";
+        echo "│ Password: colab2026                                       │\n";
         echo "└────────────────────────────────────────────────────────────┘\n";
         echo "\n";
         echo "💡 IMPORTANTE:\n";
-        echo "   - Las contraseñas son CASE SENSITIVE (mayúsculas importan)\n";
-        echo "   - Incluye el signo de exclamación (!) al final\n";
+        echo "   - Las contraseñas son simples para facilitar el acceso\n";
+        echo "   - Todo en minúsculas, fácil de recordar\n";
         echo "   - Si olvidas la contraseña, ejecuta: php artisan db:seed --class=ResetCredentialsSeeder\n";
         echo "\n";
         echo "🔐 SEGURIDAD:\n";
+        echo "   - Estas son credenciales de DESARROLLO\n";
         echo "   - Cambia estas contraseñas en producción\n";
-        echo "   - Usa contraseñas fuertes y únicas\n";
-        echo "   - Nunca compartas las credenciales de admin\n";
+        echo "   - Usa contraseñas fuertes y únicas en producción\n";
         echo "\n";
     }
 }

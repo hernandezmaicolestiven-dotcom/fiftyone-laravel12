@@ -1,0 +1,59 @@
+
+  ╔═══════════════════════════════════════════════════════════╗
+  ║                                                           ║
+  ║         🔐 ACCESOS RÁPIDOS - FIFTYONE 2026 🔐            ║
+  ║                                                           ║
+  ╚═══════════════════════════════════════════════════════════╝
+
+
+  ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+  ┃  👨‍💼  ADMINISTRADOR                                        ┃
+  ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+
+       🌐 URL:  http://localhost:8000/admin/login
+
+       📧 Email:    admin@fiftyone.com
+       🔑 Password: admin2026
+
+       ✅ Acceso completo al sistema
+
+
+  ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+  ┃  👤  CLIENTE                                              ┃
+  ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+
+       🌐 URL:  http://localhost:8000/login
+
+       📧 Email:    cliente@test.com
+       🔑 Password: cliente2026
+
+       ✅ Compras y gestión de cuenta
+
+
+  ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+  ┃  🤝  COLABORADOR                                          ┃
+  ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+
+       🌐 URL:  http://localhost:8000/admin/login
+
+       📧 Email:    colaborador@fiftyone.com
+       🔑 Password: colab2026
+
+       ✅ Acceso limitado al panel admin
+
+
+  ═══════════════════════════════════════════════════════════
+
+  💡 TIPS:
+
+     • Copia y pega las credenciales para evitar errores
+     • Las contraseñas son todo en minúsculas
+     • No hay espacios ni caracteres especiales
+
+  🔄 RESETEAR:
+
+     Si olvidas alguna contraseña, ejecuta:
+     resetear-credenciales.bat
+
+  ═══════════════════════════════════════════════════════════
+

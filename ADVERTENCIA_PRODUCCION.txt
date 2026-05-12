@@ -1,0 +1,154 @@
+═══════════════════════════════════════════════════════════
+  ⚠️⚠️⚠️ ADVERTENCIA CRÍTICA - MODO PRODUCCIÓN ⚠️⚠️⚠️
+═══════════════════════════════════════════════════════════
+
+🔴 WOMPI ESTÁ EN MODO PRODUCCIÓN
+
+🔴 LOS PAGOS SON REALES
+🔴 SE COBRARÁN TARJETAS REALES
+🔴 EL DINERO SE TRANSFERIRÁ A TU CUENTA DE WOMPI
+
+═══════════════════════════════════════════════════════════
+  ⚠️ CONFIGURACIÓN ACTUAL:
+═══════════════════════════════════════════════════════════
+
+✅ WOMPI_PUBLIC_KEY: pub_prod_ddFHxUwUp7QogxAzPOLkWUADlI7Ny1VB
+✅ WOMPI_PRIVATE_KEY: prv_prod_*** (configurada)
+✅ WOMPI_INTEGRITY_SECRET: prod_integrity_*** (configurada)
+✅ WOMPI_EVENTS_SECRET: prod_events_*** (configurada)
+🔴 WOMPI_SANDBOX: false (PRODUCCIÓN)
+
+═══════════════════════════════════════════════════════════
+  ⚠️ ESTO SIGNIFICA:
+═══════════════════════════════════════════════════════════
+
+🔴 Cuando alguien haga un pago:
+   - Se cobrará su tarjeta REAL
+   - El dinero irá a tu cuenta de Wompi
+   - Es una transacción REAL
+   - NO es una simulación
+
+🔴 NO uses tarjetas de prueba:
+   - Las tarjetas de prueba NO funcionarán
+   - Solo funcionan tarjetas REALES
+   - Los clientes deben usar sus tarjetas reales
+
+═══════════════════════════════════════════════════════════
+  ✅ PARA PROBAR SIN COBRAR:
+═══════════════════════════════════════════════════════════
+
+Si quieres PROBAR sin cobrar dinero real:
+
+1. Abre el archivo .env
+
+2. Cambia esta línea:
+   WOMPI_SANDBOX=false
+
+   Por esta:
+   WOMPI_SANDBOX=true
+
+3. Cambia las llaves a las de prueba (test_)
+
+4. Ejecuta:
+   php artisan config:clear
+
+═══════════════════════════════════════════════════════════
+  🚀 CÓMO FUNCIONA AHORA:
+═══════════════════════════════════════════════════════════
+
+1. Usuario agrega productos al carrito
+2. Selecciona "Wompi" como método de pago
+3. Hace clic en "Pagar"
+4. Se abre el widget de Wompi
+5. Usuario ingresa su tarjeta REAL
+6. Wompi procesa el pago REAL
+7. El dinero se transfiere a tu cuenta
+8. Usuario recibe confirmación
+9. La orden se actualiza
+
+═══════════════════════════════════════════════════════════
+  💰 COMISIONES DE WOMPI:
+═══════════════════════════════════════════════════════════
+
+Wompi cobra una comisión por cada transacción:
+
+- Tarjetas de crédito: ~3.49% + $900 COP
+- PSE: ~$3,500 COP por transacción
+- Nequi: ~2.99% + $900 COP
+
+Verifica las tarifas actuales en tu cuenta de Wompi.
+
+═══════════════════════════════════════════════════════════
+  📋 REQUISITOS PARA PRODUCCIÓN:
+═══════════════════════════════════════════════════════════
+
+⚠️ IMPORTANTE: Para que Wompi funcione correctamente
+   en producción, necesitas:
+
+1. ✅ Dominio con HTTPS (certificado SSL)
+   - Ejemplo: https://tutienda.com
+   - NO funciona con http://
+   - NO funciona con localhost en producción
+
+2. ✅ Configurar webhooks en Wompi
+   - URL: https://tutienda.com/api/wompi/webhook
+   - Esto permite actualizar órdenes automáticamente
+
+3. ✅ Configurar URL de callback
+   - URL: https://tutienda.com/wompi/callback
+   - Para redirigir después del pago
+
+═══════════════════════════════════════════════════════════
+  🔐 SEGURIDAD:
+═══════════════════════════════════════════════════════════
+
+✅ Las llaves privadas NUNCA se exponen al frontend
+✅ Las firmas se generan en el backend
+✅ Los webhooks validan las transacciones
+✅ El archivo .env NO se sube a GitHub
+
+═══════════════════════════════════════════════════════════
+  📝 PARA PROBAR AHORA:
+═══════════════════════════════════════════════════════════
+
+1. Cierra el navegador completamente
+2. Abre el navegador de nuevo
+3. Ve a: http://localhost:8000
+4. Presiona Ctrl+Shift+R
+5. Agrega un producto al carrito
+6. Haz clic en "Pagar con Wompi"
+7. Se abrirá el widget de Wompi
+8. Ingresa una tarjeta REAL (se cobrará)
+9. Completa el pago
+
+⚠️ RECUERDA: El pago será REAL y se cobrará la tarjeta
+
+═══════════════════════════════════════════════════════════
+  🆘 SI ALGO SALE MAL:
+═══════════════════════════════════════════════════════════
+
+Si quieres volver al modo de pruebas:
+
+1. Ejecuta: volver-a-modo-pruebas.bat
+
+O manualmente:
+1. Abre .env
+2. Cambia WOMPI_SANDBOX=false a WOMPI_SANDBOX=true
+3. Cambia las llaves a las de prueba (test_)
+4. Ejecuta: php artisan config:clear
+
+═══════════════════════════════════════════════════════════
+  ✅ ESTADO ACTUAL:
+═══════════════════════════════════════════════════════════
+
+🟢 Wompi: CONFIGURADO
+🔴 Modo: PRODUCCIÓN (pagos reales)
+🟢 Llaves: PRODUCCIÓN
+🟢 Widget: CARGADO
+🟢 Backend: FUNCIONAL
+
+═══════════════════════════════════════════════════════════
+
+⚠️⚠️⚠️ LOS PAGOS SON REALES - USA CON PRECAUCIÓN ⚠️⚠️⚠️
+
+═══════════════════════════════════════════════════════════

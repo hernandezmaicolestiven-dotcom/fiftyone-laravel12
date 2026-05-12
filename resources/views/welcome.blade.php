@@ -37,6 +37,9 @@
   <script crossorigin src="https://cdn.jsdelivr.net/npm/react@18.2.0/umd/react.production.min.js"></script>
   <script crossorigin src="https://cdn.jsdelivr.net/npm/react-dom@18.2.0/umd/react-dom.production.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@babel/standalone@7.23.5/babel.min.js"></script>
+  
+  {{-- Widget de Wompi REAL --}}
+  <script src="https://checkout.wompi.co/widget.js"></script>
   <style>
     html { scroll-behavior: smooth; }
     body { font-family: 'Inter', sans-serif; }
@@ -81,8 +84,8 @@
   window.__WISHLIST__ = {!! json_encode($wishlistIds ?? []) !!};
   window.__STATS__ = {!! json_encode(['customers' => \App\Models\User::where('role','customer')->count(), 'products' => \App\Models\Product::count(), 'orders' => \App\Models\Order::count()]) !!};
   
-  // FORZAR RECARGA COMPLETA - Versión 2.7.0 (Modo Demo Restaurado)
-  const CURRENT_VERSION = '2.7.0';
+  // FORZAR RECARGA COMPLETA - Versión 3.4.0 (Wompi Payment Page Fix)
+  const CURRENT_VERSION = '3.4.0';
   const stored = localStorage.getItem('app_version');
   if (stored !== CURRENT_VERSION) {
     console.log('🔄 Actualizando a versión ' + CURRENT_VERSION);
@@ -346,46 +349,6 @@ const PAYMENT_METHODS = [
     badge: 'Recomendado'
   },
   { 
-    id:'nequi', 
-    label:'Nequi', 
-    sub:'Pago instantáneo',
-    desc:'Desde tu app Nequi',
-    icon:'fa-mobile-screen-button',
-    color:'#7B2FBE', 
-    bg:'linear-gradient(135deg, rgba(123,47,190,.15), rgba(123,47,190,.25))', 
-    border:'rgba(123,47,190,.5)'
-  },
-  { 
-    id:'daviplata', 
-    label:'Daviplata', 
-    sub:'Billetera digital',
-    desc:'Pago desde Daviplata',
-    icon:'fa-wallet',
-    color:'#E8001C', 
-    bg:'linear-gradient(135deg, rgba(232,0,28,.12), rgba(232,0,28,.22))', 
-    border:'rgba(232,0,28,.45)'
-  },
-  { 
-    id:'pse', 
-    label:'PSE', 
-    sub:'Débito bancario',
-    desc:'Pago desde tu banco',
-    icon:'fa-building-columns',
-    color:'#00A859', 
-    bg:'linear-gradient(135deg, rgba(0,168,89,.12), rgba(0,168,89,.22))', 
-    border:'rgba(0,168,89,.45)'
-  },
-  { 
-    id:'bancolombia', 
-    label:'Bancolombia', 
-    sub:'Transferencia',
-    desc:'Transferencia bancaria',
-    icon:'fa-arrow-right-arrow-left',
-    color:'#FDDA24', 
-    bg:'linear-gradient(135deg, rgba(253,218,36,.12), rgba(253,218,36,.22))', 
-    border:'rgba(253,218,36,.45)'
-  },
-  { 
     id:'efecty', 
     label:'Efecty', 
     sub:'Pago en efectivo',
@@ -408,11 +371,6 @@ function CheckoutModal({ cart, onClose, onSuccess }) {
   const [address,  setAddress] = useState('');
   const [city,     setCity]    = useState('');
   const [payMethod, setPayMethod] = useState(null);
-  const [pseBank,   setPseBank]   = useState('');
-  const [cardNum,   setCardNum]   = useState('');
-  const [cardExp,   setCardExp]   = useState('');
-  const [cardCvv,   setCardCvv]   = useState('');
-  const [cardName,  setCardName]  = useState('');
   const [err,       setErr]       = useState('');
   const [loading,   setLoading]   = useState(false);
   const [coupon,    setCoupon]    = useState('');
@@ -455,8 +413,6 @@ function CheckoutModal({ cart, onClose, onSuccess }) {
 
   const submit = async () => {
     if (!payMethod) { setErr('Selecciona un método de pago'); return; }
-    if (payMethod === 'pse' && !pseBank) { setErr('Selecciona tu banco para PSE'); return; }
-    if (payMethod === 'tarjeta' && (!cardNum || !cardExp || !cardCvv || !cardName)) { setErr('Completa los datos de la tarjeta'); return; }
     
     // Verificar sesión justo antes de enviar
     if (!auth.loggedIn) {
@@ -535,20 +491,21 @@ function CheckoutModal({ cart, onClose, onSuccess }) {
           const wompiData = await wompiRes.json();
           console.log('✅ Datos de Wompi:', wompiData);
 
-          if (wompiData.success) {
-            // MODO DEMO: Redirigir a página demo local
-            console.log('🌐 Redirigiendo a demo de Wompi...');
+          if (wompiData.success && wompiData.checkout_data) {
+            // Guardar datos y redirigir a página de pago
+            console.log('🌐 Redirigiendo a pasarela de pago...');
             
-            // Guardar datos en sessionStorage para la página demo
             sessionStorage.setItem('wompi_payment_data', JSON.stringify({
               order_id: data.order_id,
-              amount: wompiData.checkout_data?.amount_in_cents || 0,
-              reference: wompiData.checkout_data?.reference || '',
-              customer_email: wompiData.checkout_data?.customer_email || ''
+              amount: wompiData.checkout_data.amount_in_cents,
+              reference: wompiData.checkout_data.reference,
+              customer_email: wompiData.checkout_data.customer_email,
+              customer_name: wompiData.checkout_data.customer_data?.name || 'Cliente',
+              public_key: wompiData.checkout_data.public_key
             }));
             
-            // Redirigir a la página demo
-            window.location.href = '/wompi-demo.html';
+            // Redirigir a página de pago profesional
+            window.location.href = '/wompi-payment.html';
           } else {
             console.error('❌ Error en respuesta de Wompi:', wompiData);
             setErr(wompiData.message || 'Error al iniciar el pago con Wompi');
@@ -776,52 +733,14 @@ function CheckoutModal({ cart, onClose, onSuccess }) {
                 ))}
               </div>
 
-              {/* PSE */}
-              {payMethod==='pse'&&(
-                <div className="rounded-2xl p-4 space-y-3" style={{background:'rgba(0,168,89,.08)',border:'1px solid rgba(0,168,89,.2)'}}>
-                  <p className="text-xs font-bold uppercase tracking-widest" style={{color:'rgba(255,255,255,.4)'}}>Selecciona tu banco</p>
-                  <div className="grid grid-cols-2 gap-2">
-                    {['Bancolombia','Davivienda','BBVA','Banco de Bogotá','Banco Popular','Colpatria','Occidente','Caja Social','Itaú','Scotiabank'].map(b=>(
-                      <button key={b} type="button"
-                        onClick={()=>setPseBank(b)}
-                        className="flex items-center gap-2 px-3 py-2.5 rounded-xl text-left text-xs font-semibold transition-all"
-                        style={{
-                          background: pseBank===b ? 'rgba(0,168,89,.2)' : 'rgba(255,255,255,.05)',
-                          border: pseBank===b ? '1.5px solid rgba(0,168,89,.5)' : '1.5px solid rgba(255,255,255,.08)',
-                          color: pseBank===b ? '#6ee7b7' : 'rgba(255,255,255,.6)',
-                        }}>
-                        {pseBank===b && <i className="fa-solid fa-check text-emerald-400" style={{fontSize:'9px'}}></i>}
-                        {b}
-                      </button>
-                    ))}
-                  </div>
-                  {pseBank && <p className="text-xs text-emerald-400 font-medium"><i className="fa-solid fa-circle-check mr-1"></i>{pseBank} seleccionado</p>}
-                </div>
-              )}
 
-              {/* Nequi / Daviplata */}
-              {(payMethod==='nequi'||payMethod==='daviplata')&&(
-                <div className="rounded-2xl p-4 space-y-2"
-                  style={{background:payMethod==='nequi'?'rgba(123,47,190,.08)':'rgba(232,0,28,.08)',
-                          border:payMethod==='nequi'?'1px solid rgba(123,47,190,.25)':'1px solid rgba(232,0,28,.25)'}}>
-                  <p className="text-xs font-bold uppercase tracking-widest" style={{color:'rgba(255,255,255,.4)'}}>
-                    Número {payMethod==='nequi'?'Nequi':'Daviplata'}
-                  </p>
-                  <input type="tel" placeholder="300 000 0000" className={iCls} style={iSty}/>
-                  <p className="text-xs" style={{color:'rgba(255,255,255,.3)'}}>Recibirás una notificación en tu app para confirmar.</p>
-                </div>
-              )}
-
-              {/* Efecty / Bancolombia */}
-              {(payMethod==='efecty'||payMethod==='bancolombia')&&(
+              {/* Efecty */}
+              {payMethod==='efecty'&&(
                 <div className="rounded-2xl p-4"
-                  style={{background:payMethod==='efecty'?'rgba(255,184,0,.08)':'rgba(253,218,36,.08)',
-                          border:payMethod==='efecty'?'1px solid rgba(255,184,0,.25)':'1px solid rgba(253,218,36,.25)'}}>
+                  style={{background:'rgba(255,184,0,.08)',
+                          border:'1px solid rgba(255,184,0,.25)'}}>
                   <p className="text-xs font-bold uppercase tracking-widest mb-2" style={{color:'rgba(255,255,255,.4)'}}>Instrucciones</p>
-                  {payMethod==='efecty'
-                    ? <p className="text-xs leading-relaxed" style={{color:'rgba(255,255,255,.5)'}}>Ve al punto Efecty más cercano y paga con el número de pedido que recibirás por email.</p>
-                    : <p className="text-xs leading-relaxed" style={{color:'rgba(255,255,255,.5)'}}>Transfiere a <span className="font-bold text-white">Bancolombia Ahorros 123-456789-00</span>. Envía el comprobante al WhatsApp del negocio.</p>
-                  }
+                  <p className="text-xs leading-relaxed" style={{color:'rgba(255,255,255,.5)'}}>Ve al punto Efecty más cercano y paga con el número de pedido que recibirás por email.</p>
                 </div>
               )}
             </div>

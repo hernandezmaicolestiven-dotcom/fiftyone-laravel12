@@ -6,7 +6,7 @@
     <title>Login — FiftyOne Admin</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <meta name="csrf-token" content="<?php echo e(csrf_token()); ?>">
     <script>
     // Refrescar token CSRF cada 10 minutos para evitar 419
     setInterval(function() {
@@ -28,7 +28,7 @@
 <div class="w-full max-w-md px-6">
     <div class="bg-white rounded-2xl shadow-2xl p-8">
 
-        {{-- Logo --}}
+        
         <div class="text-center mb-8">
             <div class="inline-flex items-center justify-center w-16 h-16 bg-indigo-600 rounded-2xl mb-4">
                 <i class="fa-solid fa-store text-white text-2xl"></i>
@@ -37,15 +37,16 @@
             <p class="text-gray-500 text-sm mt-1">Panel de Administración</p>
         </div>
 
-        {{-- Errors --}}
-        @if($errors->any())
+        
+        <?php if($errors->any()): ?>
             <div class="mb-4 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
-                {{ $errors->first() }}
-            </div>
-        @endif
+                <?php echo e($errors->first()); ?>
 
-        <form method="POST" action="{{ route('admin.login.post') }}" class="space-y-5">
-            @csrf
+            </div>
+        <?php endif; ?>
+
+        <form method="POST" action="<?php echo e(route('admin.login.post')); ?>" class="space-y-5">
+            <?php echo csrf_field(); ?>
 
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
@@ -53,7 +54,7 @@
                     <span class="absolute inset-y-0 left-3 flex items-center text-gray-400">
                         <i class="fa-solid fa-envelope text-sm"></i>
                     </span>
-                    <input type="email" name="email" value="{{ old('email') }}" required
+                    <input type="email" name="email" value="<?php echo e(old('email')); ?>" required
                            class="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                            placeholder="admin@fiftyone.com">
                 </div>
@@ -76,7 +77,7 @@
                     <input type="checkbox" name="remember" class="rounded border-gray-300 text-indigo-600">
                     Recordarme
                 </label>
-                <a href="{{ route('admin.password.request') }}"
+                <a href="<?php echo e(route('admin.password.request')); ?>"
                    class="text-sm text-indigo-600 hover:underline">
                     ¿Olvidaste tu contraseña?
                 </a>
@@ -92,3 +93,4 @@
 
 </body>
 </html>
+<?php /**PATH C:\Users\SoporteSENA\Downloads\fiftyone-laravel12-main\resources\views/admin/auth/login.blade.php ENDPATH**/ ?>

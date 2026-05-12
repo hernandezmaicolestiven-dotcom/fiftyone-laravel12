@@ -1,0 +1,73 @@
+═══════════════════════════════════════════════════════════
+  ⚠️ ERROR 419 - PAGE EXPIRED
+═══════════════════════════════════════════════════════════
+
+🔴 QUÉ ES ESTE ERROR:
+
+El error 419 "Page Expired" ocurre cuando el token CSRF
+(Cross-Site Request Forgery) expira. Esto pasa cuando:
+
+❌ Dejas la página de login abierta mucho tiempo
+❌ El navegador estuvo inactivo
+❌ La sesión expiró
+
+═══════════════════════════════════════════════════════════
+  ✅ SOLUCIÓN RÁPIDA (3 PASOS)
+═══════════════════════════════════════════════════════════
+
+1️⃣ RECARGA LA PÁGINA
+   Presiona F5 o Ctrl+R en el navegador
+
+2️⃣ SI NO FUNCIONA, CIERRA EL NAVEGADOR
+   Cierra TODO el navegador (no solo la pestaña)
+
+3️⃣ ABRE EL NAVEGADOR DE NUEVO
+   Ve a: http://localhost:8000/login
+
+═══════════════════════════════════════════════════════════
+  🔧 SOLUCIÓN ALTERNATIVA
+═══════════════════════════════════════════════════════════
+
+Si el error persiste, ejecuta:
+
+  solucionar-error-419.bat
+
+O manualmente:
+  php artisan cache:clear
+  php artisan config:clear
+  php artisan view:clear
+
+Luego recarga la página.
+
+═══════════════════════════════════════════════════════════
+  💡 PREVENIR ESTE ERROR
+═══════════════════════════════════════════════════════════
+
+✅ No dejes la página de login abierta mucho tiempo
+✅ Si vas a estar inactivo, cierra la sesión
+✅ Recarga la página antes de intentar iniciar sesión
+
+═══════════════════════════════════════════════════════════
+  📋 CREDENCIALES (POR SI LAS NECESITAS)
+═══════════════════════════════════════════════════════════
+
+👨‍💼 ADMIN:
+   Email:    admin@fiftyone.com
+   Password: admin2026
+
+👤 CLIENTE:
+   Email:    cliente@test.com
+   Password: cliente2026
+
+═══════════════════════════════════════════════════════════
+  🎯 RESUMEN
+═══════════════════════════════════════════════════════════
+
+El error 419 es NORMAL y FÁCIL de solucionar:
+
+1. Recarga la página (F5)
+2. Intenta iniciar sesión de nuevo
+
+¡Eso es todo! 🎉
+
+═══════════════════════════════════════════════════════════

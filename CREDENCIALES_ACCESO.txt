@@ -1,0 +1,114 @@
+═══════════════════════════════════════════════════════════
+  🔐 CREDENCIALES DE ACCESO - FIFTYONE
+═══════════════════════════════════════════════════════════
+
+📅 Fecha de actualización: 11 de Mayo de 2026
+🔄 Versión: 2.0 (Credenciales simplificadas)
+
+═══════════════════════════════════════════════════════════
+  👨‍💼 PANEL DE ADMINISTRACIÓN
+═══════════════════════════════════════════════════════════
+
+URL:      http://localhost:8000/admin/login
+          http://127.0.0.1:8000/admin/login
+
+Email:    admin@fiftyone.com
+Password: admin2026
+
+Permisos:
+  ✅ Gestión completa de productos
+  ✅ Gestión de categorías
+  ✅ Gestión de órdenes
+  ✅ Gestión de usuarios
+  ✅ Gestión de cupones
+  ✅ Reportes y analíticas
+  ✅ Configuración de la tienda
+  ✅ Sistema de facturación
+  ✅ Gestión de colaboradores
+
+═══════════════════════════════════════════════════════════
+  👤 CUENTA DE CLIENTE
+═══════════════════════════════════════════════════════════
+
+URL:      http://localhost:8000/login
+          http://127.0.0.1:8000/login
+
+Email:    cliente@test.com
+Password: cliente2026
+
+Permisos:
+  ✅ Ver catálogo de productos
+  ✅ Agregar productos al carrito
+  ✅ Realizar compras
+  ✅ Ver historial de órdenes
+  ✅ Gestionar perfil
+  ✅ Lista de deseos
+  ✅ Dejar reseñas
+
+═══════════════════════════════════════════════════════════
+  🤝 CUENTA DE COLABORADOR
+═══════════════════════════════════════════════════════════
+
+URL:      http://localhost:8000/admin/login
+          http://127.0.0.1:8000/admin/login
+
+Email:    colaborador@fiftyone.com
+Password: colab2026
+
+Permisos:
+  ✅ Ver productos
+  ✅ Ver órdenes
+  ✅ Ver reportes básicos
+  ❌ No puede eliminar
+  ❌ No puede modificar configuración
+  ❌ No puede gestionar usuarios
+
+═══════════════════════════════════════════════════════════
+  🔄 RESETEAR CREDENCIALES
+═══════════════════════════════════════════════════════════
+
+Si olvidas alguna contraseña, ejecuta:
+
+  php artisan db:seed --class=ResetCredentialsSeeder
+
+Esto restaurará todas las credenciales a los valores
+mostrados en este archivo.
+
+═══════════════════════════════════════════════════════════
+  💡 NOTAS IMPORTANTES
+═══════════════════════════════════════════════════════════
+
+✅ Las contraseñas son simples para facilitar el desarrollo
+✅ Todo en minúsculas, fácil de recordar
+✅ No hay caracteres especiales
+✅ Formato: [rol]2026
+
+⚠️  ESTAS SON CREDENCIALES DE DESARROLLO
+⚠️  En producción usa contraseñas fuertes y únicas
+⚠️  Nunca uses estas contraseñas en un servidor real
+
+═══════════════════════════════════════════════════════════
+  🚀 ACCESO RÁPIDO
+═══════════════════════════════════════════════════════════
+
+ADMIN:
+  http://localhost:8000/admin/login
+  admin@fiftyone.com / admin2026
+
+CLIENTE:
+  http://localhost:8000/login
+  cliente@test.com / cliente2026
+
+COLABORADOR:
+  http://localhost:8000/admin/login
+  colaborador@fiftyone.com / colab2026
+
+═══════════════════════════════════════════════════════════
+  📋 RESUMEN RÁPIDO
+═══════════════════════════════════════════════════════════
+
+Admin:        admin@fiftyone.com       / admin2026
+Cliente:      cliente@test.com         / cliente2026
+Colaborador:  colaborador@fiftyone.com / colab2026
+
+═══════════════════════════════════════════════════════════

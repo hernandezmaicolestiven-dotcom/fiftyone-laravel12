@@ -180,9 +180,15 @@
         {{-- User footer --}}
         <div class="border-t border-white/10 px-4 py-4">
             <a href="{{ route('admin.settings') }}" class="flex items-center gap-3 rounded-lg p-1 hover:bg-white/5 transition">
-                @if(auth()->user()->avatar)
-                    <img src="{{ Storage::url(auth()->user()->avatar) }}" alt="{{ auth()->user()->name }}" 
+                @if(auth()->user()->avatar && file_exists(storage_path('app/public/' . auth()->user()->avatar)))
+                    <img src="{{ asset('storage/' . auth()->user()->avatar) }}?v={{ auth()->user()->updated_at->timestamp }}" 
+                         alt="{{ auth()->user()->name }}" 
+                         onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"
                          class="w-8 h-8 rounded-full object-cover flex-shrink-0 border border-white/20">
+                    <div class="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0 text-white border border-white/20"
+                         style="background: linear-gradient(135deg, #3B59FF, #7B2FBE); display: none;">
+                        {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
+                    </div>
                 @else
                     <div class="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0 text-white border border-white/20"
                          style="background: linear-gradient(135deg, #3B59FF, #7B2FBE)">

@@ -51,11 +51,11 @@ http://10.6.64.193:8000/admin/login
 
 Credenciales:
 Email:    admin@fiftyone.com
-Password: Admin123!
+Password: admin2026
 
 ⚠️ IMPORTANTE:
-   - La "A" de Admin es MAYÚSCULA
-   - Incluye el signo de exclamación (!) al final
+   - Todo en minúsculas
+   - Fácil de recordar: admin2026
    - Copia y pega exactamente como está
 
 
@@ -83,7 +83,7 @@ http://10.6.64.193:8000/login
 
 Credenciales:
 Email:    cliente@test.com
-Password: Cliente123!
+Password: cliente2026
 
 Puedes ver:
 ✅ Perfil de usuario
