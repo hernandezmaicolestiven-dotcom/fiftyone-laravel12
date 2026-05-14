@@ -1,0 +1,123 @@
+╔═══════════════════════════════════════════════════════════════╗
+║        📧 CONFIGURAR GMAIL - PASOS RÁPIDOS (3 MINUTOS)       ║
+╚═══════════════════════════════════════════════════════════════╝
+
+🎯 OBJETIVO: Enviar emails REALES desde Gmail
+
+════════════════════════════════════════════════════════════════
+
+📝 PASO 1: ACTIVAR VERIFICACIÓN EN 2 PASOS (SI NO LA TIENES)
+
+1. Ve a: https://myaccount.google.com/security
+
+2. Busca "Verificación en 2 pasos"
+
+3. Si dice "Desactivada":
+   - Clic en "Verificación en 2 pasos"
+   - Clic en "Comenzar"
+   - Ingresa tu número de teléfono
+   - Confirma con el código SMS
+   - ✅ Listo
+
+4. Si dice "Activada":
+   - ✅ Continúa al Paso 2
+
+════════════════════════════════════════════════════════════════
+
+📝 PASO 2: CREAR CONTRASEÑA DE APLICACIÓN
+
+1. Ve a: https://myaccount.google.com/apppasswords
+
+2. Ingresa tu contraseña de Gmail
+
+3. En "Seleccionar app":
+   - Selecciona: "Correo"
+
+4. En "Seleccionar dispositivo":
+   - Selecciona: "Otro (nombre personalizado)"
+   - Escribe: "FiftyOne"
+
+5. Clic en "Generar"
+
+6. Google te mostrará:
+   ┌─────────────────────────────────────────┐
+   │  Tu contraseña de aplicación es:        │
+   │                                         │
+   │  xxxx xxxx xxxx xxxx                    │
+   │                                         │
+   │  [Copiar]                               │
+   └─────────────────────────────────────────┘
+
+7. COPIA LA CONTRASEÑA (sin espacios)
+   Ejemplo: abcdabcdabcdabcd
+
+════════════════════════════════════════════════════════════════
+
+📝 PASO 3: DAME TUS DATOS
+
+Necesito 2 cosas:
+
+1. Tu email de Gmail:
+   _________________________________
+
+2. La contraseña de aplicación (16 caracteres):
+   _________________________________
+
+════════════════════════════════════════════════════════════════
+
+✅ YO HARÉ EL RESTO
+
+Con esos datos yo:
+- ✅ Configuraré Gmail SMTP en tu .env
+- ✅ Limpiaré la caché
+- ✅ Probaré que funcione
+- ✅ Te confirmaré que está listo
+
+════════════════════════════════════════════════════════════════
+
+⚠️ IMPORTANTE
+
+- ❌ NO uses tu contraseña normal de Gmail
+- ✅ USA la contraseña de aplicación (16 caracteres)
+- 🔒 Es segura y puedes revocarla cuando quieras
+
+════════════════════════════════════════════════════════════════
+
+💡 EJEMPLO
+
+Si tu email es: juan@gmail.com
+Y tu contraseña de app es: abcdabcdabcdabcd
+
+Dime:
+"Email: juan@gmail.com
+Password: abcdabcdabcdabcd"
+
+Y yo configuro todo en 30 segundos.
+
+════════════════════════════════════════════════════════════════
+
+🚀 DESPUÉS DE CONFIGURAR
+
+Los emails llegarán REALMENTE a:
+- ✅ Gmail
+- ✅ Outlook
+- ✅ Yahoo
+- ✅ Cualquier correo
+
+════════════════════════════════════════════════════════════════
+
+📞 ¿NECESITAS AYUDA?
+
+Si no puedes crear la contraseña de aplicación:
+1. Verifica que tengas verificación en 2 pasos activada
+2. Intenta desde otro navegador
+3. Cierra sesión y vuelve a entrar
+
+════════════════════════════════════════════════════════════════
+
+✨ ¡Estás a 3 minutos de tener emails reales funcionando!
+
+SIGUIENTE PASO:
+Ve a: https://myaccount.google.com/apppasswords
+
+════════════════════════════════════════════════════════════════

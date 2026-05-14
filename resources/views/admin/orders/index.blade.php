@@ -185,6 +185,7 @@
                     <th class="px-6 py-3 text-left">Contacto</th>
                     <th class="px-6 py-3 text-left">Items</th>
                     <th class="px-6 py-3 text-left">Total</th>
+                    <th class="px-6 py-3 text-left">Pago</th>
                     <th class="px-6 py-3 text-left">Estado</th>
                     <th class="px-6 py-3 text-left">Fecha</th>
                     <th class="px-6 py-3 text-right">Acciones</th>
@@ -212,6 +213,15 @@
                     <td class="px-6 py-4 text-gray-600">{{ $order->items->count() }} producto(s)</td>
                     <td class="px-6 py-4 font-bold text-gray-800">${{ number_format($order->total, 2) }}</td>
                     <td class="px-6 py-4">
+                        @if($order->payment_method)
+                            <span class="px-2 py-1 rounded-lg text-xs font-semibold bg-emerald-50 text-emerald-700">
+                                <i class="fa-solid fa-credit-card mr-1"></i>{{ ucfirst($order->payment_method) }}
+                            </span>
+                        @else
+                            <span class="text-xs text-gray-400">—</span>
+                        @endif
+                    </td>
+                    <td class="px-6 py-4">
                         <span class="px-2.5 py-1 rounded-full text-xs font-semibold {{ $color }}">
                             {{ $order->status_label }}
                         </span>
@@ -236,7 +246,7 @@
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="8" class="px-6 py-16 text-center text-gray-400">
+                    <td colspan="9" class="px-6 py-16 text-center text-gray-400">
                         <i class="fa-solid fa-bag-shopping text-4xl mb-3 block opacity-30"></i>
                         No hay pedidos todavía.
                     </td>

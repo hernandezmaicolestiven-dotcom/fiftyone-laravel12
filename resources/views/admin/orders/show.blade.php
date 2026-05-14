@@ -93,6 +93,15 @@
                     <span class="text-gray-600 italic">{{ $order->notes }}</span>
                 </div>
                 @endif
+                @if($order->payment_method)
+                <div class="flex items-start gap-3">
+                    <i class="fa-solid fa-credit-card text-emerald-400 mt-0.5 w-4"></i>
+                    <div>
+                        <span class="text-xs text-gray-500 block">Método de pago</span>
+                        <span class="text-emerald-600 font-semibold">{{ ucfirst($order->payment_method) }}</span>
+                    </div>
+                </div>
+                @endif
                 <div class="flex items-start gap-3">
                     <i class="fa-solid fa-clock text-gray-400 mt-0.5 w-4"></i>
                     <span class="text-gray-500">{{ $order->created_at->format('d/m/Y H:i') }}</span>

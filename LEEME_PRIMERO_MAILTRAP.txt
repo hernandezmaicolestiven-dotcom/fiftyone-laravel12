@@ -1,0 +1,167 @@
+╔═══════════════════════════════════════════════════════════════╗
+║                    📧 LEE ESTO PRIMERO                        ║
+║              CONFIGURAR MAILTRAP EN 2 MINUTOS                 ║
+╚═══════════════════════════════════════════════════════════════╝
+
+🎯 OBJETIVO:
+Hacer que funcione el sistema de "Olvidé mi contraseña" con emails reales.
+
+════════════════════════════════════════════════════════════════
+
+⚡ PROCESO RÁPIDO (2 MINUTOS):
+
+1️⃣  Obtener credenciales de Mailtrap
+    └─ Lee: MAILTRAP_PASO_A_PASO.txt (guía visual completa)
+    └─ O lee: INSTRUCCIONES_MAILTRAP.md (guía detallada)
+
+2️⃣  Configurar en tu proyecto
+    └─ Ejecuta: configurar-mailtrap.bat
+    └─ Pega tus credenciales cuando te las pida
+
+3️⃣  Probar que funciona
+    └─ Ejecuta: probar-emails.bat
+    └─ Selecciona opción 2
+
+════════════════════════════════════════════════════════════════
+
+📚 ARCHIVOS DE AYUDA DISPONIBLES:
+
+┌─────────────────────────────────────────────────────────────┐
+│ GUÍAS VISUALES:                                             │
+├─────────────────────────────────────────────────────────────┤
+│ 📄 MAILTRAP_PASO_A_PASO.txt                                 │
+│    └─ Guía visual con capturas en texto                    │
+│    └─ Muestra exactamente dónde hacer clic                 │
+│    └─ ⭐ RECOMENDADA SI ES TU PRIMERA VEZ                   │
+│                                                             │
+│ 📄 INSTRUCCIONES_MAILTRAP.md                                │
+│    └─ Guía completa con todos los detalles                 │
+│    └─ Incluye solución de problemas                        │
+│                                                             │
+│ 📄 DONDE_ESTAN_CREDENCIALES_MAILTRAP.txt                    │
+│    └─ Guía rápida de ubicación                             │
+│    └─ Perfecta para referencia rápida                      │
+└─────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────┐
+│ SCRIPTS AUTOMÁTICOS:                                        │
+├─────────────────────────────────────────────────────────────┤
+│ 🔧 configurar-mailtrap.bat                                  │
+│    └─ Configura las credenciales automáticamente           │
+│    └─ Te pide Username y Password                          │
+│    └─ Actualiza .env y limpia caché                        │
+│    └─ ⭐ USA ESTE DESPUÉS DE OBTENER LAS CREDENCIALES       │
+│                                                             │
+│ 🧪 probar-emails.bat                                        │
+│    └─ Prueba el sistema de emails                          │
+│    └─ Envía emails de prueba                               │
+│    └─ Verifica que todo funcione                           │
+└─────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────┐
+│ DOCUMENTACIÓN COMPLETA:                                     │
+├─────────────────────────────────────────────────────────────┤
+│ 📄 CONFIGURAR_EMAILS.md                                     │
+│    └─ Guía completa con todas las opciones                 │
+│    └─ Incluye Mailtrap, Gmail, y más                       │
+│                                                             │
+│ 📄 GUIA_RAPIDA_EMAILS.txt                                   │
+│    └─ Resumen de 5 pasos                                   │
+│    └─ Perfecta para referencia rápida                      │
+└─────────────────────────────────────────────────────────────┘
+
+════════════════════════════════════════════════════════════════
+
+🚀 INICIO RÁPIDO (PARA IMPACIENTES):
+
+1. Abre: MAILTRAP_PASO_A_PASO.txt
+2. Sigue los pasos visuales
+3. Copia Username y Password
+4. Ejecuta: configurar-mailtrap.bat
+5. Pega las credenciales
+6. ¡Listo!
+
+════════════════════════════════════════════════════════════════
+
+📍 DÓNDE ESTÁN LAS CREDENCIALES EN MAILTRAP:
+
+Ruta corta:
+Email Testing → Inboxes → My Inbox → SMTP Settings → Laravel 9+
+
+Verás:
+Username: 1a2b3c4d5e6f7g  ← COPIA ESTO
+Password: 9h8i7j6k5l4m3n  ← COPIA ESTO
+
+════════════════════════════════════════════════════════════════
+
+✅ DESPUÉS DE CONFIGURAR:
+
+Prueba desde el navegador:
+1. Ve a: http://localhost:8000/recuperar-contrasena
+2. Ingresa: cliente@test.com
+3. Clic en "Enviar enlace"
+4. Ve a Mailtrap → verás el email ahí
+
+O usa el script:
+1. Ejecuta: probar-emails.bat
+2. Selecciona opción 2
+3. Ve a Mailtrap
+
+════════════════════════════════════════════════════════════════
+
+💡 VENTAJAS DE MAILTRAP:
+
+✅ No envía emails reales (seguro para pruebas)
+✅ Captura todos los emails en una bandeja virtual
+✅ Interfaz web para verlos
+✅ Gratis para desarrollo
+✅ Perfecto para demostración
+
+════════════════════════════════════════════════════════════════
+
+🔍 SI TIENES PROBLEMAS:
+
+1. Lee: MAILTRAP_PASO_A_PASO.txt (guía visual)
+2. Lee: INSTRUCCIONES_MAILTRAP.md (solución de problemas)
+3. Ejecuta: probar-emails.bat (opción 4 para ver configuración)
+
+════════════════════════════════════════════════════════════════
+
+📞 PREGUNTAS FRECUENTES:
+
+Q: ¿Dónde encuentro las credenciales?
+A: Email Testing → Inboxes → My Inbox → SMTP Settings → Laravel 9+
+
+Q: ¿Qué hago con las credenciales?
+A: Ejecuta configurar-mailtrap.bat y pégalas cuando te las pida
+
+Q: ¿Cómo sé si funciona?
+A: Ejecuta probar-emails.bat y ve a Mailtrap para ver el email
+
+Q: ¿Los emails se envían de verdad?
+A: No, solo se capturan en Mailtrap (perfecto para desarrollo)
+
+Q: ¿Cuánto cuesta?
+A: Gratis para desarrollo
+
+════════════════════════════════════════════════════════════════
+
+🎯 RESUMEN DE 3 PASOS:
+
+1️⃣  Obtener credenciales de Mailtrap
+    └─ Lee MAILTRAP_PASO_A_PASO.txt
+
+2️⃣  Configurar
+    └─ Ejecuta configurar-mailtrap.bat
+
+3️⃣  Probar
+    └─ Ejecuta probar-emails.bat
+
+════════════════════════════════════════════════════════════════
+
+✨ ¡Estás a solo 2 minutos de tener el sistema funcionando!
+
+SIGUIENTE PASO:
+Abre: MAILTRAP_PASO_A_PASO.txt
+
+════════════════════════════════════════════════════════════════

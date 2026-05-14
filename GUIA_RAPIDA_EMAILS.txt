@@ -1,0 +1,124 @@
+╔════════════════════════════════════════════════════════════╗
+║         GUÍA RÁPIDA - CONFIGURAR EMAILS (2 MINUTOS)        ║
+╚════════════════════════════════════════════════════════════╝
+
+🎯 OBJETIVO: Hacer que funcione "Olvidé mi contraseña"
+
+════════════════════════════════════════════════════════════
+
+📝 PASO 1: CREAR CUENTA EN MAILTRAP (1 minuto)
+
+1. Ve a: https://mailtrap.io/register/signup
+2. Regístrate con tu email o GitHub
+3. Confirma tu email
+
+════════════════════════════════════════════════════════════
+
+📝 PASO 2: OBTENER CREDENCIALES (30 segundos)
+
+1. Entra a Mailtrap
+2. Ve a "Email Testing" → "Inboxes"
+3. Clic en "My Inbox"
+4. Clic en "Show Credentials"
+5. Copia Username y Password
+
+Ejemplo:
+Username: 1a2b3c4d5e6f7g
+Password: 9h8i7j6k5l4m3n
+
+════════════════════════════════════════════════════════════
+
+📝 PASO 3: CONFIGURAR EN .ENV (30 segundos)
+
+Abre tu archivo .env y busca la sección MAIL
+
+Cambia esto:
+MAIL_MAILER=smtp
+MAIL_HOST=sandbox.smtp.mailtrap.io
+MAIL_PORT=2525
+MAIL_USERNAME=
+MAIL_PASSWORD=
+
+Por esto (con tus credenciales):
+MAIL_MAILER=smtp
+MAIL_HOST=sandbox.smtp.mailtrap.io
+MAIL_PORT=2525
+MAIL_USERNAME=1a2b3c4d5e6f7g
+MAIL_PASSWORD=9h8i7j6k5l4m3n
+
+Guarda el archivo.
+
+════════════════════════════════════════════════════════════
+
+📝 PASO 4: LIMPIAR CACHÉ (10 segundos)
+
+Ejecuta en tu terminal:
+php artisan config:clear
+
+════════════════════════════════════════════════════════════
+
+🧪 PASO 5: PROBAR (30 segundos)
+
+OPCIÓN A - Desde el navegador:
+1. Ve a: http://localhost:8000/recuperar-contrasena
+2. Ingresa: cliente@test.com
+3. Clic en "Enviar enlace de recuperación"
+4. Ve a Mailtrap → verás el email ahí
+5. Clic en el enlace del email
+6. Ingresa nueva contraseña
+
+OPCIÓN B - Con el script:
+1. Ejecuta: probar-emails.bat
+2. Selecciona opción 1
+3. Ve a Mailtrap
+4. Verás el email ahí
+
+════════════════════════════════════════════════════════════
+
+✅ ¡LISTO! AHORA FUNCIONA
+
+Puedes probar con:
+- cliente@test.com (cliente)
+- admin@fiftyone.com (admin)
+- colaborador@fiftyone.com (colaborador)
+
+════════════════════════════════════════════════════════════
+
+💡 VENTAJAS DE MAILTRAP:
+
+✅ No envía emails reales (seguro para pruebas)
+✅ Captura todos los emails
+✅ Interfaz web para verlos
+✅ Gratis
+✅ Perfecto para demostración
+
+════════════════════════════════════════════════════════════
+
+📧 URLS DE RECUPERACIÓN:
+
+Clientes:
+http://localhost:8000/recuperar-contrasena
+
+Admin:
+http://localhost:8000/admin/forgot-password
+
+════════════════════════════════════════════════════════════
+
+🔍 SI TIENES PROBLEMAS:
+
+1. Verifica que las credenciales en .env sean correctas
+2. Ejecuta: php artisan config:clear
+3. Revisa storage/logs/laravel.log
+4. Ejecuta: probar-emails.bat
+
+════════════════════════════════════════════════════════════
+
+📞 ARCHIVOS DE AYUDA:
+
+- CONFIGURAR_EMAILS.md (guía completa)
+- configurar-emails.bat (asistente)
+- probar-emails.bat (pruebas)
+
+════════════════════════════════════════════════════════════
+
+🎉 ¡ÉXITO! Tu sistema de recuperación de contraseña está listo

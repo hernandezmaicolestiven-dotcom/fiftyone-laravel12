@@ -1,0 +1,154 @@
+╔═══════════════════════════════════════════════════════════════╗
+║        ✅ MÉTODO DE PAGO AGREGADO A LOS PEDIDOS               ║
+╚═══════════════════════════════════════════════════════════════╝
+
+🎉 ¡CAMBIOS COMPLETADOS!
+
+════════════════════════════════════════════════════════════════
+
+✅ LO QUE SE AGREGÓ:
+
+1. ✅ Vista del Cliente (Mis Pedidos)
+   - Muestra el método de pago con ícono
+   - Color verde para destacar
+   - Ubicación: Debajo de la dirección de envío
+
+2. ✅ Panel de Admin (Lista de Pedidos)
+   - Nueva columna "Pago" en la tabla
+   - Badge con ícono de tarjeta
+   - Color verde para destacar
+
+3. ✅ Panel de Admin (Detalles del Pedido)
+   - Método de pago en la información del cliente
+   - Ícono de tarjeta de crédito
+   - Etiqueta "Método de pago"
+
+════════════════════════════════════════════════════════════════
+
+📍 DÓNDE SE MUESTRA:
+
+1. Cliente - Mis Pedidos:
+   URL: http://localhost:8000/account
+   Ubicación: Debajo de cada pedido
+   Formato: "Pago: Wompi" (con ícono verde)
+
+2. Admin - Lista de Pedidos:
+   URL: http://localhost:8000/admin/orders
+   Ubicación: Nueva columna en la tabla
+   Formato: Badge verde con ícono
+
+3. Admin - Detalles del Pedido:
+   URL: http://localhost:8000/admin/orders/{id}
+   Ubicación: Información del cliente (sidebar)
+   Formato: Ícono + "Método de pago: Wompi"
+
+════════════════════════════════════════════════════════════════
+
+🎨 DISEÑO:
+
+- ✅ Ícono: fa-credit-card
+- ✅ Color: Verde (emerald)
+- ✅ Formato: Capitalizado (Wompi, Efecty, etc.)
+- ✅ Responsive: Se adapta a móvil y desktop
+
+════════════════════════════════════════════════════════════════
+
+💡 MÉTODOS DE PAGO SOPORTADOS:
+
+- Wompi (tarjetas de crédito/débito)
+- Efecty (pago en efectivo)
+- Nequi (si se agrega)
+- PSE (si se agrega)
+- Cualquier otro método que se configure
+
+════════════════════════════════════════════════════════════════
+
+🧪 CÓMO PROBARLO:
+
+1. Haz un pedido de prueba:
+   - Ve a: http://localhost:8000
+   - Agrega productos al carrito
+   - Completa el checkout
+   - Selecciona método de pago (Wompi o Efecty)
+   - Confirma el pedido
+
+2. Ver como Cliente:
+   - Inicia sesión como cliente
+   - Ve a "Mi cuenta"
+   - Verás el método de pago en cada pedido
+
+3. Ver como Admin:
+   - Inicia sesión como admin
+   - Ve a "Pedidos"
+   - Verás la columna "Pago" en la tabla
+   - Haz clic en "Ver" para ver detalles
+
+════════════════════════════════════════════════════════════════
+
+📊 EJEMPLO DE VISUALIZACIÓN:
+
+Cliente (Mis Pedidos):
+┌─────────────────────────────────────────────────────────────┐
+│ #359 [Pendiente] 14/05/2026 · 13:45                        │
+│ Pijama Algodón Gris ×1                                      │
+│ 📍 Calle, Ibagué                                            │
+│ 💳 Pago: Wompi                    $189.800 [Ver factura]    │
+└─────────────────────────────────────────────────────────────┘
+
+Admin (Lista):
+┌──────────────────────────────────────────────────────────────┐
+│ # │ Cliente │ Items │ Total │ Pago │ Estado │ Fecha │ Acc. │
+├──────────────────────────────────────────────────────────────┤
+│359│ Juan    │ 1     │$189.8 │[Wompi]│[Pend.]│14/05  │ Ver  │
+└──────────────────────────────────────────────────────────────┘
+
+Admin (Detalles):
+┌─────────────────────────────────────────────────────────────┐
+│ Información del cliente                                     │
+├─────────────────────────────────────────────────────────────┤
+│ 👤 Juan Pérez                                               │
+│ ✉️  juan@gmail.com                                          │
+│ 📞 3001234567                                               │
+│ 📍 Calle 123, Ibagué                                        │
+│ 💳 Método de pago: Wompi                                    │
+│ 🕐 14/05/2026 13:45                                         │
+└─────────────────────────────────────────────────────────────┘
+
+════════════════════════════════════════════════════════════════
+
+✅ ARCHIVOS MODIFICADOS:
+
+1. resources/views/customer/account.blade.php
+   - Agregado método de pago en la vista del cliente
+
+2. resources/views/admin/orders/index.blade.php
+   - Agregada columna "Pago" en la tabla
+   - Actualizado colspan del mensaje vacío
+
+3. resources/views/admin/orders/show.blade.php
+   - Agregado método de pago en detalles del pedido
+
+════════════════════════════════════════════════════════════════
+
+🔍 NOTAS TÉCNICAS:
+
+- El campo `payment_method` ya existía en la tabla `orders`
+- Se usa `ucfirst()` para capitalizar el nombre del método
+- Si no hay método de pago, se muestra "—" en el admin
+- En el cliente, solo se muestra si existe el método
+
+════════════════════════════════════════════════════════════════
+
+✨ ESTADO: 100% FUNCIONAL
+
+El método de pago ahora se muestra en:
+- ✅ Vista del cliente (Mis Pedidos)
+- ✅ Panel de admin (Lista de pedidos)
+- ✅ Panel de admin (Detalles del pedido)
+
+════════════════════════════════════════════════════════════════
+
+Fecha: 14 de mayo de 2026
+Implementado por: Kiro AI Assistant
+
+════════════════════════════════════════════════════════════════

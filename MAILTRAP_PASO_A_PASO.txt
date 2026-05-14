@@ -1,0 +1,255 @@
+╔═══════════════════════════════════════════════════════════════╗
+║          MAILTRAP - GUÍA VISUAL PASO A PASO                   ║
+╚═══════════════════════════════════════════════════════════════╝
+
+🎯 OBJETIVO: Encontrar Username y Password de Mailtrap
+
+════════════════════════════════════════════════════════════════
+
+📍 PASO 1: PÁGINA PRINCIPAL DE MAILTRAP
+
+Cuando entres a https://mailtrap.io verás:
+
+┌───────────────────────────────────────────────────────────────┐
+│ Mailtrap                                      [Tu cuenta] ▼   │
+├─────────────┬─────────────────────────────────────────────────┤
+│             │                                                 │
+│ 🏠 Home     │  Welcome to Mailtrap!                           │
+│             │                                                 │
+│ 📧 Email    │  Get started with Email Testing                 │
+│   Testing   │                                                 │
+│   └ Inboxes │  [Create Inbox] [View Inboxes]                  │
+│      ↑      │                                                 │
+│   CLIC AQUÍ │                                                 │
+│             │                                                 │
+│ 📨 Email    │                                                 │
+│   Sending   │                                                 │
+│             │                                                 │
+│ 💳 Billing  │                                                 │
+│             │                                                 │
+│ ⚙️  Settings│                                                 │
+│             │                                                 │
+└─────────────┴─────────────────────────────────────────────────┘
+
+HAZ CLIC EN: "Inboxes" (en el menú lateral izquierdo)
+
+════════════════════════════════════════════════════════════════
+
+📍 PASO 2: LISTA DE INBOXES
+
+Verás una lista de tus bandejas de entrada:
+
+┌───────────────────────────────────────────────────────────────┐
+│ Mailtrap > Email Testing > Inboxes                           │
+├───────────────────────────────────────────────────────────────┤
+│                                                               │
+│  📧 My Inboxes                                                │
+│                                                               │
+│  ┌─────────────────────────────────────────────────────────┐ │
+│  │  📬 My Inbox                                            │ │
+│  │     ↑                                                   │ │
+│  │  CLIC AQUÍ                                              │ │
+│  │                                                         │ │
+│  │  Created: Today                                         ││
+│  │  Messages: 0                                            │ │
+│  └─────────────────────────────────────────────────────────┘ │
+│                                                               │
+│  [+ Create Inbox]                                             │
+│                                                               │
+└───────────────────────────────────────────────────────────────┘
+
+HAZ CLIC EN: "My Inbox" (o el nombre de tu inbox)
+
+════════════════════════════════════════════════════════════════
+
+📍 PASO 3: DENTRO DEL INBOX - PESTAÑAS
+
+Una vez dentro del inbox, verás pestañas en la parte superior:
+
+┌───────────────────────────────────────────────────────────────┐
+│ Mailtrap > Email Testing > Inboxes > My Inbox                │
+├───────────────────────────────────────────────────────────────┤
+│                                                               │
+│  📬 My Inbox                                                  │
+│                                                               │
+│  ┌─────────────────────────────────────────────────────────┐ │
+│  │                                                         │ │
+│  │  [Messages] [SMTP Settings] [POP3 Settings] [HTTP API] │ │
+│  │                    ↑                                    │ │
+│  │                CLIC AQUÍ                                │ │
+│  │                                                         │ │
+│  └─────────────────────────────────────────────────────────┘ │
+│                                                               │
+└───────────────────────────────────────────────────────────────┘
+
+HAZ CLIC EN: "SMTP Settings"
+
+════════════════════════════════════════════════════════════════
+
+📍 PASO 4: SMTP SETTINGS - SELECCIONAR INTEGRACIÓN
+
+En la pestaña SMTP Settings verás:
+
+┌───────────────────────────────────────────────────────────────┐
+│ SMTP Settings                                                 │
+├───────────────────────────────────────────────────────────────┤
+│                                                               │
+│  Select your integration:                                     │
+│                                                               │
+│  ┌─────────────────────────────────────────────────────────┐ │
+│  │  [Select framework/language...        ▼]                │ │
+│  │                                                         │ │
+│  │  Options:                                               │ │
+│  │  - PHP                                                  │ │
+│  │  - Laravel 9+  ← SELECCIONA ESTE                        │ │
+│  │  - Symfony                                              │ │
+│  │  - Node.js                                              │ │
+│  │  - Python                                               │ │
+│  │  ...                                                    │ │
+│  └─────────────────────────────────────────────────────────┘ │
+│                                                               │
+└───────────────────────────────────────────────────────────────┘
+
+SELECCIONA: "Laravel 9+"
+
+════════════════════════════════════════════════════════════════
+
+📍 PASO 5: ¡AQUÍ ESTÁN LAS CREDENCIALES!
+
+Después de seleccionar "Laravel 9+" verás:
+
+┌───────────────────────────────────────────────────────────────┐
+│ SMTP Settings - Laravel 9+                                    │
+├───────────────────────────────────────────────────────────────┤
+│                                                               │
+│  Configuration for Laravel 9+                                 │
+│                                                               │
+│  ┌─────────────────────────────────────────────────────────┐ │
+│  │                                                         │ │
+│  │  Host:     sandbox.smtp.mailtrap.io                     │ │
+│  │  Port:     2525                                         │ │
+│  │                                                         │ │
+│  │  Username: 1a2b3c4d5e6f7g  ← COPIA ESTO                │ │
+│  │            [📋 Copy]                                     │ │
+│  │                                                         │ │
+│  │  Password: 9h8i7j6k5l4m3n  ← COPIA ESTO                │ │
+│  │            [📋 Copy]                                     │ │
+│  │                                                         │ │
+│  │  Auth:     PLAIN, LOGIN and CRAM-MD5                    │ │
+│  │  TLS:      Optional (STARTTLS on all ports)             │ │
+│  │                                                         │ │
+│  └─────────────────────────────────────────────────────────┘ │
+│                                                               │
+│  Example .env configuration:                                  │
+│                                                               │
+│  ┌─────────────────────────────────────────────────────────┐ │
+│  │  MAIL_MAILER=smtp                                       │ │
+│  │  MAIL_HOST=sandbox.smtp.mailtrap.io                     │ │
+│  │  MAIL_PORT=2525                                         │ │
+│  │  MAIL_USERNAME=1a2b3c4d5e6f7g                           │ │
+│  │  MAIL_PASSWORD=9h8i7j6k5l4m3n                           │ │
+│  │  MAIL_ENCRYPTION=tls                                    │ │
+│  └─────────────────────────────────────────────────────────┘ │
+│                                                               │
+└───────────────────────────────────────────────────────────────┘
+
+¡AQUÍ ESTÁN! Copia el Username y el Password
+
+════════════════════════════════════════════════════════════════
+
+✅ LO QUE NECESITAS COPIAR:
+
+Username: _____________________________ (cópialo aquí)
+Password: _____________________________ (cópialo aquí)
+
+════════════════════════════════════════════════════════════════
+
+📝 DESPUÉS DE COPIARLAS:
+
+OPCIÓN A - Usar el script (RECOMENDADO):
+1. Ejecuta: configurar-mailtrap.bat
+2. Pega tu Username cuando te lo pida
+3. Pega tu Password cuando te lo pida
+4. ¡Listo!
+
+OPCIÓN B - Manual:
+1. Abre tu archivo .env
+2. Busca estas líneas:
+   MAIL_USERNAME=
+   MAIL_PASSWORD=
+
+3. Pega tus credenciales:
+   MAIL_USERNAME=1a2b3c4d5e6f7g
+   MAIL_PASSWORD=9h8i7j6k5l4m3n
+
+4. Guarda el archivo
+
+5. Ejecuta en tu terminal:
+   php artisan config:clear
+
+════════════════════════════════════════════════════════════════
+
+🧪 PROBAR QUE FUNCIONA:
+
+1. Ejecuta: probar-emails.bat
+2. Selecciona opción 2 (Probar recuperación de contraseña)
+3. Ve a Mailtrap → verás el email ahí
+
+O desde el navegador:
+1. Ve a: http://localhost:8000/recuperar-contrasena
+2. Ingresa: cliente@test.com
+3. Clic en "Enviar enlace"
+4. Ve a Mailtrap y verás el email
+
+════════════════════════════════════════════════════════════════
+
+💡 TIPS:
+
+✅ Puedes hacer clic en el botón [📋 Copy] junto a cada credencial
+✅ Las credenciales son únicas para tu cuenta
+✅ No caducan (puedes usarlas siempre)
+✅ Son seguras (solo tú las ves)
+
+════════════════════════════════════════════════════════════════
+
+🔍 SI NO VES LAS CREDENCIALES:
+
+Posibles razones:
+1. No seleccionaste "Laravel 9+" en el dropdown
+2. Estás en la pestaña "Messages" en vez de "SMTP Settings"
+3. No hiciste clic en "My Inbox"
+
+Solución:
+- Verifica que estés en: Inboxes > My Inbox > SMTP Settings
+- Selecciona "Laravel 9+" en el dropdown
+- Las credenciales aparecerán automáticamente
+
+════════════════════════════════════════════════════════════════
+
+📞 ¿NECESITAS AYUDA?
+
+Dime qué ves en tu pantalla:
+
+A) Veo el menú lateral pero no encuentro "Inboxes"
+   → Busca "Email Testing" y expándelo
+
+B) Estoy en "Inboxes" pero no veo "SMTP Settings"
+   → Haz clic en "My Inbox" primero
+
+C) Veo "SMTP Settings" pero no aparecen las credenciales
+   → Selecciona "Laravel 9+" en el dropdown
+
+D) Ya las encontré y las copié
+   → ¡Perfecto! Ejecuta: configurar-mailtrap.bat
+
+════════════════════════════════════════════════════════════════
+
+✨ ¡Estás a solo 2 minutos de tener el sistema funcionando!
+
+Cuando tengas las credenciales, ejecuta:
+
+    configurar-mailtrap.bat
+
+Y pégalas cuando te las pida.
+
+════════════════════════════════════════════════════════════════

@@ -1,0 +1,163 @@
+╔═══════════════════════════════════════════════════════════════╗
+║     DÓNDE ENCONTRAR TUS CREDENCIALES DE MAILTRAP (VISUAL)    ║
+╚═══════════════════════════════════════════════════════════════╝
+
+🎯 SIGUE ESTOS PASOS EXACTOS:
+
+════════════════════════════════════════════════════════════════
+
+📍 PASO 1: UBICARTE EN LA PÁGINA CORRECTA
+
+Cuando entres a Mailtrap, verás el menú lateral izquierdo.
+Busca y haz clic en:
+
+   📧 Email Testing
+      └─ Inboxes
+
+════════════════════════════════════════════════════════════════
+
+📍 PASO 2: SELECCIONAR TU INBOX
+
+Verás una lista de "Inboxes" (bandejas de entrada).
+Por defecto hay uno llamado "My Inbox".
+
+Haz clic en "My Inbox" (o el nombre que tenga tu inbox).
+
+════════════════════════════════════════════════════════════════
+
+📍 PASO 3: ENCONTRAR LAS CREDENCIALES
+
+Una vez dentro del inbox, verás varias pestañas en la parte superior:
+
+   [Messages] [SMTP Settings] [POP3 Settings] [HTTP API]
+                    ↑
+              HAZ CLIC AQUÍ
+
+════════════════════════════════════════════════════════════════
+
+📍 PASO 4: COPIAR LAS CREDENCIALES
+
+En la pestaña "SMTP Settings" verás un dropdown que dice:
+"Select your integration"
+
+Selecciona: "Laravel 9+"
+
+Verás algo como esto:
+
+┌─────────────────────────────────────────────────────────┐
+│ Host:     sandbox.smtp.mailtrap.io                      │
+│ Port:     2525                                          │
+│ Username: 1a2b3c4d5e6f7g    ← COPIA ESTO               │
+│ Password: 9h8i7j6k5l4m3n    ← COPIA ESTO               │
+│ Auth:     PLAIN, LOGIN and CRAM-MD5                     │
+│ TLS:      Optional (STARTTLS on all ports)             │
+└─────────────────────────────────────────────────────────┘
+
+════════════════════════════════════════════════════════════════
+
+✅ LO QUE NECESITAS COPIAR:
+
+Username: _____________________________ (cópialo aquí)
+Password: _____________________________ (cópialo aquí)
+
+════════════════════════════════════════════════════════════════
+
+📝 DESPUÉS DE COPIARLAS:
+
+1. Abre tu archivo .env
+2. Busca estas líneas:
+
+   MAIL_USERNAME=
+   MAIL_PASSWORD=
+
+3. Pega tus credenciales:
+
+   MAIL_USERNAME=1a2b3c4d5e6f7g
+   MAIL_PASSWORD=9h8i7j6k5l4m3n
+
+4. Guarda el archivo
+
+5. Ejecuta en tu terminal:
+   php artisan config:clear
+
+6. ¡Listo! Ya funciona
+
+════════════════════════════════════════════════════════════════
+
+🔍 SI NO VES "SMTP Settings":
+
+Puede que estés en la vista de "Messages" (mensajes).
+Busca las pestañas en la parte superior y haz clic en "SMTP Settings".
+
+════════════════════════════════════════════════════════════════
+
+💡 ALTERNATIVA - RUTA RÁPIDA:
+
+Si no encuentras las pestañas, busca un botón o enlace que diga:
+- "Show Credentials"
+- "Integration"
+- "Settings"
+
+Cualquiera de estos te llevará a las credenciales SMTP.
+
+════════════════════════════════════════════════════════════════
+
+📸 REFERENCIA VISUAL:
+
+La interfaz de Mailtrap se ve así:
+
+┌─────────────────────────────────────────────────────────────┐
+│ Mailtrap                                    [Tu cuenta] ▼   │
+├──────────┬──────────────────────────────────────────────────┤
+│          │                                                  │
+│ Email    │  My Inbox                                        │
+│ Testing  │  ┌────────────────────────────────────────────┐ │
+│  └Inboxes│  │ [Messages] [SMTP Settings] [POP3] [HTTP]  │ │
+│          │  │                                            │ │
+│ Email    │  │  Select your integration: [Laravel 9+ ▼]  │ │
+│ Sending  │  │                                            │ │
+│          │  │  Host: sandbox.smtp.mailtrap.io           │ │
+│ Billing  │  │  Port: 2525                               │ │
+│          │  │  Username: 1a2b3c4d5e6f7g                 │ │
+│ Settings │  │  Password: 9h8i7j6k5l4m3n                 │ │
+│          │  └────────────────────────────────────────────┘ │
+└──────────┴──────────────────────────────────────────────────┘
+
+════════════════════════════════════════════════════════════════
+
+🎯 RESUMEN RÁPIDO:
+
+1. Email Testing → Inboxes
+2. Clic en "My Inbox"
+3. Pestaña "SMTP Settings"
+4. Seleccionar "Laravel 9+"
+5. Copiar Username y Password
+6. Pegar en .env
+7. php artisan config:clear
+
+════════════════════════════════════════════════════════════════
+
+❓ ¿SIGUES SIN ENCONTRARLAS?
+
+Dime qué ves en tu pantalla y te ayudo a ubicarlas.
+
+Opciones:
+A) Veo el menú lateral pero no encuentro "Inboxes"
+B) Estoy en "Inboxes" pero no veo "SMTP Settings"
+C) Veo "SMTP Settings" pero no aparecen las credenciales
+D) Ya las encontré y las copié
+
+════════════════════════════════════════════════════════════════
+
+📞 CUANDO LAS TENGAS:
+
+Dime: "Ya las tengo" y te ayudo a configurarlas en el .env
+
+O si prefieres, pégalas aquí y yo las configuro por ti:
+
+Username: _____________________
+Password: _____________________
+
+════════════════════════════════════════════════════════════════
+
+✨ ¡Estás a solo 2 minutos de tener el sistema funcionando!
