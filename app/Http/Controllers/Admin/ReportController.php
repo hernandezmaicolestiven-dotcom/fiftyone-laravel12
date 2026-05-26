@@ -103,17 +103,32 @@ class ReportController extends Controller
             $query->where('stock', '>=', 5);
         }
 
-        $products = $query->orderBy('stock')->get();
+        // Paginación: 50 productos por página
+        $products = $query->orderBy('stock')->paginate(50)->appends($request->query());
 
-        // KPIs
-        $totalProducts = $products->count();
-        $totalStock = $products->sum('stock');
-        $outOfStock = $products->where('stock', 0)->count();
-        $lowStock = $products->where('stock', '>', 0)->where('stock', '<', 5)->count();
-        $totalValue = $products->sum(fn ($p) => $p->price * $p->stock);
+        // KPIs calculados sobre todos los productos (sin paginación)
+        $allQuery = Product::query();
+        if ($categoryId) {
+            $allQuery->where('category_id', $categoryId);
+        }
+        if ($stockFilter === 'out') {
+            $allQuery->where('stock', 0);
+        } elseif ($stockFilter === 'low') {
+            $allQuery->where('stock', '>', 0)->where('stock', '<', 5);
+        } elseif ($stockFilter === 'ok') {
+            $allQuery->where('stock', '>=', 5);
+        }
+        
+        $allProducts = $allQuery->get();
+        
+        $totalProducts = $allProducts->count();
+        $totalStock = $allProducts->sum('stock');
+        $outOfStock = $allProducts->where('stock', 0)->count();
+        $lowStock = $allProducts->where('stock', '>', 0)->where('stock', '<', 5)->count();
+        $totalValue = $allProducts->sum(fn ($p) => $p->price * $p->stock);
 
         // Barras por categoría
-        $byCategory = $products->groupBy(fn ($p) => $p->category?->name ?? 'Sin categoría')
+        $byCategory = $allProducts->groupBy(fn ($p) => $p->category?->name ?? 'Sin categoría')
             ->map(fn ($g) => ['count' => $g->count(), 'stock' => $g->sum('stock'), 'value' => $g->sum(fn ($p) => $p->price * $p->stock)])
             ->sortByDesc('stock')->values();
 
@@ -123,10 +138,10 @@ class ReportController extends Controller
 
         // Dona stock status
         $stockStatus = [
-            'Sin stock' => $products->where('stock', 0)->count(),
-            'Stock bajo' => $products->where('stock', '>', 0)->where('stock', '<', 5)->count(),
-            'Normal' => $products->where('stock', '>=', 5)->where('stock', '<', 20)->count(),
-            'Alto' => $products->where('stock', '>=', 20)->count(),
+            'Sin stock' => $allProducts->where('stock', 0)->count(),
+            'Stock bajo' => $allProducts->where('stock', '>', 0)->where('stock', '<', 5)->count(),
+            'Normal' => $allProducts->where('stock', '>=', 5)->where('stock', '<', 20)->count(),
+            'Alto' => $allProducts->where('stock', '>=', 20)->count(),
         ];
 
         $categories = Category::orderBy('name')->get();

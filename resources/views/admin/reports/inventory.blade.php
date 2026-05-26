@@ -127,6 +127,52 @@
             </tbody>
         </table>
     </div>
+    
+    {{-- Paginación --}}
+    @if($products->hasPages())
+    <div class="px-6 py-4 border-t border-gray-100 dark:border-white/10">
+        <div class="flex items-center justify-between">
+            <div class="text-sm text-gray-600 dark:text-gray-400">
+                Mostrando {{ $products->firstItem() }} - {{ $products->lastItem() }} de {{ $products->total() }} productos
+            </div>
+            <div class="flex gap-2">
+                @if($products->onFirstPage())
+                    <span class="px-3 py-2 rounded-lg text-sm font-medium text-gray-400 bg-gray-100 dark:bg-white/5 cursor-not-allowed">
+                        Anterior
+                    </span>
+                @else
+                    <a href="{{ $products->previousPageUrl() }}" class="px-3 py-2 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-white/5 hover:bg-gray-200 dark:hover:bg-white/10 transition">
+                        Anterior
+                    </a>
+                @endif
+                
+                <div class="flex gap-1">
+                    @foreach($products->getUrlRange(max(1, $products->currentPage() - 2), min($products->lastPage(), $products->currentPage() + 2)) as $page => $url)
+                        @if($page == $products->currentPage())
+                            <span class="px-3 py-2 rounded-lg text-sm font-bold text-white" style="background: linear-gradient(135deg, #3B59FF, #7B2FBE);">
+                                {{ $page }}
+                            </span>
+                        @else
+                            <a href="{{ $url }}" class="px-3 py-2 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-white/5 hover:bg-gray-200 dark:hover:bg-white/10 transition">
+                                {{ $page }}
+                            </a>
+                        @endif
+                    @endforeach
+                </div>
+                
+                @if($products->hasMorePages())
+                    <a href="{{ $products->nextPageUrl() }}" class="px-3 py-2 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-white/5 hover:bg-gray-200 dark:hover:bg-white/10 transition">
+                        Siguiente
+                    </a>
+                @else
+                    <span class="px-3 py-2 rounded-lg text-sm font-medium text-gray-400 bg-gray-100 dark:bg-white/5 cursor-not-allowed">
+                        Siguiente
+                    </span>
+                @endif
+            </div>
+        </div>
+    </div>
+    @endif
 </div>
 
 @endsection

@@ -376,6 +376,7 @@ function CheckoutModal({ cart, onClose, onSuccess }) {
   const [coupon,    setCoupon]    = useState('');
   const [discount,  setDiscount]  = useState(0);
   const [couponMsg, setCouponMsg] = useState('');
+  const [orderReference, setOrderReference] = useState(null);
   const rawTotal = cart.reduce((s,i) => s + i.price * i.qty, 0);
   const total = Math.max(0, rawTotal - discount);
 
@@ -460,6 +461,9 @@ function CheckoutModal({ cart, onClose, onSuccess }) {
         return;
       }
 
+      // Guardar el número de referencia
+      setOrderReference(data.order_id);
+
       // Si el método de pago es Wompi, redirigir al checkout de Wompi
       if (payMethod === 'wompi') {
         try {
@@ -516,6 +520,10 @@ function CheckoutModal({ cart, onClose, onSuccess }) {
           setErr('Error al conectar con Wompi. Por favor recarga la página (Ctrl+Shift+R)');
           setLoading(false);
         }
+      } else if (payMethod === 'efecty') {
+        // Para Efecty, solo detener el loading y mostrar el número de referencia
+        setLoading(false);
+        // No cerrar el modal, el usuario verá el número de referencia
       } else {
         // Para otros métodos de pago, mostrar éxito inmediatamente
         onSuccess(data.order_id);
@@ -736,11 +744,48 @@ function CheckoutModal({ cart, onClose, onSuccess }) {
 
               {/* Efecty */}
               {payMethod==='efecty'&&(
-                <div className="rounded-2xl p-4"
+                <div className="rounded-2xl p-4 space-y-3"
                   style={{background:'rgba(255,184,0,.08)',
                           border:'1px solid rgba(255,184,0,.25)'}}>
-                  <p className="text-xs font-bold uppercase tracking-widest mb-2" style={{color:'rgba(255,255,255,.4)'}}>Instrucciones</p>
-                  <p className="text-xs leading-relaxed" style={{color:'rgba(255,255,255,.5)'}}>Ve al punto Efecty más cercano y paga con el número de pedido que recibirás por email.</p>
+                  <div>
+                    <p className="text-xs font-bold uppercase tracking-widest mb-2" style={{color:'rgba(255,255,255,.4)'}}>Instrucciones</p>
+                    {!orderReference ? (
+                      <p className="text-xs leading-relaxed" style={{color:'rgba(255,255,255,.5)'}}>
+                        Haz clic en "Confirmar pedido" para generar tu número de referencia y luego ve al punto Efecty más cercano para realizar el pago.
+                      </p>
+                    ) : (
+                      <>
+                        <p className="text-xs leading-relaxed mb-3" style={{color:'rgba(255,255,255,.5)'}}>
+                          Ve al punto Efecty más cercano y paga con este número de referencia:
+                        </p>
+                        <div className="rounded-xl p-3 mb-3" style={{background:'rgba(255,184,0,.15)',border:'1px solid rgba(255,184,0,.35)'}}>
+                          <p className="text-[10px] font-bold uppercase tracking-widest mb-1" style={{color:'rgba(255,255,255,.5)'}}>Número de Referencia</p>
+                          <div className="flex items-center justify-between gap-2">
+                            <p className="text-lg font-black" style={{color:'#FFB800'}}>#{orderReference}</p>
+                            <button 
+                              onClick={() => {
+                                navigator.clipboard.writeText(orderReference.toString());
+                                alert('✅ Número de referencia copiado');
+                              }}
+                              className="px-3 py-1.5 rounded-lg text-xs font-bold transition-all hover:scale-105"
+                              style={{background:'rgba(255,184,0,.25)',color:'#FFB800'}}>
+                              <i className="fa-solid fa-copy mr-1"></i>
+                              Copiar
+                            </button>
+                          </div>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                  <a href="https://www.efecty.com.co/puntos-de-atencion/" 
+                     target="_blank" 
+                     rel="noopener noreferrer"
+                     className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl text-sm font-bold transition-all hover:scale-[1.02]"
+                     style={{background:'rgba(255,184,0,.2)',color:'#FFB800',border:'1px solid rgba(255,184,0,.4)'}}>
+                    <i className="fa-solid fa-location-dot text-xs"></i>
+                    Buscar punto Efecty cercano
+                    <i className="fa-solid fa-arrow-up-right-from-square text-xs"></i>
+                  </a>
                 </div>
               )}
             </div>
@@ -757,13 +802,16 @@ function CheckoutModal({ cart, onClose, onSuccess }) {
                   style={{background:'rgba(255,255,255,.06)',border:'1px solid rgba(255,255,255,.08)',color:'rgba(255,255,255,.5)'}}>
                   <i className="fa-solid fa-arrow-left mr-1 text-xs"></i> Volver
                 </button>
-                <button onClick={submit} disabled={loading||!payMethod}
+                <button onClick={submit} disabled={loading||!payMethod||(payMethod==='efecty'&&orderReference)}
                   className="flex-[2] py-3.5 rounded-2xl text-white font-black text-sm flex items-center justify-center gap-2 transition-all hover:scale-[1.02] disabled:opacity-50"
                   style={{background:'linear-gradient(90deg,#3B59FF,#7B2FBE)',boxShadow:payMethod?'0 8px 30px rgba(59,89,255,.45)':'none'}}>
-                  {loading
-                    ? <><i className="fa-solid fa-spinner fa-spin"></i> Procesando...</>
-                    : <><i className="fa-solid fa-shield-halved text-xs"></i> Pagar {fmt(total)}</>
-                  }
+                  {loading ? (
+                    <><i className="fa-solid fa-spinner fa-spin"></i> Procesando...</>
+                  ) : (payMethod==='efecty'&&orderReference) ? (
+                    <><i className="fa-solid fa-check text-xs"></i> Pedido confirmado</>
+                  ) : (
+                    <><i className="fa-solid fa-shield-halved text-xs"></i> {payMethod==='efecty' ? 'Confirmar pedido' : `Pagar ${fmt(total)}`}</>
+                  )}
                 </button>
               </div>
             </div>
@@ -841,7 +889,7 @@ function Navbar({ cartCount, onCartOpen }) {
         <div className="flex items-center justify-between h-16">
           <a href="/" className="flex items-center gap-2 flex-shrink-0">
             <img src="/logo-fiftyone.svg" alt="FiftyOne Logo" className="h-10 w-10" />
-            <span className="text-white font-black text-xl">Fifty<span className="text-[#3B59FF]">One</span></span>
+            <span className="text-white font-black text-xl">FiftyOne</span>
           </a>
           <div className="hidden md:flex items-center gap-7">
             {links.map(l => <a key={l.label} href={l.href} className="text-gray-300 hover:text-[#3B59FF] text-sm font-medium transition-colors">{l.label}</a>)}
@@ -1551,7 +1599,7 @@ function Footer() {
           <div className="col-span-2 md:col-span-1">
             <div className="flex items-center gap-2 mb-4">
               <img src="/logo-fiftyone.svg" alt="FiftyOne Logo" className="h-10 w-10" />
-              <span className="text-white font-black text-xl">Fifty<span className="text-[#3B59FF]">One</span></span>
+              <span className="text-white font-black text-xl">FiftyOne</span>
             </div>
             <p className="text-sm leading-relaxed mb-5 text-gray-400">Tu tienda de ropa oversize. Estilo streetwear, telas premium y envíos a todo el país.</p>
           </div>

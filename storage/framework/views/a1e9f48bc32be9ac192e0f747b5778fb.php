@@ -400,6 +400,73 @@
 <?php echo $__env->yieldPushContent('scripts'); ?>
 
 
+<div id="confirmModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4" style="background: rgba(0,0,0,0.75); backdrop-filter: blur(10px);">
+    <div class="bg-white dark:bg-[#1e1e2e] rounded-2xl shadow-2xl max-w-md w-full overflow-hidden transform transition-all">
+        <div class="p-6">
+            <div class="flex items-center gap-4 mb-4">
+                <div class="w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0" style="background: linear-gradient(135deg, #3B59FF, #7B2FBE);">
+                    <i class="fa-solid fa-question text-white text-xl"></i>
+                </div>
+                <h3 class="text-lg font-bold text-gray-800 dark:text-gray-100" id="confirmTitle">Confirmar acción</h3>
+            </div>
+            <p class="text-sm text-gray-600 dark:text-gray-400 mb-6" id="confirmMessage"></p>
+            <div class="flex gap-3">
+                <button onclick="window.confirmModalReject()" class="flex-1 px-4 py-2.5 rounded-xl text-sm font-semibold text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-[#12121f] hover:bg-gray-200 dark:hover:bg-[#16162a] transition">
+                    Cancelar
+                </button>
+                <button onclick="window.confirmModalResolve()" class="flex-1 px-4 py-2.5 rounded-xl text-sm font-semibold text-white transition" style="background: linear-gradient(90deg, #3B59FF, #7B2FBE);">
+                    Confirmar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Sistema de confirmación personalizado
+window.confirmModal = function(message, title = 'Confirmar acción') {
+    return new Promise((resolve, reject) => {
+        const modal = document.getElementById('confirmModal');
+        document.getElementById('confirmTitle').textContent = title;
+        document.getElementById('confirmMessage').textContent = message;
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+        
+        window.confirmModalResolve = () => {
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+            resolve(true);
+        };
+        
+        window.confirmModalReject = () => {
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+            resolve(false);
+        };
+    });
+};
+
+// Reemplazar todos los onsubmit con confirm
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('form[onsubmit*="confirm"]').forEach(form => {
+        const originalOnsubmit = form.getAttribute('onsubmit');
+        const match = originalOnsubmit.match(/confirm\(['"](.+?)['"]\)/);
+        if (match) {
+            const message = match[1];
+            form.removeAttribute('onsubmit');
+            form.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                const confirmed = await window.confirmModal(message);
+                if (confirmed) {
+                    this.submit();
+                }
+            });
+        }
+    });
+});
+</script>
+
+
 <script>
 // Sin spinner - navegación directa
 </script>
