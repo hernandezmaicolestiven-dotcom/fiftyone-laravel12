@@ -22,7 +22,7 @@ class ProductController extends Controller
             $query->whereHas('category', fn($q) => $q->where('name', request('categoria')));
         }
 
-        $products = $query->get();
+        $products = $query->paginate(12)->withQueryString();
         $categories = Category::orderBy('name')->get();
 
         return view('catalogo', compact('products', 'categories'));

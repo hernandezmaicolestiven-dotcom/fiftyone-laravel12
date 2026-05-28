@@ -10,7 +10,40 @@
     <style>
         @keyframes slideIn { from{opacity:0;transform:translateX(100px)} to{opacity:1;transform:translateX(0)} }
         @keyframes fadeOut { from{opacity:1} to{opacity:0} }
+        @keyframes fadeInUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+        html { scroll-behavior: smooth; }
+        #productos { scroll-margin-top: 100px; }
+        
+        /* Animación de entrada para productos */
+        .product-card {
+            animation: fadeInUp 0.4s ease-out forwards;
+            opacity: 0;
+        }
+        .product-card:nth-child(1) { animation-delay: 0.05s; }
+        .product-card:nth-child(2) { animation-delay: 0.1s; }
+        .product-card:nth-child(3) { animation-delay: 0.15s; }
+        .product-card:nth-child(4) { animation-delay: 0.2s; }
+        .product-card:nth-child(5) { animation-delay: 0.25s; }
+        .product-card:nth-child(6) { animation-delay: 0.3s; }
+        .product-card:nth-child(7) { animation-delay: 0.35s; }
+        .product-card:nth-child(8) { animation-delay: 0.4s; }
+        .product-card:nth-child(9) { animation-delay: 0.45s; }
+        .product-card:nth-child(10) { animation-delay: 0.5s; }
+        .product-card:nth-child(11) { animation-delay: 0.55s; }
+        .product-card:nth-child(12) { animation-delay: 0.6s; }
     </style>
+    
+    <!-- Script de scroll ANTES de renderizar -->
+    <script>
+        // Detectar si hay paginación y preparar el scroll
+        (function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.has('page') || window.location.hash === '#productos') {
+                // Guardar que necesitamos hacer scroll
+                sessionStorage.setItem('scrollToProducts', 'true');
+            }
+        })();
+    </script>
 </head>
 <body class="bg-gray-50" style="font-family: 'Inter', sans-serif;">
 
@@ -38,7 +71,7 @@
     <div class="mb-8">
         <span class="text-sm font-bold uppercase text-purple-600">Catálogo</span>
         <h1 class="text-4xl font-black text-gray-900 mt-1">Todos los productos</h1>
-        <p class="text-gray-500 mt-2">{{ count($products) }} productos disponibles</p>
+        <p class="text-gray-500 mt-2">{{ $products->total() }} productos disponibles</p>
     </div>
 
     <!-- Filtros -->
@@ -54,9 +87,9 @@
     </div>
 
     <!-- Grid de productos -->
-    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-5">
+    <div id="productos" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-5">
         @foreach($products as $product)
-        <div class="bg-white rounded-2xl overflow-hidden shadow-sm border hover:shadow-lg transition-all">
+        <div class="product-card bg-white rounded-2xl overflow-hidden shadow-sm border hover:shadow-lg transition-all">
             <div class="relative aspect-square bg-gray-100">
                 <img src="{{ $product->image ?? 'https://images.unsplash.com/photo-1556821840-3a63f15732ce?w=400' }}" 
                      alt="{{ $product->name }}"
@@ -81,6 +114,61 @@
         </div>
         @endforeach
     </div>
+    
+    <!-- Script inline para scroll inmediato después del grid -->
+    <script>
+        if (sessionStorage.getItem('scrollToProducts') === 'true') {
+            sessionStorage.removeItem('scrollToProducts');
+            const productos = document.getElementById('productos');
+            if (productos) {
+                const yOffset = -90;
+                const y = productos.getBoundingClientRect().top + window.pageYOffset + yOffset;
+                window.scrollTo(0, y);
+            }
+        }
+    </script>
+
+    <!-- Paginación -->
+    @if($products->hasPages())
+    <div class="mt-12 flex justify-center">
+        <div class="flex items-center gap-2">
+            {{-- Botón anterior --}}
+            @if($products->onFirstPage())
+                <span class="w-10 h-10 rounded-lg bg-gray-100 text-gray-400 flex items-center justify-center cursor-not-allowed">
+                    <i class="fa-solid fa-chevron-left text-sm"></i>
+                </span>
+            @else
+                <a href="{{ $products->previousPageUrl() }}#productos" class="w-10 h-10 rounded-lg bg-white border hover:bg-purple-50 hover:border-purple-600 text-gray-700 flex items-center justify-center transition">
+                    <i class="fa-solid fa-chevron-left text-sm"></i>
+                </a>
+            @endif
+
+            {{-- Números de página --}}
+            @foreach($products->getUrlRange(1, $products->lastPage()) as $page => $url)
+                @if($page == $products->currentPage())
+                    <span class="w-10 h-10 rounded-lg bg-purple-600 text-white font-bold flex items-center justify-center">
+                        {{ $page }}
+                    </span>
+                @else
+                    <a href="{{ $url }}#productos" class="w-10 h-10 rounded-lg bg-white border hover:bg-purple-50 hover:border-purple-600 text-gray-700 font-semibold flex items-center justify-center transition">
+                        {{ $page }}
+                    </a>
+                @endif
+            @endforeach
+
+            {{-- Botón siguiente --}}
+            @if($products->hasMorePages())
+                <a href="{{ $products->nextPageUrl() }}#productos" class="w-10 h-10 rounded-lg bg-white border hover:bg-purple-50 hover:border-purple-600 text-gray-700 flex items-center justify-center transition">
+                    <i class="fa-solid fa-chevron-right text-sm"></i>
+                </a>
+            @else
+                <span class="w-10 h-10 rounded-lg bg-gray-100 text-gray-400 flex items-center justify-center cursor-not-allowed">
+                    <i class="fa-solid fa-chevron-right text-sm"></i>
+                </span>
+            @endif
+        </div>
+    </div>
+    @endif
 
 </div>
 
