@@ -91,7 +91,7 @@
         @foreach($products as $product)
         <div class="product-card bg-white rounded-2xl overflow-hidden shadow-sm border hover:shadow-lg transition-all">
             <div class="relative aspect-square bg-gray-100">
-                <img src="{{ $product->image ?? 'https://images.unsplash.com/photo-1556821840-3a63f15732ce?w=400' }}" 
+                <img src="{{ $product->image ? (str_starts_with($product->image, 'http') ? $product->image : Storage::url($product->image)) : 'https://images.unsplash.com/photo-1556821840-3a63f15732ce?w=400' }}" 
                      alt="{{ $product->name }}"
                      class="w-full h-full object-cover">
                 @if($product->stock < 5)

@@ -1,0 +1,18 @@
+═══════════════════════════════════════════════════════════
+  🔧 SCRIPTS ÚTILES
+═══════════════════════════════════════════════════════════
+
+RESETEAR BASE DE DATOS:
+   resetear-todo.bat
+
+ARREGLAR CREDENCIALES:
+   arreglar-credenciales.bat
+
+INICIAR CON HTTPS:
+   iniciar-con-https.bat
+
+═══════════════════════════════════════════════════════════
+
+Ejecuta cualquiera de estos archivos con doble clic.
+
+═══════════════════════════════════════════════════════════

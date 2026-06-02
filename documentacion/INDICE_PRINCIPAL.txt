@@ -1,0 +1,28 @@
+═══════════════════════════════════════════════════════════
+  📚 ÍNDICE DE DOCUMENTACIÓN
+═══════════════════════════════════════════════════════════
+
+ARCHIVOS PRINCIPALES:
+
+1. LEEME.md
+   → Guía completa de inicio
+
+2. CREDENCIALES_ACCESO.txt
+   → Usuarios y contraseñas
+
+3. TODO_FUNCIONANDO.txt
+   → Resumen de funcionalidades
+
+4. RESUMEN_FINAL.md
+   → Guía completa del proyecto
+
+═══════════════════════════════════════════════════════════
+
+CARPETAS:
+
+• docs/importante/     - Documentos esenciales
+• docs/wompi/          - Configuración de pagos
+• docs/emails/         - Configuración de emails
+• docs/guias/          - Guías de uso
+
+═══════════════════════════════════════════════════════════

@@ -1078,7 +1078,17 @@ function ProductCard({ product, onAdd, forceOpen, onForceOpenDone }) {
       </button>
 
       <div className="relative aspect-square overflow-hidden bg-gradient-to-br from-gray-50 to-gray-100">
-        <img src={product.img} alt={product.name} className="w-full h-full object-contain p-4 group-hover:scale-105 transition-transform duration-500" loading="lazy" />
+        <img 
+          src={product.img} 
+          alt={product.name} 
+          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" 
+          loading="lazy"
+          onError={(e) => {
+            console.error('Error loading image:', product.img, 'for product:', product.name);
+            e.target.onerror = null;
+            e.target.src = 'https://via.placeholder.com/400/3B59FF/FFFFFF?text=' + encodeURIComponent(product.name.substring(0,2));
+          }}
+        />
         {product.badge && (
           <span className={`absolute top-3 left-3 text-xs font-bold px-2.5 py-1 rounded-full ${product.badge === 'Oferta' ? 'bg-red-500 text-white' : 'bg-[#3B59FF] text-white'}`}>
             {product.badge}
@@ -1136,7 +1146,17 @@ function ProductCard({ product, onAdd, forceOpen, onForceOpenDone }) {
              style={{background:'rgba(0,0,0,.7)',backdropFilter:'blur(8px)'}}>
           <div className="bg-white rounded-3xl overflow-hidden max-w-lg w-full shadow-2xl" onClick={e => e.stopPropagation()}>
             <div className="relative aspect-video overflow-hidden bg-gradient-to-br from-gray-50 to-gray-100">
-              <img src={product.img} alt={product.name} className="w-full h-full object-contain p-6" loading="lazy" />
+              <img 
+                src={product.img} 
+                alt={product.name} 
+                className="w-full h-full object-cover" 
+                loading="lazy"
+                onError={(e) => {
+                  console.error('Error loading image:', product.img, 'for product:', product.name);
+                  e.target.onerror = null;
+                  e.target.src = 'https://via.placeholder.com/800x450/3B59FF/FFFFFF?text=' + encodeURIComponent(product.name);
+                }}
+              />
               <button onClick={() => setDetail(false)} className="absolute top-3 right-3 w-9 h-9 rounded-full bg-white/90 flex items-center justify-center shadow">
                 <i className="fa-solid fa-xmark text-gray-700"></i>
               </button>

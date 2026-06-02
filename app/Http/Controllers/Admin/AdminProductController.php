@@ -178,6 +178,9 @@ class AdminProductController extends Controller
 
         Product::create($data);
 
+        // Limpiar caché del home para que se vea el nuevo producto inmediatamente
+        $this->clearHomeCache();
+
         return redirect()->route('admin.products.index')
             ->with('success', 'Producto creado correctamente.');
     }
@@ -212,6 +215,9 @@ class AdminProductController extends Controller
 
         $product->update($data);
 
+        // Limpiar caché del home para que se vean los cambios inmediatamente
+        $this->clearHomeCache();
+
         return redirect()->route('admin.products.index')
             ->with('success', 'Producto actualizado correctamente.');
     }
@@ -223,6 +229,9 @@ class AdminProductController extends Controller
         }
 
         $product->delete(); // Soft delete — no borra de la BD
+
+        // Limpiar caché del home para que se vean los cambios inmediatamente
+        $this->clearHomeCache();
 
         return redirect()->route('admin.products.index')
             ->with('success', 'Producto eliminado. Puedes restaurarlo desde la papelera.');
@@ -237,6 +246,10 @@ class AdminProductController extends Controller
     public function restore($id)
     {
         Product::withTrashed()->findOrFail($id)->restore();
+        
+        // Limpiar caché del home para que se vea el producto restaurado
+        $this->clearHomeCache();
+        
         return redirect()->route('admin.products.trashed')
             ->with('success', 'Producto restaurado correctamente.');
     }
@@ -248,7 +261,25 @@ class AdminProductController extends Controller
             Storage::disk('public')->delete($product->image);
         }
         $product->forceDelete();
+        
+        // Limpiar caché del home
+        $this->clearHomeCache();
+        
         return redirect()->route('admin.products.trashed')
             ->with('success', 'Producto eliminado permanentemente.');
+    }
+
+    /**
+     * Limpiar caché del home para que los cambios se vean inmediatamente
+     */
+    private function clearHomeCache()
+    {
+        // Limpiar todas las páginas del home
+        for ($page = 1; $page <= 10; $page++) {
+            cache()->forget("home_products_page_{$page}");
+        }
+        
+        // Limpiar caché de reseñas también
+        cache()->forget('home_reviews');
     }
 }

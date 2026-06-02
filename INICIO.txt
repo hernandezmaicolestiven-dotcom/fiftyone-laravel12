@@ -1,0 +1,30 @@
+═══════════════════════════════════════════════════════════
+  🚀 FIFTYONE - INICIO RÁPIDO
+═══════════════════════════════════════════════════════════
+
+1. INICIAR SERVIDOR:
+   php artisan serve
+
+2. ABRIR NAVEGADOR:
+   http://localhost:8000
+
+3. CREDENCIALES:
+   Admin:  admin@fiftyone.com / admin123
+   Cliente: hernandezmaicolestiven@gmail.com / 12345678
+
+═══════════════════════════════════════════════════════════
+  📁 CARPETAS PRINCIPALES
+═══════════════════════════════════════════════════════════
+
+documentacion/  - Toda la documentación del proyecto
+utilidades/     - Scripts útiles (.bat)
+docs/           - Guías técnicas
+scripts/        - Scripts PHP
+
+═══════════════════════════════════════════════════════════
+  📖 DOCUMENTACIÓN
+═══════════════════════════════════════════════════════════
+
+Ver: documentacion/LEEME.md
+
+═══════════════════════════════════════════════════════════

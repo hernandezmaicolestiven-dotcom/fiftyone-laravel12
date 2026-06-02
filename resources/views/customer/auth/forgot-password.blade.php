@@ -20,11 +20,12 @@
 
     <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
         <h2 class="text-xl font-bold text-gray-900 mb-2">¿Olvidaste tu contraseña?</h2>
-        <p class="text-sm text-gray-500 mb-6">No te preocupes, te enviaremos un enlace para restablecerla.</p>
+        <p class="text-sm text-gray-500 mb-6">Te enviaremos una contraseña temporal a tu correo electrónico.</p>
 
         @if(session('status'))
-        <div class="mb-5 bg-emerald-50 border border-emerald-200 text-emerald-700 px-4 py-3 rounded-xl text-sm flex items-center gap-2">
-            <i class="fa-solid fa-circle-check"></i> {{ session('status') }}
+        <div class="mb-5 bg-emerald-50 border border-emerald-200 text-emerald-700 px-4 py-3 rounded-xl text-sm flex items-start gap-2">
+            <i class="fa-solid fa-circle-check mt-0.5"></i>
+            <div>{{ session('status') }}</div>
         </div>
         @endif
 
@@ -46,7 +47,7 @@
                 </div>
             </div>
             <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2.5 rounded-lg transition text-sm">
-                Enviar enlace de recuperación
+                Enviar contraseña temporal
             </button>
         </form>
 

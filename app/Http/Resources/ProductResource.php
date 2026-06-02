@@ -15,6 +15,10 @@ class ProductResource extends JsonResource
             'description' => $this->description,
             'price' => (float) $this->price,
             'stock' => $this->stock,
+            'image' => $this->image ? (str_starts_with($this->image, 'http') ? $this->image : \Storage::url($this->image)) : null,
+            'sizes' => $this->sizes,
+            'colors' => $this->colors,
+            'category_id' => $this->category_id,
             'created_at' => $this->created_at?->toISOString(),
             'updated_at' => $this->updated_at?->toISOString(),
         ];

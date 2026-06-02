@@ -1,0 +1,156 @@
+═══════════════════════════════════════════════════════════
+  🔐 CREDENCIALES DE ACCESO - FIFTYONE
+═══════════════════════════════════════════════════════════
+
+📅 Fecha de actualización: 1 de Junio de 2026
+🔄 Versión: 3.0 (Credenciales arregladas)
+✅ Estado: TODAS LAS CUENTAS FUNCIONANDO
+
+═══════════════════════════════════════════════════════════
+  👨‍💼 PANEL DE ADMINISTRACIÓN
+═══════════════════════════════════════════════════════════
+
+URL:      http://localhost:8000/admin/login
+          http://127.0.0.1:8000/admin/login
+
+Email:    admin@fiftyone.com
+Password: admin123
+
+Permisos:
+  ✅ Gestión completa de productos
+  ✅ Gestión de categorías
+  ✅ Gestión de órdenes
+  ✅ Gestión de usuarios
+  ✅ Gestión de cupones
+  ✅ Reportes y analíticas
+  ✅ Configuración de la tienda
+  ✅ Sistema de facturación
+  ✅ Gestión de colaboradores
+
+═══════════════════════════════════════════════════════════
+  👤 CUENTA DE MAICOL HERNANDEZ
+═══════════════════════════════════════════════════════════
+
+URL:      http://localhost:8000/login
+          http://127.0.0.1:8000/login
+
+Email:    hernandezmaicolestiven@gmail.com
+Password: 12345678
+
+Permisos:
+  ✅ Ver catálogo de productos
+  ✅ Agregar productos al carrito
+  ✅ Realizar compras
+  ✅ Ver historial de órdenes
+  ✅ Gestionar perfil
+  ✅ Lista de deseos
+  ✅ Dejar reseñas
+  ✅ Recuperar contraseña
+
+═══════════════════════════════════════════════════════════
+  👤 CUENTA DE CLIENTE DE PRUEBA
+═══════════════════════════════════════════════════════════
+
+URL:      http://localhost:8000/login
+          http://127.0.0.1:8000/login
+
+Email:    cliente@test.com
+Password: cliente123
+
+Permisos:
+  ✅ Ver catálogo de productos
+  ✅ Agregar productos al carrito
+  ✅ Realizar compras
+  ✅ Ver historial de órdenes
+  ✅ Gestionar perfil
+  ✅ Lista de deseos
+  ✅ Dejar reseñas
+
+═══════════════════════════════════════════════════════════
+  🤝 CUENTA DE COLABORADOR
+═══════════════════════════════════════════════════════════
+
+URL:      http://localhost:8000/admin/login
+          http://127.0.0.1:8000/admin/login
+
+Email:    colaborador@fiftyone.com
+Password: colab123
+
+Permisos:
+  ✅ Ver productos
+  ✅ Ver órdenes
+  ✅ Ver reportes básicos
+  ❌ No puede eliminar
+  ❌ No puede modificar configuración
+  ❌ No puede gestionar usuarios
+
+═══════════════════════════════════════════════════════════
+  🔄 SI LAS CREDENCIALES NO FUNCIONAN
+═══════════════════════════════════════════════════════════
+
+Ejecuta este comando para arreglarlas:
+
+  php scripts/fix-credentials.php
+
+Esto restaurará todas las credenciales a los valores
+mostrados en este archivo y verificará que funcionen.
+
+═══════════════════════════════════════════════════════════
+  💡 NOTAS IMPORTANTES
+═══════════════════════════════════════════════════════════
+
+✅ Todas las contraseñas han sido verificadas
+✅ Puedes iniciar sesión inmediatamente
+✅ Las contraseñas son simples para facilitar el desarrollo
+✅ No hay caracteres especiales complicados
+
+⚠️  ESTAS SON CREDENCIALES DE DESARROLLO
+⚠️  En producción usa contraseñas fuertes y únicas
+⚠️  Nunca uses estas contraseñas en un servidor real
+
+═══════════════════════════════════════════════════════════
+  🚀 ACCESO RÁPIDO
+═══════════════════════════════════════════════════════════
+
+ADMIN:
+  http://localhost:8000/admin/login
+  admin@fiftyone.com / admin123
+
+MAICOL:
+  http://localhost:8000/login
+  hernandezmaicolestiven@gmail.com / 12345678
+
+CLIENTE:
+  http://localhost:8000/login
+  cliente@test.com / cliente123
+
+COLABORADOR:
+  http://localhost:8000/admin/login
+  colaborador@fiftyone.com / colab123
+
+═══════════════════════════════════════════════════════════
+  📋 RESUMEN RÁPIDO (COPIAR Y PEGAR)
+═══════════════════════════════════════════════════════════
+
+Admin:        admin@fiftyone.com                / admin123
+Maicol:       hernandezmaicolestiven@gmail.com  / 12345678
+Cliente:      cliente@test.com                  / cliente123
+Colaborador:  colaborador@fiftyone.com          / colab123
+
+═══════════════════════════════════════════════════════════
+  🧪 PROBAR RECUPERACIÓN DE CONTRASEÑA
+═══════════════════════════════════════════════════════════
+
+Para probar el sistema de recuperación de contraseña:
+
+1. Ve a: http://localhost:8000/recuperar-contrasena
+2. Ingresa: hernandezmaicolestiven@gmail.com
+3. Recibirás un email con contraseña temporal
+4. Inicia sesión con la contraseña temporal
+5. Cambia tu contraseña desde "Mi Cuenta"
+
+NOTA: Necesitas configurar el email primero
+Ver: GUIA_RECUPERACION_CONTRASEÑA.md
+
+═══════════════════════════════════════════════════════════
+
