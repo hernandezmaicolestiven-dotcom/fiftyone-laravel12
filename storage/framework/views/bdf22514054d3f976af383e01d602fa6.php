@@ -1982,6 +1982,13 @@ document.addEventListener('DOMContentLoaded', function() {
 .wa-btn:hover { transform: scale(1.12) rotate(-5deg) !important; }
 .wa-tooltip { opacity:0; transform:translateX(10px); transition:all .25s ease; pointer-events:none; }
 .wa-wrap:hover .wa-tooltip { opacity:1; transform:translateX(0); }
+
+/* Ajuste para móvil - evitar superposición con barra de navegación */
+@media (max-width: 768px) {
+    #wa-float-btn {
+        bottom: 85px !important; /* Moverlo arriba de la barra móvil */
+    }
+}
 </style>
 <div id="wa-float-btn" class="wa-wrap" style="position:fixed;bottom:28px;right:28px;z-index:9999;display:flex;align-items:center;gap:10px;flex-direction:row-reverse;opacity:1;transform:translateX(0);transition:all 0.4s cubic-bezier(0.22,1,0.36,1)">
     <a href="https://wa.me/573118422192?text=Buen%20d%C3%ADa%2C%20equipo%20FiftyOne.%0A%0AMe%20gustar%C3%ADa%20recibir%20informaci%C3%B3n%20detallada%20sobre%3A%0A%0A%E2%80%A2%20Disponibilidad%20de%20productos%0A%E2%80%A2%20Gu%C3%ADa%20de%20tallas%0A%E2%80%A2%20Tiempos%20de%20entrega%0A%E2%80%A2%20M%C3%A9todos%20de%20pago%0A%0AAgradezco%20su%20atenci%C3%B3n%20y%20pronta%20respuesta.%0A%0ASaludos%20cordiales."

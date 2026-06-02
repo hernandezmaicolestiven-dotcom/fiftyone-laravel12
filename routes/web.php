@@ -246,6 +246,7 @@ Route::middleware('guest')->group(function () {
 Route::middleware('auth')->group(function () {
     Route::get('/mi-cuenta', [CustomerAuthController::class, 'account'])->name('customer.account');
     Route::post('/logout', [CustomerAuthController::class, 'logout'])->name('customer.logout');
+    Route::post('/logout-other-sessions', [CustomerAuthController::class, 'logoutOtherSessions'])->name('customer.logout-other-sessions');
     Route::put('/mi-cuenta/perfil', [CustomerAuthController::class, 'updateProfile'])->name('customer.profile.update');
     Route::put('/mi-cuenta/password', [CustomerAuthController::class, 'updatePassword'])->name('customer.password.update');
     Route::patch('/mi-cuenta/orders/{order}/cancel', [CustomerAuthController::class, 'cancelOrder'])->name('customer.order.cancel');

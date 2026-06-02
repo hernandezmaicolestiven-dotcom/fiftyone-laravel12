@@ -54,16 +54,56 @@ class CustomerAuthController extends Controller
             'password' => 'required',
         ]);
 
+        // Buscar el usuario
+        $user = User::where('email', $request->email)->first();
+
+        // Verificar si la cuenta está bloqueada
+        if ($user && $user->isLocked()) {
+            $minutes = $user->locked_until->diffInMinutes(now());
+            return back()->withErrors([
+                'email' => "Tu cuenta está bloqueada temporalmente. Intenta de nuevo en {$minutes} minutos."
+            ])->onlyInput('email');
+        }
+
+        // Intentar autenticar
         if (Auth::attempt(['email' => $request->email, 'password' => $request->password], $request->boolean('remember'))) {
             $request->session()->regenerate();
+            
+            $user = Auth::user();
+
+            // Actualizar información de login
+            $user->update([
+                'last_login_at' => now(),
+                'last_login_ip' => $request->ip(),
+                'failed_login_attempts' => 0,
+            ]);
+
+            // Crear sesión en UserSession
+            $userAgent = $request->userAgent() ?? '';
+            \App\Models\UserSession::create([
+                'user_id' => $user->id,
+                'session_id' => session()->getId(),
+                'ip_address' => $request->ip(),
+                'user_agent' => $userAgent,
+                'device_type' => \App\Models\UserSession::detectDevice($userAgent),
+                'browser' => \App\Models\UserSession::detectBrowser($userAgent),
+                'platform' => \App\Models\UserSession::detectPlatform($userAgent),
+                'last_activity' => now(),
+                'is_current' => true,
+            ]);
+
+            // Verificar si debe cambiar contraseña
+            if ($user->force_password_change) {
+                return redirect()->route('customer.account')->with('warning', 'Por seguridad, debes cambiar tu contraseña.');
+            }
 
             // Si es admin → panel de administración
-            if (Auth::user()->role === 'admin') {
+            if ($user->role === 'admin') {
                 return redirect()->route('admin.dashboard');
             }
 
             // Si es colaborador → panel también
-            if (Auth::user()->role === 'colaborador') {
+            if ($user->role === 'colaborador') {
                 return redirect()->route('admin.dashboard');
             }
 
@@ -75,17 +115,49 @@ class CustomerAuthController extends Controller
             return redirect()->route('customer.account');
         }
 
+        // Incrementar intentos fallidos
+        if ($user) {
+            $user->incrementFailedAttempts();
+            
+            // Bloquear después de 5 intentos fallidos
+            if ($user->failed_login_attempts >= 5) {
+                $user->lockAccount(30); // Bloquear por 30 minutos
+                return back()->withErrors([
+                    'email' => 'Demasiados intentos fallidos. Tu cuenta ha sido bloqueada por 30 minutos.'
+                ])->onlyInput('email');
+            }
+        }
+
         return back()->withErrors(['email' => 'Credenciales incorrectas.'])->onlyInput('email');
     }
 
     public function logout(Request $request)
     {
+        $sessionId = session()->getId();
+        
+        // Eliminar la sesión de la base de datos
+        \App\Models\UserSession::where('session_id', $sessionId)->delete();
+        
         Auth::logout();
         
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
         return redirect('/')->with('success', 'Sesión cerrada correctamente.');
+    }
+
+    /** Cerrar todas las demás sesiones */
+    public function logoutOtherSessions(Request $request)
+    {
+        $user = Auth::user();
+        $currentSessionId = session()->getId();
+
+        // Eliminar todas las sesiones excepto la actual
+        \App\Models\UserSession::where('user_id', $user->id)
+            ->where('session_id', '!=', $currentSessionId)
+            ->delete();
+
+        return back()->with('success', 'Se han cerrado todas las demás sesiones.');
     }
 
     /** Área de cuenta del cliente — historial de pedidos */
@@ -95,7 +167,13 @@ class CustomerAuthController extends Controller
         $orders  = $user->orders()->with('items')->latest()->get();
         $wishlist = \App\Models\Wishlist::with('product.category')
             ->where('user_id', $user->id)->latest()->get();
-        return view('customer.account', compact('user', 'orders', 'wishlist'));
+        
+        // Obtener sesiones activas
+        $sessions = \App\Models\UserSession::where('user_id', $user->id)
+            ->latest('last_activity')
+            ->get();
+        
+        return view('customer.account', compact('user', 'orders', 'wishlist', 'sessions'));
     }
 
     public function cancelOrder(\App\Models\Order $order)
